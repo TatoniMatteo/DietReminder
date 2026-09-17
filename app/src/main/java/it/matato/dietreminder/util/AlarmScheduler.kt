@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.core.net.toUri
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.model.HydrationRange
 import it.matato.dietreminder.data.model.MealType
@@ -42,39 +43,57 @@ object AlarmScheduler {
         }
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("title", title)
-            putExtra("message", message)
-            putExtra("type", type.name)
-            extraData.forEach { (key, value) -> putExtra(key, value) }
+
+        val triggerIntent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra(EXTRA_TITLE, title)
+            putExtra(EXTRA_MESSAGE, message)
+            putExtra(EXTRA_TYPE, type.name)
+
+            extraData.forEach { (key, value) ->
+                putExtra(key, value)
+            }
         }
 
-        val pendingIntent = PendingIntent.getBroadcast(
+        val triggerPendingIntent = PendingIntent.getBroadcast(
             context,
             type.ordinal,
-            intent,
+            triggerIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        AppLog.d("Scheduling ${type.name} alarm at ${Instant.ofEpochMilli(timeMillis)}")
+        val showIntent = Intent(
+            Intent.ACTION_VIEW, createMealDeepLink(extraData)
+        ).apply {
+            setPackage(context.packageName)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
 
-        scheduleAlarm(alarmManager, timeMillis, pendingIntent)
+        val showPendingIntent = PendingIntent.getActivity(
+            context,
+            type.ordinal,
+            showIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        AppLog.d("Scheduling ${type.name} alarm clock at ${Instant.ofEpochMilli(timeMillis)}")
+
+        scheduleAlarmClock(
+            alarmManager = alarmManager,
+            timeMillis = timeMillis,
+            triggerPendingIntent = triggerPendingIntent,
+            showPendingIntent = showPendingIntent,
+            label = message
+        )
 
         AlarmTracker.registerAlarm(
-            context,
-            ScheduledAlarm(
-                id = type.ordinal,
-                type = type.name,
-                timeMillis = timeMillis,
-                label = title
+            context, ScheduledAlarm(
+                id = type.ordinal, type = type.name, timeMillis = timeMillis, label = title
             )
         )
     }
 
     fun scheduleHydrationAlarm(
-        context: Context,
-        intervalMinutes: Int,
-        ranges: List<HydrationRange>
+        context: Context, intervalMinutes: Int, ranges: List<HydrationRange>
     ) {
         if (ranges.isEmpty()) {
             AppLog.w("No hydration ranges configured, skipping alarm")
@@ -88,9 +107,7 @@ object AlarmScheduler {
             return
         }
 
-        val normalizedRanges = ranges
-            .filter { it.startMinutes < it.endMinutes }
-            .sortedBy { it.startMinutes }
+        val normalizedRanges = ranges.filter { it.startMinutes < it.endMinutes }.sortedBy { it.startMinutes }
 
         if (normalizedRanges.isEmpty()) {
             AppLog.w("No valid hydration ranges configured, skipping alarm")
@@ -102,10 +119,7 @@ object AlarmScheduler {
         val currentMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
 
         val nextTriggerMillis = calculateNextHydrationTrigger(
-            now = now,
-            currentMinutes = currentMinutes,
-            intervalMinutes = intervalMinutes,
-            ranges = normalizedRanges
+            now = now, currentMinutes = currentMinutes, intervalMinutes = intervalMinutes, ranges = normalizedRanges
         )
 
         if (nextTriggerMillis == null) {
@@ -127,12 +141,13 @@ object AlarmScheduler {
         }
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
         val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("title", context.getString(R.string.hydration_notification_title))
-            putExtra("message", context.getString(R.string.hydration_notification_message))
-            putExtra("type", "HYDRATION")
-            putExtra("interval", intervalMinutes.toString())
-            putExtra("ranges_json", Json.encodeToString(normalizedRanges))
+            putExtra(EXTRA_TITLE, context.getString(R.string.hydration_notification_title))
+            putExtra(EXTRA_MESSAGE, context.getString(R.string.hydration_notification_message))
+            putExtra(EXTRA_TYPE, TYPE_HYDRATION)
+            putExtra(EXTRA_INTERVAL, intervalMinutes.toString())
+            putExtra(EXTRA_RANGES_JSON, Json.encodeToString(normalizedRanges))
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
@@ -143,14 +158,16 @@ object AlarmScheduler {
         )
 
         AppLog.d("Scheduling hydration alarm at ${Instant.ofEpochMilli(nextTriggerMillis)}")
-
-        scheduleAlarm(alarmManager, nextTriggerMillis, pendingIntent)
+        scheduleExactAlarmManagerAlarm(
+            alarmManager = alarmManager,
+            timeMillis = nextTriggerMillis,
+            pendingIntent = pendingIntent
+        )
 
         AlarmTracker.registerAlarm(
-            context,
-            ScheduledAlarm(
+            context, ScheduledAlarm(
                 id = HYDRATION_ALARM_ID,
-                type = "HYDRATION",
+                type = TYPE_HYDRATION,
                 timeMillis = nextTriggerMillis,
                 label = context.getString(R.string.hydration_notification_title)
             )
@@ -169,7 +186,7 @@ object AlarmScheduler {
         val timeMillis = calendar.timeInMillis
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("type", "DAILY_SYNC")
+            putExtra(EXTRA_TYPE, TYPE_DAILY_SYNC)
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
@@ -180,16 +197,11 @@ object AlarmScheduler {
         )
 
         AppLog.d("Scheduling daily sync at ${Instant.ofEpochMilli(timeMillis)}")
-
-        scheduleAlarm(alarmManager, timeMillis, pendingIntent)
+        scheduleExactAlarmManagerAlarm(alarmManager = alarmManager, timeMillis = timeMillis, pendingIntent = pendingIntent)
 
         AlarmTracker.registerAlarm(
-            context,
-            ScheduledAlarm(
-                id = DAILY_SYNC_ALARM_ID,
-                type = "DAILY_SYNC",
-                timeMillis = timeMillis,
-                label = "Daily alarm sync"
+            context, ScheduledAlarm(
+                id = DAILY_SYNC_ALARM_ID, type = TYPE_DAILY_SYNC, timeMillis = timeMillis, label = "Daily alarm sync"
             )
         )
     }
@@ -198,10 +210,7 @@ object AlarmScheduler {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, AlarmReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            id,
-            intent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            context, id, intent, PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
         )
 
         pendingIntent?.let {
@@ -218,20 +227,19 @@ object AlarmScheduler {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         MealType.entries.forEach { type ->
-            cancelAlarmManagerAlarm(alarmManager, context, type.ordinal)
+            cancelAlarmManagerAlarm(
+                alarmManager = alarmManager, context = context, id = type.ordinal
+            )
         }
 
-        cancelAlarmManagerAlarm(alarmManager, context, HYDRATION_ALARM_ID)
-        cancelAlarmManagerAlarm(alarmManager, context, DAILY_SYNC_ALARM_ID)
+        cancelAlarmManagerAlarm(alarmManager = alarmManager, context = context, id = HYDRATION_ALARM_ID)
+        cancelAlarmManagerAlarm(alarmManager = alarmManager, context = context, id = DAILY_SYNC_ALARM_ID)
 
         AlarmTracker.clearAll(context)
     }
 
     private fun calculateNextHydrationTrigger(
-        now: Calendar,
-        currentMinutes: Int,
-        intervalMinutes: Int,
-        ranges: List<HydrationRange>
+        now: Calendar, currentMinutes: Int, intervalMinutes: Int, ranges: List<HydrationRange>
     ): Long? {
         val activeRange = ranges.firstOrNull {
             currentMinutes >= it.startMinutes && currentMinutes < it.endMinutes
@@ -239,7 +247,11 @@ object AlarmScheduler {
 
         if (activeRange != null) {
             val candidateMillis = now.timeInMillis + intervalMinutes * 60 * 1000L
-            val candidate = Calendar.getInstance().apply { timeInMillis = candidateMillis }
+
+            val candidate = Calendar.getInstance().apply {
+                timeInMillis = candidateMillis
+            }
+
             val candidateMinutes = candidate.get(Calendar.HOUR_OF_DAY) * 60 + candidate.get(Calendar.MINUTE)
 
             if (candidateMinutes < activeRange.endMinutes && isToday(candidateMillis)) {
@@ -247,7 +259,9 @@ object AlarmScheduler {
             }
         }
 
-        val nextRange = ranges.firstOrNull { it.startMinutes > currentMinutes }
+        val nextRange = ranges.firstOrNull {
+            it.startMinutes > currentMinutes
+        }
 
         if (nextRange == null) {
             return null
@@ -261,10 +275,27 @@ object AlarmScheduler {
         }.timeInMillis
     }
 
-    private fun scheduleAlarm(
+    private fun scheduleAlarmClock(
         alarmManager: AlarmManager,
         timeMillis: Long,
-        pendingIntent: PendingIntent
+        triggerPendingIntent: PendingIntent,
+        showPendingIntent: PendingIntent,
+        label: String
+    ) {
+        if (alarmManager.canScheduleExactAlarms()) {
+            AppLog.t("Using setAlarmClock for user alarm")
+            val alarmClockInfo = AlarmManager.AlarmClockInfo(timeMillis, showPendingIntent)
+            alarmManager.setAlarmClock(alarmClockInfo, triggerPendingIntent)
+        } else {
+            AppLog.w("Exact alarms not allowed, falling back to setAndAllowWhileIdle")
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMillis, triggerPendingIntent)
+        }
+
+        AppLog.d("Alarm clock scheduled: $label")
+    }
+
+    private fun scheduleExactAlarmManagerAlarm(
+        alarmManager: AlarmManager, timeMillis: Long, pendingIntent: PendingIntent
     ) {
         if (alarmManager.canScheduleExactAlarms()) {
             AppLog.t("Using setExactAndAllowWhileIdle")
@@ -275,25 +306,50 @@ object AlarmScheduler {
         }
     }
 
-    private fun cancelAlarmManagerAlarm(alarmManager: AlarmManager, context: Context, id: Int) {
+    private fun cancelAlarmManagerAlarm(
+        alarmManager: AlarmManager, context: Context, id: Int
+    ) {
         val intent = Intent(context, AlarmReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            id,
-            intent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            context, id, intent, PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
         )
 
-        pendingIntent?.let { alarmManager.cancel(it) }
+        pendingIntent?.let {
+            alarmManager.cancel(it)
+        }
+    }
+
+    private fun createMealDeepLink(
+        extraData: Map<String, String>
+    ) = run {
+        val mealId = extraData[EXTRA_MEAL_ID]?.toLongOrNull()
+        val dayName = extraData[EXTRA_DAY_NAME]
+
+        if (mealId != null && !dayName.isNullOrBlank()) {
+            "dietreminder://week?mealId=$mealId&dayName=$dayName".toUri()
+        } else {
+            "dietreminder://week".toUri()
+        }
     }
 
     private fun isToday(timeMillis: Long): Boolean {
         val target = Calendar.getInstance().apply {
             this.timeInMillis = timeMillis
         }
+
         val today = Calendar.getInstance()
 
-        return target.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
-                target.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)
+        return target.get(Calendar.YEAR) == today.get(Calendar.YEAR) && target.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)
     }
+
+    private const val TYPE_HYDRATION = "HYDRATION"
+    private const val TYPE_DAILY_SYNC = "DAILY_SYNC"
+
+    private const val EXTRA_TYPE = "type"
+    private const val EXTRA_TITLE = "title"
+    private const val EXTRA_MESSAGE = "message"
+    private const val EXTRA_INTERVAL = "interval"
+    private const val EXTRA_RANGES_JSON = "ranges_json"
+    private const val EXTRA_MEAL_ID = "meal_id"
+    private const val EXTRA_DAY_NAME = "day_name"
 }

@@ -45,6 +45,8 @@
     <string name="back">Back</string>
     <string name="configure">Configure</string>
     <string name="active">Active</string>
+    <string name="courses_count">%1$d courses</string>
+    <string name="add_meal">Add a meal</string>
 
     <!-- HomeScreen -->
     <string name="greeting">Hello!</string>
@@ -172,4 +174,7 @@
     <string name="meal_afternoon_snack_short">Snack</string>
     <string name="meal_dinner_short">Dinner</string>
     <string name="meal_other_short">Meal</string>
+    <string name="window_minutes_value">%1$d min</string>
+    <string name="meal_type">Meal type</string>
+    <string name="meal_time">Meal time</string>
 </resources>

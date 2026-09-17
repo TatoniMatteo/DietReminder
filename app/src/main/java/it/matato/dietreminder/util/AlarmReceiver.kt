@@ -35,27 +35,31 @@ class AlarmReceiver : BroadcastReceiver() {
 
     private suspend fun processAlarm(context: Context, intent: Intent) {
         val type = intent.getStringExtra(EXTRA_TYPE)
-        val titleExtra = intent.getStringExtra(EXTRA_TITLE)
-        val messageExtra = intent.getStringExtra(EXTRA_MESSAGE)
+        val title = intent.getStringExtra(EXTRA_TITLE)
+        val message = intent.getStringExtra(EXTRA_MESSAGE)
 
         AppLog.i("AlarmReceiver triggered! Action: ${intent.action}, Type: $type")
-        AppLog.d("Payload: $titleExtra - $messageExtra")
-
-        AppLog.t("Initiating automatic sync from AlarmReceiver")
-        AlarmSyncHelper.doSync(context)
+        AppLog.d("Payload: $title - $message")
 
         if (type == TYPE_DAILY_SYNC) {
             AppLog.i("Daily alarm sync triggered")
+            AlarmSyncHelper.doSync(context)
             return
         }
 
         if (type == TYPE_HYDRATION && !isHydrationAlarmValid(intent)) {
             AppLog.i("Hydration alarm fired outside allowed windows, suppressing notification")
+            AlarmSyncHelper.doSync(context)
             return
         }
 
-        val title = titleExtra ?: context.getString(R.string.app_name)
-        val message = messageExtra ?: context.getString(R.string.it_is_time_to_eat)
+        val notificationTitle = title ?: context.getString(R.string.app_name)
+        val notificationMessage = message ?: context.getString(R.string.it_is_time_to_eat)
+
+        if (isMealAlarm(type)) {
+            AlarmSoundPlayer.playMealAlarm(context)
+            AppLog.i("Meal alarm sound started for type=$type")
+        }
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -67,41 +71,33 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val notificationId = System.currentTimeMillis().toInt()
         val activityIntent = Intent(
-            Intent.ACTION_VIEW,
-            createDeepLink(intent, type)
+            Intent.ACTION_VIEW, createDeepLink(intent, type)
         ).apply {
             setPackage(context.packageName)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
         val contentPendingIntent = PendingIntent.getActivity(
-            context,
-            notificationId,
-            activityIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            context, notificationId, activityIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.app_icon_foreground)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setContentIntent(contentPendingIntent)
-            .setAutoCancel(true)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID).setSmallIcon(R.drawable.app_icon_foreground)
+            .setContentTitle(notificationTitle).setContentText(notificationMessage).setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM).setContentIntent(contentPendingIntent).setAutoCancel(true)
 
         if (type == TYPE_HYDRATION) {
-            val laterIntent = Intent(context, HydrationReceiver::class.java)
-                .apply { action = ACTION_LATER; putExtra(EXTRA_NOTIFICATION_ID, notificationId) }
+            val laterIntent = Intent(context, HydrationReceiver::class.java).apply {
+                action = ACTION_LATER
+                putExtra(EXTRA_NOTIFICATION_ID, notificationId)
+            }
 
             val laterPendingIntent = PendingIntent.getBroadcast(
-                context,
-                notificationId + 1,
-                laterIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                context, notificationId + 1, laterIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            builder.addAction(0, context.getString(R.string.action_later), laterPendingIntent)
+            builder.addAction(
+                0, context.getString(R.string.action_later), laterPendingIntent
+            )
         }
 
         try {
@@ -110,6 +106,13 @@ class AlarmReceiver : BroadcastReceiver() {
         } catch (e: Exception) {
             AppLog.e("System failed to post notification", e)
         }
+
+        AppLog.t("Synchronizing alarms after handling current alarm")
+        AlarmSyncHelper.doSync(context)
+    }
+
+    private fun isMealAlarm(type: String?): Boolean {
+        return !type.isNullOrBlank() && type != TYPE_DAILY_SYNC && type != TYPE_HYDRATION
     }
 
     private fun isHydrationAlarmValid(intent: Intent): Boolean {
@@ -148,30 +151,32 @@ class AlarmReceiver : BroadcastReceiver() {
             return
         }
 
-        AppLog.t("Creating notification channel: $CHANNEL_ID")
+        AppLog.t("Creating silent notification channel: $CHANNEL_ID")
 
         val channel = NotificationChannel(
-            CHANNEL_ID,
-            channelName,
-            NotificationManager.IMPORTANCE_HIGH
+            CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH
         ).apply {
             description = context.getString(R.string.meal_reminders_desc)
             enableLights(true)
-            enableVibration(true)
+            enableVibration(false)
+            setSound(null, null)
         }
 
         notificationManager.createNotificationChannel(channel)
     }
 
     private fun createDeepLink(intent: Intent, type: String?) =
-        if (type == TYPE_HYDRATION) "dietreminder://hydration".toUri() else {
+        if (type == TYPE_HYDRATION) {
+            "dietreminder://hydration".toUri()
+        } else {
             val mealId = intent.getLongExtra(EXTRA_MEAL_ID, -1L)
             val dayName = intent.getStringExtra(EXTRA_DAY_NAME)
 
-            if (mealId != -1L && !dayName.isNullOrBlank())
+            if (mealId != -1L && !dayName.isNullOrBlank()) {
                 "dietreminder://week?mealId=$mealId&dayName=$dayName".toUri()
-            else
+            } else {
                 "dietreminder://week".toUri()
+            }
         }
 
     private companion object {

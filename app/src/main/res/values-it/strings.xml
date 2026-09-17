@@ -45,6 +45,8 @@
     <string name="back">Indietro</string>
     <string name="configure">Configura</string>
     <string name="active">Attiva</string>
+    <string name="courses_count">%1$d portate</string>
+    <string name="add_meal">Aggiungi un pasto</string>
 
     <!-- HomeScreen -->
     <string name="greeting">Ciao!</string>
@@ -172,4 +174,7 @@
     <string name="meal_afternoon_snack_short">Spunt.</string>
     <string name="meal_dinner_short">Cena</string>
     <string name="meal_other_short">Pasto</string>
+    <string name="window_minutes_value">%1$d min</string>
+    <string name="meal_type">Tipo di pasto</string>
+    <string name="meal_time">Orario del pasto</string>
 </resources>

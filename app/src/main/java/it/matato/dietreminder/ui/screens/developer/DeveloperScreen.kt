@@ -1,10 +1,5 @@
 package it.matato.dietreminder.ui.screens.developer
 
-import android.Manifest
-import android.app.AlarmManager
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -61,7 +56,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.model.ScheduledAlarm
 import it.matato.dietreminder.ui.viewmodel.DietViewModel
@@ -71,6 +65,7 @@ import it.matato.dietreminder.util.AlarmTracker
 import it.matato.dietreminder.util.AppLog
 import it.matato.dietreminder.util.LogEntry
 import it.matato.dietreminder.util.LogLevel
+import it.matato.dietreminder.util.PermissionManager
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -79,8 +74,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DeveloperScreen(
-    vm: DietViewModel,
-    onBack: () -> Unit
+    vm: DietViewModel, onBack: () -> Unit
 ) {
     val context = LocalContext.current
     val logs by vm.appLogs.collectAsState()
@@ -101,49 +95,44 @@ fun DeveloperScreen(
         }
     }
 
-    val exactAlarmLauncher = rememberLauncherForActivityResult(
+    val specialPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        AppLog.d("Returned from exact alarm permission settings")
+        AppLog.d("Returned from special permission settings")
     }
 
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+    val runtimePermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) {
-        val alarmManager =
-            context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
-
-        if (!alarmManager.canScheduleExactAlarms()) {
-            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                data = "package:${context.packageName}".toUri()
-            }
-
-            exactAlarmLauncher.launch(intent)
-        }
+        AppLog.d("Returned from runtime permission request")
     }
 
     fun checkPermissions() {
-        val notificationGranted = context.checkSelfPermission(
-            Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
+        val runtimePermission = PermissionManager.getNextPermissionToRequest(context)
 
-        if (!notificationGranted) {
-            notificationPermissionLauncher.launch(
-                Manifest.permission.POST_NOTIFICATIONS
-            )
+        if (runtimePermission != null) {
+            AppLog.i("Requesting runtime permission: $runtimePermission")
+            runtimePermissionLauncher.launch(runtimePermission)
             return
         }
 
-        val alarmManager =
-            context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
+        val specialPermission = PermissionManager.getNextSpecialPermission(context)
 
-        if (!alarmManager.canScheduleExactAlarms()) {
-            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                data = "package:${context.packageName}".toUri()
+        if (specialPermission != null) {
+            val intent = PermissionManager.createSpecialPermissionIntent(
+                context, specialPermission
+            )
+
+            if (intent != null) {
+                AppLog.i("Opening special permission settings: $specialPermission")
+                specialPermissionLauncher.launch(intent)
+                return
             }
 
-            exactAlarmLauncher.launch(intent)
+            AppLog.w("No settings intent available for special permission: $specialPermission")
         }
+
+        AppLog.i("All supported application permissions are granted")
     }
 
     LaunchedEffect(Unit) {
@@ -152,21 +141,17 @@ fun DeveloperScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(stringResource(R.string.developer_settings))
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
+            TopAppBar(title = {
+                Text(stringResource(R.string.developer_settings))
+            }, navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = stringResource(R.string.back)
+                    )
                 }
-            )
-        }
-    ) { padding ->
+            })
+        }) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -183,12 +168,10 @@ fun DeveloperScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Security,
@@ -197,8 +180,7 @@ fun DeveloperScreen(
                             )
 
                             Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                                modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Text(
                                     text = stringResource(R.string.check_app_permissions),
@@ -219,12 +201,10 @@ fun DeveloperScreen(
                         Button(
                             onClick = {
                                 checkPermissions()
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                            }, modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.Security,
-                                contentDescription = null
+                                imageVector = Icons.Rounded.Security, contentDescription = null
                             )
 
                             Spacer(Modifier.width(8.dp))
@@ -244,8 +224,7 @@ fun DeveloperScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.log_levels),
@@ -258,16 +237,11 @@ fun DeveloperScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            LogLevel.entries
-                                .sortedBy { it.priority }
-                                .forEach { level ->
+                            LogLevel.entries.sortedBy { it.priority }.forEach { level ->
                                     LogLevelChip(
-                                        label = level.name,
-                                        selected = selectedLevel == level,
-                                        onClick = {
+                                        label = level.name, selected = selectedLevel == level, onClick = {
                                             selectedLevel = level
-                                        }
-                                    )
+                                        })
                                 }
                         }
                     }
@@ -283,16 +257,14 @@ fun DeveloperScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(300.dp)
                                 .background(
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = MaterialTheme.shapes.medium
+                                    color = MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium
                                 )
                                 .padding(10.dp)
                         ) {
@@ -306,14 +278,12 @@ fun DeveloperScreen(
                         }
 
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
+                            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
                         ) {
                             TextButton(
                                 onClick = {
                                     AppLog.clear()
-                                }
-                            ) {
+                                }) {
                                 Text(stringResource(R.string.clear_logs))
                             }
                         }
@@ -330,8 +300,7 @@ fun DeveloperScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         if (scheduledAlarms.isEmpty()) {
                             Text(
@@ -342,30 +311,25 @@ fun DeveloperScreen(
                         } else {
                             scheduledAlarms.forEach { alarm ->
                                 ScheduledAlarmRow(
-                                    alarm = alarm,
-                                    onCancel = {
+                                    alarm = alarm, onCancel = {
                                         AlarmScheduler.cancelAlarm(
-                                            context,
-                                            alarm.id
+                                            context, alarm.id
                                         )
                                         refreshAlarms()
-                                    }
-                                )
+                                    })
                             }
                         }
 
                         HorizontalDivider()
 
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Button(
                                 onClick = {
                                     AlarmSyncHelper.syncAlarms(context)
                                     refreshAlarms()
-                                },
-                                modifier = Modifier.weight(1f)
+                                }, modifier = Modifier.weight(1f)
                             ) {
                                 Text(stringResource(R.string.run_checker))
                             }
@@ -374,8 +338,7 @@ fun DeveloperScreen(
                                 onClick = {
                                     AlarmScheduler.cancelAllAlarms(context)
                                     refreshAlarms()
-                                },
-                                modifier = Modifier.weight(1f)
+                                }, modifier = Modifier.weight(1f)
                             ) {
                                 Text(stringResource(R.string.clear_alarms))
                             }
@@ -395,12 +358,10 @@ fun DeveloperScreen(
                     Button(
                         onClick = {
                             vm.triggerTestAlarm()
-                        },
-                        modifier = Modifier.fillMaxWidth()
+                        }, modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.NotificationsActive,
-                            contentDescription = null
+                            imageVector = Icons.Rounded.NotificationsActive, contentDescription = null
                         )
 
                         Spacer(Modifier.width(8.dp))
@@ -411,12 +372,10 @@ fun DeveloperScreen(
                     OutlinedButton(
                         onClick = {
                             vm.scheduleTestAlarm(10)
-                        },
-                        modifier = Modifier.fillMaxWidth()
+                        }, modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.Timer,
-                            contentDescription = null
+                            imageVector = Icons.Rounded.Timer, contentDescription = null
                         )
 
                         Spacer(Modifier.width(8.dp))
@@ -430,49 +389,38 @@ fun DeveloperScreen(
                 DangerZone(
                     onResetDatabase = {
                         showResetDialog = true
-                    }
-                )
+                    })
             }
         }
     }
 
     if (showResetDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                showResetDialog = false
-            },
-            title = {
+        AlertDialog(onDismissRequest = {
+            showResetDialog = false
+        }, title = {
+            Text(
+                text = stringResource(R.string.reset_database), color = MaterialTheme.colorScheme.error
+            )
+        }, text = {
+            Text(stringResource(R.string.reset_database_confirm))
+        }, confirmButton = {
+            TextButton(
+                onClick = {
+                    vm.resetDatabase()
+                    showResetDialog = false
+                }) {
                 Text(
-                    text = stringResource(R.string.reset_database),
-                    color = MaterialTheme.colorScheme.error
+                    text = stringResource(R.string.delete), color = MaterialTheme.colorScheme.error
                 )
-            },
-            text = {
-                Text(stringResource(R.string.reset_database_confirm))
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        vm.resetDatabase()
-                        showResetDialog = false
-                    }
-                ) {
-                    Text(
-                        text = stringResource(R.string.delete),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showResetDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
             }
-        )
+        }, dismissButton = {
+            TextButton(
+                onClick = {
+                    showResetDialog = false
+                }) {
+                Text(stringResource(R.string.cancel))
+            }
+        })
     }
 }
 
@@ -494,12 +442,10 @@ private fun DangerZone(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.DeleteForever,
@@ -508,8 +454,7 @@ private fun DangerZone(
                     )
 
                     Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.reset_database),
@@ -526,16 +471,12 @@ private fun DangerZone(
                 }
 
                 Button(
-                    onClick = onResetDatabase,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
+                    onClick = onResetDatabase, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError
                     )
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.DeleteForever,
-                        contentDescription = null
+                        imageVector = Icons.Rounded.DeleteForever, contentDescription = null
                     )
 
                     Spacer(Modifier.width(8.dp))
@@ -552,50 +493,36 @@ private fun DeveloperSectionTitle(
     title: String
 ) {
     Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.SemiBold
+        text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold
     )
 }
 
 @Composable
 private fun ScheduledAlarmRow(
-    alarm: ScheduledAlarm,
-    onCancel: () -> Unit
+    alarm: ScheduledAlarm, onCancel: () -> Unit
 ) {
     val locale = LocalLocale.current.platformLocale
 
-    val time = Instant.ofEpochMilli(alarm.timeMillis)
-        .atZone(ZoneId.systemDefault())
-        .format(
+    val time = Instant.ofEpochMilli(alarm.timeMillis).atZone(ZoneId.systemDefault()).format(
             DateTimeFormatter.ofPattern(
-                "EEE HH:mm",
-                locale
+                "EEE HH:mm", locale
             )
         )
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
-                text = alarm.label,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold
+                text = alarm.label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold
             )
 
             Text(
                 text = stringResource(
-                    R.string.alarm_time_and_id,
-                    time,
-                    alarm.id
-                ),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                    R.string.alarm_time_and_id, time, alarm.id
+                ), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -613,17 +540,12 @@ private fun ScheduledAlarmRow(
 
 @Composable
 private fun LogLevelChip(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
+    label: String, selected: Boolean, onClick: () -> Unit
 ) {
     FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = {
+        selected = selected, onClick = onClick, label = {
             Text(label)
-        }
-    )
+        })
 }
 
 @Composable
