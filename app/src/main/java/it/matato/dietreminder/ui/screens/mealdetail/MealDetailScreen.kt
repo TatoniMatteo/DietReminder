@@ -59,6 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
+import it.matato.dietreminder.data.database.entity.Course
 import it.matato.dietreminder.data.database.entity.FoodItem
 import it.matato.dietreminder.data.database.entity.Meal
 import it.matato.dietreminder.data.database.relation.CourseWithItems
@@ -109,6 +110,16 @@ fun MealDetailScreen(
         }
 
         isLoading = false
+    }
+
+    fun addCourse() {
+        val meal = mealEntity ?: return
+
+        courses = courses + CourseWithItems(
+            course = Course(
+                mealId = meal.id, name = "", order = courses.size
+            ), items = emptyList()
+        )
     }
 
     Scaffold { padding ->
@@ -203,7 +214,10 @@ fun MealDetailScreen(
 
                 if (courses.isEmpty()) {
                     item {
-                        EmptyCourses()
+                        EmptyCourses(
+                            onAddCourse = {
+                                addCourse()
+                            })
                     }
                 } else {
                     item {
@@ -215,6 +229,8 @@ fun MealDetailScreen(
                             courses = courses.toMutableList().apply {
                                 removeAt(index)
                             }
+                        }, onAddCourse = {
+                            addCourse()
                         })
                     }
                 }
@@ -462,7 +478,7 @@ private fun CoursesHeader(
 
 @Composable
 private fun CoursesList(
-    courses: List<CourseWithItems>, onUpdate: (Int, CourseWithItems) -> Unit, onDelete: (Int) -> Unit
+    courses: List<CourseWithItems>, onUpdate: (Int, CourseWithItems) -> Unit, onDelete: (Int) -> Unit, onAddCourse: () -> Unit
 ) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large
@@ -475,11 +491,23 @@ private fun CoursesList(
                     onDelete(index)
                 })
 
-                if (index < courses.lastIndex) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
+            TextButton(
+                onClick = onAddCourse, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Add, contentDescription = null
+                )
+
+                Spacer(modifier = Modifier.width(6.dp))
+
+                Text(stringResource(R.string.add_course))
             }
         }
     }
@@ -542,8 +570,8 @@ private fun CourseListItem(
         courseWithItems.items.forEachIndexed { itemIndex, item ->
             FoodItemRow(item = item, onUpdate = { updatedItem ->
                 val updatedItems = courseWithItems.items.toMutableList().apply {
-                        set(itemIndex, updatedItem)
-                    }
+                    set(itemIndex, updatedItem)
+                }
 
                 onUpdate(
                     courseWithItems.copy(
@@ -552,8 +580,8 @@ private fun CourseListItem(
                 )
             }, onDelete = {
                 val updatedItems = courseWithItems.items.toMutableList().apply {
-                        removeAt(itemIndex)
-                    }
+                    removeAt(itemIndex)
+                }
 
                 onUpdate(
                     courseWithItems.copy(
@@ -635,9 +663,13 @@ private fun FoodItemRow(
 }
 
 @Composable
-private fun EmptyCourses() {
+private fun EmptyCourses(
+    onAddCourse: () -> Unit
+) {
     OutlinedCard(
-        modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onAddCourse), shape = MaterialTheme.shapes.large
     ) {
         Column(
             modifier = Modifier
@@ -659,7 +691,7 @@ private fun EmptyCourses() {
             Text(
                 text = stringResource(R.string.add_course),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
