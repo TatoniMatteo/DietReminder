@@ -44,11 +44,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.CourseEntity
-import it.matato.dietreminder.data.CourseWithItems
-import it.matato.dietreminder.data.FoodItemEntity
-import it.matato.dietreminder.data.MealEntity
-import it.matato.dietreminder.data.MealType
+import it.matato.dietreminder.data.database.entity.Course
+import it.matato.dietreminder.data.database.entity.FoodItem
+import it.matato.dietreminder.data.database.entity.Meal
+import it.matato.dietreminder.data.database.relation.CourseWithItems
+import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.ui.viewmodel.DietViewModel
 import java.time.DayOfWeek
 
@@ -61,7 +61,7 @@ fun MealDetailScreen(
     dayOfWeek: DayOfWeek,
     onBack: () -> Unit
 ) {
-    var mealEntity by remember { mutableStateOf<MealEntity?>(null) }
+    var mealEntity by remember { mutableStateOf<Meal?>(null) }
     var courses by remember { mutableStateOf<List<CourseWithItems>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
@@ -85,7 +85,7 @@ fun MealDetailScreen(
         } else {
             val defaultTimeMinutes = vm.getDefaultTime(MealType.LUNCH)
             time = "%02d:%02d".format(defaultTimeMinutes / 60, defaultTimeMinutes % 60)
-            mealEntity = MealEntity(dietId = dietId, dayOfWeek = dayOfWeek, type = MealType.LUNCH, timeMinutes = defaultTimeMinutes)
+            mealEntity = Meal(dietId = dietId, dayOfWeek = dayOfWeek, type = MealType.LUNCH, timeMinutes = defaultTimeMinutes)
         }
         isLoading = false
     }
@@ -219,7 +219,7 @@ fun MealDetailScreen(
                         Text(stringResource(R.string.courses), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         TextButton(onClick = {
                             courses = courses + CourseWithItems(
-                                course = CourseEntity(mealId = mealId, name = "Nuova portata", order = courses.size),
+                                course = Course(mealId = mealId, name = "Nuova portata", order = courses.size),
                                 items = emptyList()
                             )
                         }) {
@@ -313,7 +313,7 @@ private fun CourseEditorCard(
 
             TextButton(
                 onClick = {
-                    val newItem = FoodItemEntity(
+                    val newItem = FoodItem(
                         courseId = courseWithItems.course.id,
                         name = "",
                         quantities = emptyList(),

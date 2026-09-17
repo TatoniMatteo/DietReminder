@@ -44,7 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.MealWithDetails
+import it.matato.dietreminder.data.database.relation.MealWithDetails
 import it.matato.dietreminder.ui.viewmodel.DietViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate

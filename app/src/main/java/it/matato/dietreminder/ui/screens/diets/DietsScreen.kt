@@ -42,7 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.DietEntity
+import it.matato.dietreminder.data.database.entity.Diet
 import it.matato.dietreminder.ui.viewmodel.DietViewModel
 
 @Composable
@@ -81,7 +81,7 @@ fun DietsScreen(
                 )
             }
 
-            items(diets, key = DietEntity::id) { diet ->
+            items(diets, key = Diet::id) { diet ->
                 DietCard(
                     diet = diet,
                     onActivate = { vm.activate(diet.id) },
@@ -106,7 +106,7 @@ fun DietsScreen(
 
 @Composable
 private fun DietCard(
-    diet: DietEntity,
+    diet: Diet,
     onActivate: () -> Unit,
     onDuplicate: () -> Unit,
     onDelete: () -> Unit,

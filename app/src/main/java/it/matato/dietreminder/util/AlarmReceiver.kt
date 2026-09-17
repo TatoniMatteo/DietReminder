@@ -9,7 +9,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.HydrationRange
+import it.matato.dietreminder.data.model.HydrationRange
 import java.util.Calendar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,10 +19,7 @@ import kotlinx.serialization.json.Json
 
 class AlarmReceiver : BroadcastReceiver() {
 
-    override fun onReceive(
-        context: Context,
-        intent: Intent
-    ) {
+    override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()
 
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
@@ -36,10 +33,7 @@ class AlarmReceiver : BroadcastReceiver() {
         }
     }
 
-    private suspend fun processAlarm(
-        context: Context,
-        intent: Intent
-    ) {
+    private suspend fun processAlarm(context: Context, intent: Intent) {
         val type = intent.getStringExtra(EXTRA_TYPE)
         val titleExtra = intent.getStringExtra(EXTRA_TITLE)
         val messageExtra = intent.getStringExtra(EXTRA_MESSAGE)
@@ -63,9 +57,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val title = titleExtra ?: context.getString(R.string.app_name)
         val message = messageExtra ?: context.getString(R.string.it_is_time_to_eat)
 
-        val notificationManager = context.getSystemService(
-            Context.NOTIFICATION_SERVICE
-        ) as NotificationManager
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         createNotificationChannel(
             context = context,
@@ -99,13 +91,8 @@ class AlarmReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
 
         if (type == TYPE_HYDRATION) {
-            val laterIntent = Intent(
-                context,
-                HydrationReceiver::class.java
-            ).apply {
-                action = ACTION_LATER
-                putExtra(EXTRA_NOTIFICATION_ID, notificationId)
-            }
+            val laterIntent = Intent(context, HydrationReceiver::class.java)
+                .apply { action = ACTION_LATER; putExtra(EXTRA_NOTIFICATION_ID, notificationId) }
 
             val laterPendingIntent = PendingIntent.getBroadcast(
                 context,
@@ -114,11 +101,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            builder.addAction(
-                0,
-                context.getString(R.string.action_later),
-                laterPendingIntent
-            )
+            builder.addAction(0, context.getString(R.string.action_later), laterPendingIntent)
         }
 
         try {
@@ -145,25 +128,13 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         val now = Calendar.getInstance()
-        val currentMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 +
-                now.get(Calendar.MINUTE)
+        val currentMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
 
         val isInRange = ranges.any { range ->
             when {
-                range.startMinutes < range.endMinutes -> {
-                    currentMinutes >= range.startMinutes &&
-                            currentMinutes < range.endMinutes
-                }
-
-                range.endMinutes == 0 -> {
-                    currentMinutes >= range.startMinutes
-                }
-
-                range.startMinutes > range.endMinutes -> {
-                    currentMinutes >= range.startMinutes ||
-                            currentMinutes < range.endMinutes
-                }
-
+                range.startMinutes < range.endMinutes -> currentMinutes >= range.startMinutes && currentMinutes < range.endMinutes
+                range.endMinutes == 0 -> currentMinutes >= range.startMinutes
+                range.startMinutes > range.endMinutes -> currentMinutes >= range.startMinutes || currentMinutes < range.endMinutes
                 else -> false
             }
         }
@@ -172,11 +143,7 @@ class AlarmReceiver : BroadcastReceiver() {
         return isInRange
     }
 
-    private fun createNotificationChannel(
-        context: Context,
-        notificationManager: NotificationManager,
-        channelName: String
-    ) {
+    private fun createNotificationChannel(context: Context, notificationManager: NotificationManager, channelName: String) {
         if (notificationManager.getNotificationChannel(CHANNEL_ID) != null) {
             return
         }
@@ -196,21 +163,16 @@ class AlarmReceiver : BroadcastReceiver() {
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun createDeepLink(
-        intent: Intent,
-        type: String?
-    ) = if (type == TYPE_HYDRATION) {
-        "dietreminder://hydration".toUri()
-    } else {
-        val mealId = intent.getLongExtra(EXTRA_MEAL_ID, -1L)
-        val dayName = intent.getStringExtra(EXTRA_DAY_NAME)
+    private fun createDeepLink(intent: Intent, type: String?) =
+        if (type == TYPE_HYDRATION) "dietreminder://hydration".toUri() else {
+            val mealId = intent.getLongExtra(EXTRA_MEAL_ID, -1L)
+            val dayName = intent.getStringExtra(EXTRA_DAY_NAME)
 
-        if (mealId != -1L && !dayName.isNullOrBlank()) {
-            "dietreminder://week?mealId=$mealId&dayName=$dayName".toUri()
-        } else {
-            "dietreminder://week".toUri()
+            if (mealId != -1L && !dayName.isNullOrBlank())
+                "dietreminder://week?mealId=$mealId&dayName=$dayName".toUri()
+            else
+                "dietreminder://week".toUri()
         }
-    }
 
     private companion object {
         const val CHANNEL_ID = "diet_alarms"

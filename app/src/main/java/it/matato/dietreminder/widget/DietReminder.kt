@@ -38,7 +38,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import it.matato.dietreminder.DietApplication
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.MealType
+import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.domain.NextMeal
 import it.matato.dietreminder.domain.nextMeal
 import java.time.LocalDateTime

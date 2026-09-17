@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import it.matato.dietreminder.data.AppDatabase
-import it.matato.dietreminder.data.DietRepository
+import it.matato.dietreminder.data.database.AppDatabase
+import it.matato.dietreminder.data.repository.DietRepository
 import it.matato.dietreminder.util.AlarmSyncHelper
 import it.matato.dietreminder.util.AppLog
 import it.matato.dietreminder.util.worker.AlarmCheckerWorker
@@ -13,14 +13,19 @@ import it.matato.dietreminder.widget.WidgetRefreshWorker
 import java.util.concurrent.TimeUnit
 
 class DietApplication : Application() {
-    val database by lazy { AppDatabase.create(this) }
+
+    val database by lazy {
+        AppDatabase.create(this)
+    }
+
     val repository by lazy {
         DietRepository(
-            database.dietDao(),
-            database.mealDao(),
-            database.courseDao(),
-            database.foodItemDao(),
-            database.configDao()
+            database = database,
+            diets = database.dietDao(),
+            meals = database.mealDao(),
+            courses = database.courseDao(),
+            foodItems = database.foodItemDao(),
+            config = database.configDao(),
         )
     }
 
@@ -32,18 +37,14 @@ class DietApplication : Application() {
         AlarmSyncHelper.syncAlarms(this)
 
         AppLog.d("Setting up Periodic Workers")
-        val request = PeriodicWorkRequestBuilder<WidgetRefreshWorker>(15, TimeUnit.MINUTES).build()
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            WidgetRefreshWorker.WORK_NAME,
-            ExistingPeriodicWorkPolicy.UPDATE,
-            request,
-        )
+
+        val widgetRequest = PeriodicWorkRequestBuilder<WidgetRefreshWorker>(15, TimeUnit.MINUTES).build()
+        WorkManager.getInstance(this)
+            .enqueueUniquePeriodicWork(WidgetRefreshWorker.WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, widgetRequest)
+
         val checkerRequest = PeriodicWorkRequestBuilder<AlarmCheckerWorker>(1, TimeUnit.HOURS).build()
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "AlarmChecker",
-            ExistingPeriodicWorkPolicy.KEEP,
-            checkerRequest
-        )
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork("AlarmChecker", ExistingPeriodicWorkPolicy.KEEP, checkerRequest)
+
         AppLog.i("=== Application Ready ===")
     }
 }

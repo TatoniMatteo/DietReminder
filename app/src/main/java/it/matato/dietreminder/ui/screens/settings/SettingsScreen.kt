@@ -81,7 +81,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.MealType
+import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.ui.viewmodel.DietViewModel
 import java.io.OutputStreamWriter
 import kotlinx.coroutines.launch

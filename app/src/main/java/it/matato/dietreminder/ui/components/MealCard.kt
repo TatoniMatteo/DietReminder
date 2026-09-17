@@ -16,11 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import it.matato.dietreminder.data.MealEntity
+import it.matato.dietreminder.data.database.entity.Meal
 
 @Composable
 fun MealCard(
-    meal: MealEntity,
+    meal: Meal,
     onClick: () -> Unit
 ) {
     ElevatedCard(

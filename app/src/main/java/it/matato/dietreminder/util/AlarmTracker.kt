@@ -2,7 +2,7 @@ package it.matato.dietreminder.util
 
 import android.content.Context
 import it.matato.dietreminder.DietApplication
-import it.matato.dietreminder.data.ScheduledAlarm
+import it.matato.dietreminder.data.model.ScheduledAlarm
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,20 +17,14 @@ object AlarmTracker {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
 
-    fun registerAlarm(
-        context: Context,
-        alarm: ScheduledAlarm
-    ) {
+    fun registerAlarm(context: Context, alarm: ScheduledAlarm) {
         scope.launch {
             mutex.withLock {
                 val current = getAlarmsInternal(context)
-
-                val updated = (current.filter { it.id != alarm.id } + alarm)
-                    .sortedBy { it.timeMillis }
-
-                saveAlarms(context, updated)
-
-                AppLog.t("Alarm registered: ID=${alarm.id}, Type=${alarm.type}")
+                val updated = (current.filter { it.id != alarm.id } + alarm).sortedBy { it.timeMillis }; saveAlarms(
+                context,
+                updated
+            ); AppLog.t("Alarm registered: ID=${alarm.id}, Type=${alarm.type}")
             }
         }
     }
@@ -43,9 +37,7 @@ object AlarmTracker {
             mutex.withLock {
                 val current = getAlarmsInternal(context)
                 val updated = current.filter { it.id != id }
-
                 saveAlarms(context, updated)
-
                 AppLog.t("Alarm unregistered: ID=$id")
             }
         }
@@ -82,15 +74,8 @@ object AlarmTracker {
         }
     }
 
-    private suspend fun saveAlarms(
-        context: Context,
-        alarms: List<ScheduledAlarm>
-    ) {
+    private suspend fun saveAlarms(context: Context, alarms: List<ScheduledAlarm>) {
         val repo = (context.applicationContext as DietApplication).repository
-
-        repo.saveConfig(
-            "scheduled_alarms_registry",
-            Json.encodeToString(alarms)
-        )
+        repo.saveConfig("scheduled_alarms_registry", Json.encodeToString(alarms))
     }
 }

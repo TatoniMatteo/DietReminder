@@ -63,7 +63,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.ScheduledAlarm
+import it.matato.dietreminder.data.model.ScheduledAlarm
 import it.matato.dietreminder.ui.viewmodel.DietViewModel
 import it.matato.dietreminder.util.AlarmScheduler
 import it.matato.dietreminder.util.AlarmSyncHelper

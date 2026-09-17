@@ -1,6 +1,6 @@
 package it.matato.dietreminder.domain
 
-import it.matato.dietreminder.data.MealWithDetails
+import it.matato.dietreminder.data.database.relation.MealWithDetails
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -9,6 +9,7 @@ data class NextMeal(val meal: MealWithDetails, val dateTime: LocalDateTime, val 
 
 fun nextMeal(meals: List<MealWithDetails>, now: LocalDateTime, windowMinutes: Int): NextMeal? {
     if (meals.isEmpty()) return null
+
     val window = windowMinutes.coerceAtLeast(0).toLong()
     val candidates = (0 .. 1).flatMap { dayOffset ->
         val date = now.toLocalDate().plusDays(dayOffset.toLong())
@@ -17,6 +18,7 @@ fun nextMeal(meals: List<MealWithDetails>, now: LocalDateTime, windowMinutes: In
             Candidate(meal = meal, mealDateTime = mealDateTime, showUntil = mealDateTime.plusMinutes(window))
         }
     }.sortedBy { it.mealDateTime }
+
     val current =
         candidates.firstOrNull { candidate -> !now.isBefore(candidate.mealDateTime) && now.isBefore(candidate.showUntil) }
     val next = current ?: candidates.firstOrNull { candidate -> candidate.mealDateTime.isAfter(now) }

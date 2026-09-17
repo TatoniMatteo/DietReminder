@@ -5,9 +5,9 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.HydrationRange
-import it.matato.dietreminder.data.MealType
-import it.matato.dietreminder.data.ScheduledAlarm
+import it.matato.dietreminder.data.model.HydrationRange
+import it.matato.dietreminder.data.model.MealType
+import it.matato.dietreminder.data.model.ScheduledAlarm
 import java.time.Instant
 import java.util.Calendar
 import kotlinx.serialization.json.Json
@@ -268,26 +268,14 @@ object AlarmScheduler {
     ) {
         if (alarmManager.canScheduleExactAlarms()) {
             AppLog.t("Using setExactAndAllowWhileIdle")
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                timeMillis,
-                pendingIntent
-            )
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMillis, pendingIntent)
         } else {
             AppLog.w("Exact alarms not allowed, falling back to setAndAllowWhileIdle")
-            alarmManager.setAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                timeMillis,
-                pendingIntent
-            )
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMillis, pendingIntent)
         }
     }
 
-    private fun cancelAlarmManagerAlarm(
-        alarmManager: AlarmManager,
-        context: Context,
-        id: Int
-    ) {
+    private fun cancelAlarmManagerAlarm(alarmManager: AlarmManager, context: Context, id: Int) {
         val intent = Intent(context, AlarmReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             context,

@@ -3,9 +3,9 @@ package it.matato.dietreminder.util
 import android.content.Context
 import it.matato.dietreminder.DietApplication
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.HydrationRange
-import it.matato.dietreminder.data.MealType
-import it.matato.dietreminder.data.MealWithDetails
+import it.matato.dietreminder.data.database.relation.MealWithDetails
+import it.matato.dietreminder.data.model.HydrationRange
+import it.matato.dietreminder.data.model.MealType
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -117,53 +117,26 @@ object AlarmSyncHelper {
         }
     }
 
-    private suspend fun syncHydrationAlarm(
-        context: Context,
-        app: DietApplication
-    ) {
-        val hydrationRangesJson = app.repository
-            .observeConfig("hydration_ranges")
-            .first()
-            ?.value
-
+    private suspend fun syncHydrationAlarm(context: Context, app: DietApplication) {
+        val hydrationRangesJson = app.repository.observeConfig("hydration_ranges").first()?.value
         val hydrationRanges = hydrationRangesJson?.let { json ->
             try {
                 Json.decodeFromString<List<HydrationRange>>(json)
             } catch (e: Exception) {
-                AppLog.e("Failed to decode hydration ranges", e)
+                AppLog.e("Failed to decode hydration ranges", e); null
+            }
+        } ?: listOf(HydrationRange(startMinutes = 8 * 60, endMinutes = 22 * 60))
+
+        val activeDays = app.repository.observeConfig("hydration_days").first()?.value?.split(",")?.mapNotNull {
+            try {
+                DayOfWeek.valueOf(it.trim())
+            } catch (_: Exception) {
                 null
             }
-        } ?: listOf(
-            HydrationRange(
-                startMinutes = 8 * 60,
-                endMinutes = 22 * 60
-            )
-        )
+        }?.toSet() ?: DayOfWeek.entries.toSet()
 
-        val activeDays = app.repository
-            .observeConfig("hydration_days")
-            .first()
-            ?.value
-            ?.split(",")
-            ?.mapNotNull {
-                try {
-                    DayOfWeek.valueOf(it.trim())
-                } catch (_: Exception) {
-                    null
-                }
-            }
-            ?.toSet()
-            ?: DayOfWeek.entries.toSet()
-
-        val interval = app.repository
-            .observeConfig("hydration_interval")
-            .first()
-            ?.value
-            ?.toIntOrNull()
-            ?: 120
-
+        val interval = app.repository.observeConfig("hydration_interval").first()?.value?.toIntOrNull() ?: 120
         val today = LocalDate.now().dayOfWeek
-
         if (!activeDays.contains(today)) {
             AppLog.i("Hydration reminder skipped: today ($today) is not an active day")
             return
@@ -178,9 +151,7 @@ object AlarmSyncHelper {
         )
     }
 
-    private fun findTodayMealOccurrence(
-        matchingMeals: List<MealWithDetails>
-    ): LocalDateTime? {
+    private fun findTodayMealOccurrence(matchingMeals: List<MealWithDetails>): LocalDateTime? {
         if (matchingMeals.isEmpty()) {
             return null
         }

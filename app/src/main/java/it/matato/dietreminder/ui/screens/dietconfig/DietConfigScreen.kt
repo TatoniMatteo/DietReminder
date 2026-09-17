@@ -43,8 +43,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.DietEntity
-import it.matato.dietreminder.data.MealWithDetails
+import it.matato.dietreminder.data.database.entity.Diet
+import it.matato.dietreminder.data.database.relation.MealWithDetails
 import it.matato.dietreminder.ui.components.MealCard
 import it.matato.dietreminder.ui.viewmodel.DietViewModel
 import java.time.DayOfWeek
@@ -61,7 +61,7 @@ fun DietConfigScreen(
 ) {
     val configuration = LocalConfiguration.current
     val locale = configuration.locales[0]
-    var diet by remember { mutableStateOf<DietEntity?>(null) }
+    var diet by remember { mutableStateOf<Diet?>(null) }
     val meals by vm.meals.collectAsState()
     
     LaunchedEffect(dietId) {

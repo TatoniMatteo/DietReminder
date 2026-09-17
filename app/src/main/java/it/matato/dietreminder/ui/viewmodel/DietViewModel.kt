@@ -7,11 +7,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import it.matato.dietreminder.DietApplication
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.CourseWithItems
-import it.matato.dietreminder.data.HydrationRange
-import it.matato.dietreminder.data.MealEntity
-import it.matato.dietreminder.data.MealType
-import it.matato.dietreminder.data.MealWithDetails
+import it.matato.dietreminder.data.database.entity.Meal
+import it.matato.dietreminder.data.database.relation.CourseWithItems
+import it.matato.dietreminder.data.database.relation.MealWithDetails
+import it.matato.dietreminder.data.model.HydrationRange
+import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.domain.NextMeal
 import it.matato.dietreminder.domain.nextMeal
 import it.matato.dietreminder.util.AlarmReceiver
@@ -203,7 +203,7 @@ class DietViewModel(app: Application) : AndroidViewModel(app) {
 
     fun duplicate(id: Long) = viewModelScope.launch { repo.duplicate(id) }
 
-    fun saveMeal(meal: MealEntity, courses: List<CourseWithItems>) = viewModelScope.launch {
+    fun saveMeal(meal: Meal, courses: List<CourseWithItems>) = viewModelScope.launch {
         repo.saveMeal(meal, courses)
         DietReminder.updateAll(getApplication())
     }
