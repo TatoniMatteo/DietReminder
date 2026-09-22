@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import it.matato.dietreminder.data.database.entity.AppConfig
+import it.matato.dietreminder.data.database.entity.ConfigKey
 import it.matato.dietreminder.data.database.entity.MealDefaultTime
 import kotlinx.coroutines.flow.Flow
 
@@ -22,6 +23,10 @@ interface ConfigDao {
 
     @Query("SELECT * FROM app_config WHERE `key` = :key")
     fun observeConfig(key: String): Flow<AppConfig?>
+
+    fun observeConfig(key: ConfigKey): Flow<AppConfig?> {
+        return observeConfig(key.name)
+    }
 
     @Query("DELETE FROM app_config")
     suspend fun deleteAll()

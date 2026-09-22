@@ -21,6 +21,6 @@ data class Course(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val mealId: Long,
-    val name: String,
+    val name: String = "",
     val order: Int = 0
 )

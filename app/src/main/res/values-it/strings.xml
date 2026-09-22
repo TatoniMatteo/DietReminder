@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Memo Pasti</string>
+
     <string name="home">Home</string>
     <string name="week">Settimana</string>
     <string name="diets">Diete</string>
     <string name="settings">Impostazioni</string>
-    <string name="stats">Stats</string>
+    <string name="stats">Statistiche</string>
+
+    <string name="back">Indietro</string>
+    <string name="cancel">Annulla</string>
+    <string name="save">Salva</string>
+    <string name="create">Crea</string>
+    <string name="delete">Elimina</string>
+    <string name="edit">Modifica</string>
+    <string name="add">Aggiungi</string>
+    <string name="activate">Attiva</string>
+    <string name="duplicate">Duplica</string>
+    <string name="configure">Configura</string>
+    <string name="active">Attiva</string>
+    <string name="confirm">Conferma</string>
+
     <string name="next_meal">PROSSIMO PASTO</string>
     <string name="no_diet">Nessuna dieta attiva</string>
     <string name="configure_diet">Configura una dieta</string>
+
     <string name="meal_breakfast">Colazione</string>
     <string name="meal_morning_snack">Spuntino</string>
     <string name="meal_lunch">Pranzo</string>
@@ -16,123 +32,83 @@
     <string name="meal_dinner">Cena</string>
     <string name="meal_other">Altro</string>
     <string name="meal_hydration">Idratazione</string>
-    <string name="new_diet">Nuova Dieta</string>
-    <string name="diet_name">Nome Dieta</string>
-    <string name="window_minutes">Finestra visualizzazione (minuti)</string>
-    <string name="cancel">Annulla</string>
-    <string name="create">Crea</string>
-    <string name="import_diet">Importa Dieta</string>
-    <string name="import_desc">Importa via testo o file (.dr)</string>
-    <string name="import_file">Scegli File</string>
-    <string name="import_text">Incolla Testo</string>
-    <string name="export_diet">Esporta Dieta</string>
-    <string name="export_name">Esporta %1$s</string>
-    <string name="json_exported">Dieta esportata con successo</string>
-    <string name="export_failed">Esportazione fallita</string>
-    <string name="import_failed">Importazione fallita</string>
-    <string name="backup_data">Dati e Backup</string>
-    <string name="import_success">Dieta importata con successo</string>
-    <string name="import_overwrite_title">Dieta Già Esistente</string>
-    <string name="import_overwrite_message">Una dieta con lo stesso ID univoco esiste già. Vuoi sovrascriverla o annullare l\'importazione?</string>
-    <string name="overwrite">Sovrascrivi</string>
-    <string name="default_meal_times">Orari predefiniti pasti</string>
-    <string name="save">Salva</string>
-    <string name="delete">Elimina</string>
-    <string name="edit">Modifica</string>
-    <string name="add">Aggiungi</string>
-    <string name="activate">Attiva</string>
-    <string name="duplicate">Duplica</string>
-    <string name="back">Indietro</string>
-    <string name="configure">Configura</string>
-    <string name="active">Attiva</string>
+
+    <string name="new_diet">Nuova dieta</string>
+    <string name="diet_name">Nome dieta</string>
+    <string name="window_minutes">Finestra di visualizzazione (minuti)</string>
     <string name="courses_count">%1$d portate</string>
     <string name="add_meal">Aggiungi un pasto</string>
 
-    <!-- HomeScreen -->
+    <string name="import_diet">Importa dieta</string>
+    <string name="import_desc">Importa tramite testo o file (.dr)</string>
+    <string name="import_file">Scegli file</string>
+    <string name="import_text">Incolla testo</string>
+    <string name="export_diet">Esporta dieta</string>
+    <string name="export_name">Esporta %1$s</string>
+    <string name="json_exported">Dieta esportata con successo</string>
+    <string name="export_failed">Esportazione non riuscita</string>
+    <string name="import_failed">Importazione non riuscita</string>
+    <string name="backup_data">Dati e backup</string>
+    <string name="import_success">Dieta importata con successo</string>
+    <string name="import_invalid_json">Il file non è valido</string>
+    <string name="import_overwrite_title">Dieta già esistente</string>
+    <string name="import_overwrite_message">Una dieta con lo stesso ID univoco esiste già. Vuoi sovrascriverla o annullare l\'importazione?</string>
+    <string name="overwrite">Sovrascrivi</string>
+    <string name="default_meal_times">Orari predefiniti dei pasti</string>
+
     <string name="greeting">Ciao!</string>
     <string name="today_is">Oggi è %1$s %2$s</string>
     <string name="hydration_title">Idratazione</string>
     <string name="glasses_today">%1$d bicchieri oggi</string>
-    <string name="next_meal_title">Prossimo Pasto</string>
+    <string name="next_meal_title">Prossimo pasto</string>
     <string name="in_minutes">tra %1$d min</string>
     <string name="ago_minutes">%1$d min fa</string>
     <string name="now">ora</string>
-    <string name="today_schedule">Programma di Oggi</string>
+    <string name="today_schedule">Programma di oggi</string>
     <string name="welcome_message">Benvenuto! Inizia creando una dieta nelle impostazioni o nella sezione diete.</string>
 
-    <!-- SettingsScreen -->
-    <string name="appearance_personalization">Aspetto e Personalizzazione</string>
+    <string name="appearance_personalization">Aspetto e personalizzazione</string>
     <string name="theme">Tema</string>
     <string name="theme_light">Chiaro</string>
     <string name="theme_dark">Scuro</string>
     <string name="theme_system">Sistema</string>
-    <string name="dynamic_colors">Colori Dinamici (System)</string>
+    <string name="dynamic_colors">Colori dinamici (sistema)</string>
     <string name="dynamic_colors_desc">Usa i colori del tema del telefono</string>
-    <string name="app_color">Colore Applicazione</string>
+    <string name="app_color">Colore dell\'applicazione</string>
     <string name="app_color_desc">Personalizza la palette dei colori</string>
     <string name="language">Lingua</string>
     <string name="lang_it">Italiano</string>
     <string name="lang_en">English</string>
+
     <string name="planning">Pianificazione</string>
     <string name="default_time">Orario predefinito</string>
-    <string name="notifications_alarms">Notifiche e Allarmi</string>
-    <string name="meal_reminders">Promemoria Pasti</string>
-    <string name="meal_reminders_desc">Invia brevi allarmi quando è ora di mangiare</string>
-    <string name="hydration_reminders">Promemoria Idratazione</string>
-    <string name="hydration_reminders_desc">Notifiche regolari per bere acqua</string>
-    <string name="hydration_interval">Intervallo Idratazione (min)</string>
-    <string name="hydration_interval_desc">Tempo tra le notifiche</string>
-    <string name="hydration_windows">Fasce Orarie</string>
-    <string name="hydration_days">Giorni Attivi</string>
-    <string name="no_windows_configured">Nessuna fascia configurata</string>
-    <string name="active_windows">%1$d fasce attive</string>
-    <string name="log_levels">Livelli Log</string>
-    <string name="filter_logs">Filtra Log</string>
-    <string name="export_logs">Esporta Log</string>
-    <string name="database_tools">Strumenti Database</string>
-    <string name="reset_database">Resetta Database</string>
-    <string name="reset_database_confirm">Sei sicuro? Questo eliminerà TUTTE le diete e le impostazioni.</string>
-    <string name="trigger_hydration_alarm">Trigger Allarme Idratazione</string>
-    <string name="immediate_trigger">Trigger Immediato</string>
-    <string name="immediate_trigger_desc">Invia subito la notifica (senza scheduler)</string>
-    <string name="test_scheduler">Test Scheduler (10s)</string>
-    <string name="test_scheduler_desc">Pianifica un allarme tra 10 secondi</string>
-    <string name="alarm_scheduled_toast">Allarme pianificato tra 10s</string>
-    <string name="log_console">Log Console</string>
-    <string name="clear_logs">Pulisci Log</string>
-    <string name="disable_dev_mode">Disattiva Modalità Sviluppatore</string>
-    <string name="app_info">Informazioni App</string>
-    <string name="version">Versione</string>
-    <string name="developer">Sviluppatore</string>
     <string name="set_default_time">Imposta orario predefinito</string>
-    <string name="new_window">Nuova Fascia</string>
+    <string name="new_window">Nuova fascia</string>
     <string name="start">Inizio</string>
     <string name="end">Fine</string>
-    <string name="choose_seed_color">Scegli Colore Seed</string>
-    <string name="select_language">Seleziona Lingua</string>
-    <string name="paste_json">Incolla JSON</string>
-    <string name="json_content">Contenuto JSON</string>
-    <string name="import_label">Importa</string>
     <string name="from_to">Dalle %1$02d:%2$02d alle %3$02d:%4$02d</string>
-    <string name="scheduled_alarms">Allarmi Schedulati</string>
-    <string name="run_checker">Esegui Controllo</string>
-    <string name="clear_alarms">Cancella tutti</string>
-    <string name="developer_settings">Impostazioni sviluppatore</string>
-    <string name="developer_settings_description">Advanced tools and logs</string>
-    <string name="check_app_permissions">Controlla permessi</string>
-    <string name="check_app_permissions_description">Check the permissions required by the application.</string>
-    <string name="alarm_time_and_id">%1$s (ID: %2$d)</string>
-    <string name="cancel_alarm">Annulla allarme</string>
-    <string name="danger_zone">Zona pericolosa</string>
-    <string name="reset_database_description">Questa operazione elimina definitivamente tutti i dati dell\'applicazione e non può essere annullata.</string>
 
-    <!-- HydrationStatsScreen -->
-    <string name="hydration_stats">Statistiche Idratazione</string>
-    <string name="daily_average">Media Giornaliera</string>
+    <string name="notifications_alarms">Notifiche e allarmi</string>
+    <string name="meal_reminders">Promemoria pasti</string>
+    <string name="meal_reminders_desc">Invia brevi notifiche quando è ora di mangiare</string>
+    <string name="hydration_reminders">Promemoria idratazione</string>
+    <string name="hydration_reminders_desc">Invia notifiche regolari per ricordarti di bere</string>
+    <string name="hydration_interval">Intervallo di idratazione (min)</string>
+    <string name="hydration_interval_desc">Tempo tra le notifiche</string>
+    <string name="hydration_windows">Fasce orarie</string>
+    <string name="hydration_days">Giorni attivi</string>
+    <string name="no_windows_configured">Nessuna fascia configurata</string>
+    <string name="active_windows">%1$d fasce attive</string>
+
+    <string name="choose_seed_color">Scegli colore principale</string>
+    <string name="select_language">Seleziona lingua</string>
+
+    <string name="hydration_stats">Statistiche idratazione</string>
+    <string name="daily_average">Media giornaliera</string>
     <string name="glasses_per_day">bicchieri al giorno</string>
     <string name="achievements">Traguardi</string>
     <string name="consistent">Costante</string>
-    <string name="consistent_desc">7 giorni > 8 bicchieri</string>
+    <string name="consistent_desc">7 giorni con più di 8 bicchieri</string>
     <string name="champion">Campione</string>
     <string name="champion_desc">Record: %1$d bicchieri</string>
     <string name="history">Cronologia</string>
@@ -140,34 +116,71 @@
     <string name="glasses_missing">Mancano %1$d bicchieri</string>
     <string name="last_7_days">Ultimi 7 giorni</string>
 
-    <!-- MealDetailScreen -->
-    <string name="new_meal">Nuovo Pasto</string>
-    <string name="edit_meal">Modifica Pasto</string>
+    <string name="new_meal">Nuovo pasto</string>
+    <string name="edit_meal">Modifica pasto</string>
     <string name="time_label">Ora (HH:mm)</string>
     <string name="custom_label">Etichetta personalizzata</string>
     <string name="additional_notes">Note aggiuntive</string>
     <string name="courses">Portate</string>
-    <string name="add_course">Aggiungi Portata</string>
-    <string name="course_name_hint">Nome portata (es. Primo)</string>
+    <string name="add_course">Aggiungi portata</string>
+    <string name="course_name_hint">Nome portata (es. primo)</string>
     <string name="food_item">Alimento</string>
     <string name="quantity">Quantità</string>
-    <string name="add_food_item">Aggiungi Alimento</string>
+    <string name="add_food_item">Aggiungi alimento</string>
     <string name="new_course_default">Nuova portata</string>
     <string name="no_meals_for_day">Nessun pasto per questo giorno</string>
     <string name="expand">Espandi</string>
-    <string name="collapse">Collassa</string>
+    <string name="collapse">Comprimi</string>
 
-    <!-- Notifications -->
-    <string name="it_is_time_to_eat">Ora di mangiare!</string>
-    <string name="it_is_moment_of">È il momento della %1$s</string>
-    <string name="hydration_notification_title">Idratazione</string>
-    <string name="hydration_notification_message">Ricordati di bere un bicchiere d’acqua!</string>
-    <string name="action_drank">Bevuto ✅</string>
-    <string name="action_later">Più tardi ⏰</string>
-    <string name="no_scheduled_alarms">Nessun evento schedulato</string>
+    <string name="paste_json">Incolla JSON</string>
+    <string name="json_content">Contenuto JSON</string>
+    <string name="import_label">Importa</string>
+
+    <string name="log_levels">Livelli di log</string>
+    <string name="filter_logs">Filtra log</string>
+    <string name="export_logs">Esporta log</string>
+    <string name="log_console">Console dei log</string>
+    <string name="clear_logs">Cancella log</string>
+    <string name="no_logs">Nessun log trovato</string>
+
+    <string name="database_tools">Strumenti database</string>
+    <string name="reset_database">Reimposta database</string>
+    <string name="disable_developer_mode_confirmation">Vuoi davvero disabilitare le opzioni sviluppatore?</string>
+    <string name="reset_database_confirmation">Vuoi davvero cancellare tutti i dati del database? Questa operazione non può essere annullata.</string>
+    <string name="reset_database_description">Questa operazione elimina definitivamente tutti i dati dell\'applicazione e non può essere annullata.</string>
+
+    <string name="developer_clicks_remaining">Ti mancano %1$d clic</string>
+    <string name="developer_settings">Impostazioni sviluppatore</string>
+    <string name="developer_settings_description">Strumenti avanzati e log</string>
+    <string name="check_app_permissions">Controlla permessi</string>
+    <string name="check_app_permissions_description">Controlla i permessi richiesti dall\'applicazione.</string>
+    <string name="disable_dev_mode">Disattiva modalità sviluppatore</string>
+    <string name="disable_developer_mode">Disabilita opzioni sviluppatore</string>
+    <string name="disable_developer_mode_description">Nasconde le opzioni dedicate allo sviluppo</string>
+    <string name="danger_zone">Zona pericolosa</string>
+
+    <string name="scheduled_alarms">Allarmi pianificati</string>
+    <string name="run_checker">Esegui controllo</string>
+    <string name="clear_alarms">Cancella tutti</string>
+    <string name="alarm_time_and_id">%1$s (ID: %2$d)</string>
+    <string name="cancel_alarm">Annulla allarme</string>
+    <string name="no_scheduled_alarms">Nessun evento pianificato</string>
+
+    <string name="trigger_hydration_alarm">Esegui allarme idratazione</string>
+    <string name="immediate_trigger">Esegui immediatamente</string>
+    <string name="immediate_trigger_desc">Invia subito la notifica senza utilizzare lo scheduler</string>
+    <string name="test_scheduler">Programma notifica di test</string>
+    <string name="test_scheduler_desc">Pianifica un allarme tra 10 secondi</string>
+    <string name="alarm_scheduled_toast">Allarme pianificato tra 10 s</string>
     <string name="notification_tests">Test notifiche</string>
 
-    <!-- Widget -->
+    <string name="it_is_time_to_eat">È ora di mangiare!</string>
+    <string name="it_is_moment_of">È il momento di %1$s</string>
+    <string name="hydration_notification_title">Idratazione</string>
+    <string name="hydration_notification_message">Ricordati di bere un bicchiere d\'acqua!</string>
+    <string name="action_drank">Bevuto ✅</string>
+    <string name="action_later">Più tardi ⏰</string>
+
     <string name="meal_breakfast_short">Colaz.</string>
     <string name="meal_morning_snack_short">Spunt.</string>
     <string name="meal_lunch_short">Pranzo</string>
@@ -177,4 +190,9 @@
     <string name="window_minutes_value">%1$d min</string>
     <string name="meal_type">Tipo di pasto</string>
     <string name="meal_time">Orario del pasto</string>
+
+    <string name="app_info">Informazioni sull\'app</string>
+    <string name="version">Versione</string>
+    <string name="developer">Sviluppatore</string>
+    <string name="daily_alarm_sync">Sincronizzazione giornaliera</string>
 </resources>

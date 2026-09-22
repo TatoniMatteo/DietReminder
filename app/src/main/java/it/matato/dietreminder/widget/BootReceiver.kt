@@ -6,7 +6,7 @@ import android.content.Intent
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import it.matato.dietreminder.util.AlarmSyncHelper
+import it.matato.dietreminder.util.alarm.AlarmSyncHelper
 import it.matato.dietreminder.util.AppLog
 import java.util.concurrent.TimeUnit
 

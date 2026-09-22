@@ -1,138 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Diet Reminder</string>
+
     <string name="home">Home</string>
     <string name="week">Week</string>
     <string name="diets">Diets</string>
     <string name="settings">Settings</string>
-    <string name="stats">Stats</string>
-    <string name="next_meal">NEXT MEAL</string>
-    <string name="no_diet">No active diet</string>
-    <string name="configure_diet">Configure a diet</string>
-    <string name="meal_breakfast">Breakfast</string>
-    <string name="meal_morning_snack">Morning Snack</string>
-    <string name="meal_lunch">Lunch</string>
-    <string name="meal_afternoon_snack">Afternoon Snack</string>
-    <string name="meal_dinner">Dinner</string>
-    <string name="meal_other">Other</string>
-    <string name="meal_hydration">Hydration</string>
-    <string name="new_diet">New Diet</string>
-    <string name="diet_name">Diet Name</string>
-    <string name="window_minutes">Visibility Window (minutes)</string>
+    <string name="stats">Statistics</string>
+
+    <string name="back">Back</string>
     <string name="cancel">Cancel</string>
-    <string name="create">Create</string>
-    <string name="import_diet">Import Diet</string>
-    <string name="import_desc">Import via text or file (.dr)</string>
-    <string name="import_file">Pick File</string>
-    <string name="import_text">Paste Text</string>
-    <string name="export_diet">Export Diet</string>
-    <string name="export_name">Export %1$s</string>
-    <string name="json_exported">Diet exported successfully</string>
-    <string name="export_failed">Export failed</string>
-    <string name="import_failed">Import failed</string>
-    <string name="backup_data">Data and Backup</string>
-    <string name="import_success">Diet imported successfully</string>
-    <string name="import_overwrite_title">Diet Already Exists</string>
-    <string name="import_overwrite_message">A diet with the same unique ID already exists. Do you want to overwrite it or cancel the import?</string>
-    <string name="overwrite">Overwrite</string>
-    <string name="default_meal_times">Default meal times</string>
     <string name="save">Save</string>
+    <string name="create">Create</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="add">Add</string>
     <string name="activate">Activate</string>
     <string name="duplicate">Duplicate</string>
-    <string name="back">Back</string>
     <string name="configure">Configure</string>
     <string name="active">Active</string>
+    <string name="confirm">Confirm</string>
+
+    <string name="next_meal">NEXT MEAL</string>
+    <string name="no_diet">No active diet</string>
+    <string name="configure_diet">Configure a diet</string>
+
+    <string name="meal_breakfast">Breakfast</string>
+    <string name="meal_morning_snack">Morning snack</string>
+    <string name="meal_lunch">Lunch</string>
+    <string name="meal_afternoon_snack">Afternoon snack</string>
+    <string name="meal_dinner">Dinner</string>
+    <string name="meal_other">Other</string>
+    <string name="meal_hydration">Hydration</string>
+
+    <string name="new_diet">New diet</string>
+    <string name="diet_name">Diet name</string>
+    <string name="window_minutes">Visibility window (minutes)</string>
     <string name="courses_count">%1$d courses</string>
     <string name="add_meal">Add a meal</string>
 
-    <!-- HomeScreen -->
+    <string name="import_diet">Import diet</string>
+    <string name="import_desc">Import via text or file (.dr)</string>
+    <string name="import_file">Choose file</string>
+    <string name="import_text">Paste text</string>
+    <string name="export_diet">Export diet</string>
+    <string name="export_name">Export %1$s</string>
+    <string name="json_exported">Diet exported successfully</string>
+    <string name="export_failed">Export failed</string>
+    <string name="import_failed">Import failed</string>
+    <string name="backup_data">Data and backup</string>
+    <string name="import_success">Diet imported successfully</string>
+    <string name="import_invalid_json">The file is invalid</string>
+    <string name="import_overwrite_title">Diet already exists</string>
+    <string name="import_overwrite_message">A diet with the same unique ID already exists. Do you want to overwrite it or cancel the import?</string>
+    <string name="overwrite">Overwrite</string>
+    <string name="default_meal_times">Default meal times</string>
+
     <string name="greeting">Hello!</string>
     <string name="today_is">Today is %1$s %2$s</string>
     <string name="hydration_title">Hydration</string>
     <string name="glasses_today">%1$d glasses today</string>
-    <string name="next_meal_title">Next Meal</string>
+    <string name="next_meal_title">Next meal</string>
     <string name="in_minutes">in %1$d min</string>
     <string name="ago_minutes">%1$d min ago</string>
     <string name="now">now</string>
-    <string name="today_schedule">Today\'s Schedule</string>
-    <string name="welcome_message">Welcome! Start by creating a diet in settings or the diets section.</string>
+    <string name="today_schedule">Today\'s schedule</string>
+    <string name="welcome_message">Welcome! Start by creating a diet in the diets section.</string>
 
-    <!-- SettingsScreen -->
-    <string name="appearance_personalization">Appearance and Personalization</string>
+    <string name="appearance_personalization">Appearance and personalization</string>
     <string name="theme">Theme</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="theme_system">System</string>
-    <string name="dynamic_colors">Dynamic Colors (System)</string>
-    <string name="dynamic_colors_desc">Use colors from your phone theme</string>
-    <string name="app_color">Application Color</string>
+    <string name="dynamic_colors">Dynamic colors (system)</string>
+    <string name="dynamic_colors_desc">Use colors from your phone\'s theme</string>
+    <string name="app_color">Application color</string>
     <string name="app_color_desc">Customize the color palette</string>
     <string name="language">Language</string>
     <string name="lang_it">Italiano</string>
     <string name="lang_en">English</string>
+
     <string name="planning">Planning</string>
     <string name="default_time">Default time</string>
-    <string name="notifications_alarms">Notifications and Alarms</string>
-    <string name="meal_reminders">Meal Reminders</string>
-    <string name="meal_reminders_desc">Send short alarms when it\'s time to eat</string>
-    <string name="hydration_reminders">Hydration Reminders</string>
-    <string name="hydration_reminders_desc">Regular notifications to drink water</string>
-    <string name="hydration_interval">Hydration Interval (min)</string>
-    <string name="hydration_interval_desc">Time between notifications</string>
-    <string name="hydration_windows">Time Windows</string>
-    <string name="hydration_days">Active Days</string>
-    <string name="no_windows_configured">No windows configured</string>
-    <string name="active_windows">%1$d active windows</string>
-    <string name="log_levels">Log Levels</string>
-    <string name="filter_logs">Filter Logs</string>
-    <string name="export_logs">Export Logs</string>
-    <string name="database_tools">Database Tools</string>
-    <string name="reset_database">Reset Database</string>
-    <string name="reset_database_confirm">Are you sure? This will delete ALL diets and settings.</string>
-    <string name="trigger_hydration_alarm">Trigger Hydration Alarm</string>
-    <string name="immediate_trigger">Immediate Trigger</string>
-    <string name="immediate_trigger_desc">Send notification immediately (no scheduler)</string>
-    <string name="test_scheduler">Test Scheduler (10s)</string>
-    <string name="test_scheduler_desc">Schedule an alarm in 10 seconds</string>
-    <string name="alarm_scheduled_toast">Alarm scheduled in 10s</string>
-    <string name="log_console">Log Console</string>
-    <string name="clear_logs">Clear Logs</string>
-    <string name="disable_dev_mode">Disable Developer Mode</string>
-    <string name="app_info">App Info</string>
-    <string name="version">Version</string>
-    <string name="developer">Developer</string>
     <string name="set_default_time">Set default time</string>
-    <string name="new_window">New Window</string>
+    <string name="new_window">New window</string>
     <string name="start">Start</string>
     <string name="end">End</string>
-    <string name="choose_seed_color">Choose Seed Color</string>
-    <string name="select_language">Select Language</string>
-    <string name="paste_json">Paste JSON</string>
-    <string name="json_content">JSON Content</string>
-    <string name="import_label">Import</string>
     <string name="from_to">From %1$02d:%2$02d to %3$02d:%4$02d</string>
-    <string name="scheduled_alarms">Scheduled Alarms</string>
-    <string name="run_checker">Run Checker</string>
-    <string name="clear_alarms">Clear all</string>
-    <string name="developer_settings">Developer settings</string>
-    <string name="developer_settings_description">Advanced tools and logs</string>
-    <string name="check_app_permissions">Check permissions</string>
-    <string name="check_app_permissions_description">Check the permissions required by the application.</string>
-    <string name="alarm_time_and_id">%1$s (ID: %2$d)</string>
-    <string name="cancel_alarm">Cancel alarm</string>
-    <string name="danger_zone">Danger zone</string>
-    <string name="reset_database_description">This action permanently deletes all application data and cannot be undone.</string>
 
-    <!-- HydrationStatsScreen -->
-    <string name="hydration_stats">Hydration Stats</string>
-    <string name="daily_average">Daily Average</string>
+    <string name="notifications_alarms">Notifications and alarms</string>
+    <string name="meal_reminders">Meal reminders</string>
+    <string name="meal_reminders_desc">Send brief notifications when it\'s time to eat</string>
+    <string name="hydration_reminders">Hydration reminders</string>
+    <string name="hydration_reminders_desc">Send regular notifications to remind you to drink</string>
+    <string name="hydration_interval">Hydration interval (min)</string>
+    <string name="hydration_interval_desc">Time between notifications</string>
+    <string name="hydration_windows">Time windows</string>
+    <string name="hydration_days">Active days</string>
+    <string name="no_windows_configured">No windows configured</string>
+    <string name="active_windows">%1$d active windows</string>
+
+    <string name="choose_seed_color">Choose primary color</string>
+    <string name="select_language">Select language</string>
+
+    <string name="hydration_stats">Hydration statistics</string>
+    <string name="daily_average">Daily average</string>
     <string name="glasses_per_day">glasses per day</string>
     <string name="achievements">Achievements</string>
     <string name="consistent">Consistent</string>
-    <string name="consistent_desc">7 days > 8 glasses</string>
+    <string name="consistent_desc">7 days with more than 8 glasses</string>
     <string name="champion">Champion</string>
     <string name="champion_desc">Record: %1$d glasses</string>
     <string name="history">History</string>
@@ -140,34 +116,71 @@
     <string name="glasses_missing">%1$d glasses missing</string>
     <string name="last_7_days">Last 7 days</string>
 
-    <!-- MealDetailScreen -->
-    <string name="new_meal">New Meal</string>
-    <string name="edit_meal">Edit Meal</string>
+    <string name="new_meal">New meal</string>
+    <string name="edit_meal">Edit meal</string>
     <string name="time_label">Time (HH:mm)</string>
-    <string name="custom_label">Custom Label</string>
-    <string name="additional_notes">Additional Notes</string>
+    <string name="custom_label">Custom label</string>
+    <string name="additional_notes">Additional notes</string>
     <string name="courses">Courses</string>
-    <string name="add_course">Add Course</string>
-    <string name="course_name_hint">Course name (e.g. First)</string>
-    <string name="food_item">Food Item</string>
+    <string name="add_course">Add course</string>
+    <string name="course_name_hint">Course name (e.g. first course)</string>
+    <string name="food_item">Food item</string>
     <string name="quantity">Quantity</string>
-    <string name="add_food_item">Add Food Item</string>
-    <string name="new_course_default">New Course</string>
+    <string name="add_food_item">Add food item</string>
+    <string name="new_course_default">New course</string>
     <string name="no_meals_for_day">No meals for this day</string>
     <string name="expand">Expand</string>
     <string name="collapse">Collapse</string>
 
-    <!-- Notifications -->
-    <string name="it_is_time_to_eat">Time to eat!</string>
-    <string name="it_is_moment_of">It is the moment of %1$s</string>
+    <string name="paste_json">Paste JSON</string>
+    <string name="json_content">JSON content</string>
+    <string name="import_label">Import</string>
+
+    <string name="log_levels">Log levels</string>
+    <string name="filter_logs">Filter logs</string>
+    <string name="export_logs">Export logs</string>
+    <string name="log_console">Log console</string>
+    <string name="clear_logs">Clear logs</string>
+    <string name="no_logs">No logs found</string>
+
+    <string name="database_tools">Database tools</string>
+    <string name="reset_database">Reset database</string>
+    <string name="disable_developer_mode_confirmation">Do you really want to disable developer options?</string>
+    <string name="reset_database_confirmation">Do you really want to delete all database data? This action cannot be undone.</string>
+    <string name="reset_database_description">This action permanently deletes all application data and cannot be undone.</string>
+
+    <string name="developer_clicks_remaining">You are missing %1$d clicks</string>
+    <string name="developer_settings">Developer settings</string>
+    <string name="developer_settings_description">Advanced tools and logs</string>
+    <string name="check_app_permissions">Check permissions</string>
+    <string name="check_app_permissions_description">Check the permissions required by the application.</string>
+    <string name="disable_dev_mode">Disable developer mode</string>
+    <string name="disable_developer_mode">Disable developer options</string>
+    <string name="disable_developer_mode_description">Hides the options dedicated to development</string>
+    <string name="danger_zone">Danger zone</string>
+
+    <string name="scheduled_alarms">Scheduled alarms</string>
+    <string name="run_checker">Run checker</string>
+    <string name="clear_alarms">Clear all</string>
+    <string name="alarm_time_and_id">%1$s (ID: %2$d)</string>
+    <string name="cancel_alarm">Cancel alarm</string>
+    <string name="no_scheduled_alarms">No scheduled events</string>
+
+    <string name="trigger_hydration_alarm">Run hydration alarm</string>
+    <string name="immediate_trigger">Run immediately</string>
+    <string name="immediate_trigger_desc">Send the notification immediately without using the scheduler</string>
+    <string name="test_scheduler">Schedule test alarm</string>
+    <string name="test_scheduler_desc">Schedule an alarm in 10 seconds</string>
+    <string name="alarm_scheduled_toast">Alarm scheduled in 10 s</string>
+    <string name="notification_tests">Notification tests</string>
+
+    <string name="it_is_time_to_eat">It\'s time to eat!</string>
+    <string name="it_is_moment_of">It\'s time for %1$s</string>
     <string name="hydration_notification_title">Hydration</string>
     <string name="hydration_notification_message">Remember to drink a glass of water!</string>
     <string name="action_drank">Drank ✅</string>
     <string name="action_later">Later ⏰</string>
-    <string name="no_scheduled_alarms">No scheduled alarms</string>
-    <string name="notification_tests">Notification tests</string>
 
-    <!-- Widget -->
     <string name="meal_breakfast_short">Break.</string>
     <string name="meal_morning_snack_short">Snack</string>
     <string name="meal_lunch_short">Lunch</string>
@@ -177,4 +190,9 @@
     <string name="window_minutes_value">%1$d min</string>
     <string name="meal_type">Meal type</string>
     <string name="meal_time">Meal time</string>
+
+    <string name="app_info">App information</string>
+    <string name="version">Version</string>
+    <string name="developer">Developer</string>
+    <string name="daily_alarm_sync">Daily alarm sync</string>
 </resources>

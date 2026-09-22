@@ -22,6 +22,6 @@ data class FoodItem(
     val id: Long = 0,
     val courseId: Long,
     val name: String,
-    val quantities: List<String> = emptyList(),
+    val quantities: String,
     val order: Int = 0
 )

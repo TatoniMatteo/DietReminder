@@ -5,7 +5,7 @@ compileSdk = "37"
 minSdk = "34"
 #noinspection UnusedVersionCatalogEntry
 targetSdk = "37"
-agp = "9.4.0"
+agp = "9.4.1"
 kotlin = "2.4.20"
 ksp = "2.3.12"
 coreKtx = "1.19.0"

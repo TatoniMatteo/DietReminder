@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class FoodItemExport(
     val name: String,
-    val quantities: List<String>,
+    val quantities: String,
     val order: Int
 )

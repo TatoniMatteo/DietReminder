@@ -1,5 +1,6 @@
 package it.matato.dietreminder.ui.screens.dietconfig
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
@@ -54,12 +55,15 @@ import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.database.entity.Diet
+import it.matato.dietreminder.data.database.entity.Meal
 import it.matato.dietreminder.data.database.relation.MealWithDetails
 import it.matato.dietreminder.data.model.MealType
-import it.matato.dietreminder.ui.viewmodel.DietViewModel
+import it.matato.dietreminder.ui.theme.DietTheme
+import it.matato.dietreminder.viewmodel.DietViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -70,89 +74,97 @@ fun DietConfigScreen(
     dietId: Long,
     onBack: () -> Unit,
     onAddMeal: (Long, DayOfWeek) -> Unit,
-    onEditMeal: (Long, Long) -> Unit
+    onEditMeal: (Long, DayOfWeek) -> Unit,
 ) {
     var diet by remember { mutableStateOf<Diet?>(null) }
     val meals by vm.meals.collectAsState()
+    var selectedDay by rememberSaveable {
+        mutableStateOf(LocalDate.now().dayOfWeek)
+    }
 
     LaunchedEffect(dietId) {
         diet = vm.diets.value.find { it.id == dietId }
     }
 
-    var day by rememberSaveable {
-        mutableStateOf(LocalDate.now().dayOfWeek)
+    var dietMeals by remember {
+        mutableStateOf<List<MealWithDetails>>(emptyList())
     }
 
+    LaunchedEffect(dietId, selectedDay, meals) {
+        val allMeals = if (vm.active.value?.id == dietId) {
+            meals
+        } else {
+            vm.getDietMeals(dietId)
+        }
+
+        dietMeals = allMeals.filter { it.meal.dayOfWeek == selectedDay }.sortedBy { it.meal.timeMinutes }
+    }
+
+    DietConfigContent(
+        dietName = diet?.name ?: stringResource(R.string.configure_diet),
+        selectedDay = selectedDay,
+        dietMeals = dietMeals,
+        onBack = onBack,
+        onDaySelected = { selectedDay = it },
+        onAddMeal = { onAddMeal(dietId, selectedDay) },
+        onEditMeal = { mealId -> onEditMeal(mealId, selectedDay) }
+    )
+}
+
+@SuppressLint("UnusedContentLambdaTargetStateParameter")
+@Composable
+fun DietConfigContent(
+    dietName: String,
+    selectedDay: DayOfWeek,
+    dietMeals: List<MealWithDetails>,
+    onBack: () -> Unit,
+    onDaySelected: (DayOfWeek) -> Unit,
+    onAddMeal: () -> Unit,
+    onEditMeal: (Long) -> Unit,
+) {
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    onAddMeal(dietId, day)
-                },
+                onClick = onAddMeal,
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Add,
-                    contentDescription = stringResource(R.string.add)
+                    contentDescription = stringResource(R.string.add),
                 )
             }
-        }
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding),
         ) {
             DietConfigHeader(
-                dietName = diet?.name ?: stringResource(R.string.configure_diet),
-                onBack = onBack
+                dietName = dietName,
+                onBack = onBack,
             )
 
             DaySelector(
-                selectedDay = day,
-                onDaySelected = { day = it }
+                selectedDay = selectedDay,
+                onDaySelected = onDaySelected,
             )
 
             AnimatedContent(
-                targetState = day,
+                targetState = selectedDay,
                 transitionSpec = {
                     if (targetState.ordinal > initialState.ordinal) {
-                        slideInHorizontally { it } +
-                                fadeIn() togetherWith
-                                slideOutHorizontally { -it } +
-                                fadeOut()
+                        slideInHorizontally { it } + fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
                     } else {
-                        slideInHorizontally { -it } +
-                                fadeIn() togetherWith
-                                slideOutHorizontally { it } +
-                                fadeOut()
+                        slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { it } + fadeOut()
                     }.using(
-                        SizeTransform(clip = false)
+                        SizeTransform(clip = false),
                     )
                 },
-                label = "day_change"
-            ) { selectedDay ->
-                var dietMeals by remember {
-                    mutableStateOf<List<MealWithDetails>>(emptyList())
-                }
-
-                LaunchedEffect(dietId, selectedDay, meals) {
-                    val allMeals = if (vm.active.value?.id == dietId) {
-                        meals
-                    } else {
-                        vm.getDietMeals(dietId)
-                    }
-
-                    dietMeals = allMeals
-                        .filter {
-                            it.meal.dayOfWeek == selectedDay
-                        }
-                        .sortedBy {
-                            it.meal.timeMinutes
-                        }
-                }
-
+                label = "day_change",
+            ) { targetDay ->
+                // Note: dietMeals is already filtered by selectedDay in the parent Screen
                 if (dietMeals.isEmpty()) {
                     EmptyDayState()
                 } else {
@@ -162,22 +174,19 @@ fun DietConfigScreen(
                             start = 20.dp,
                             end = 20.dp,
                             top = 12.dp,
-                            bottom = 28.dp
+                            bottom = 28.dp,
                         ),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
                     ) {
                         items(
                             items = dietMeals,
-                            key = { it.meal.id }
+                            key = { it.meal.id },
                         ) { mealDetails ->
                             MealTimelineItem(
                                 mealDetails = mealDetails,
                                 onClick = {
-                                    onEditMeal(
-                                        mealDetails.meal.id,
-                                        dietId
-                                    )
-                                }
+                                    onEditMeal(mealDetails.meal.id)
+                                },
                             )
                         }
                     }
@@ -190,7 +199,7 @@ fun DietConfigScreen(
 @Composable
 private fun DietConfigHeader(
     dietName: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -199,26 +208,26 @@ private fun DietConfigHeader(
                 start = 12.dp,
                 end = 24.dp,
                 top = 10.dp,
-                bottom = 8.dp
+                bottom = 8.dp,
             ),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
-            onClick = onBack
+            onClick = onBack,
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                contentDescription = stringResource(R.string.back)
+                contentDescription = stringResource(R.string.back),
             )
         }
 
         Column(
-            modifier = Modifier.padding(start = 4.dp)
+            modifier = Modifier.padding(start = 4.dp),
         ) {
             Text(
                 text = stringResource(R.string.configure_diet),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             Text(
@@ -226,7 +235,7 @@ private fun DietConfigHeader(
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1
+                maxLines = 1,
             )
         }
     }
@@ -235,7 +244,7 @@ private fun DietConfigHeader(
 @Composable
 private fun DaySelector(
     selectedDay: DayOfWeek,
-    onDaySelected: (DayOfWeek) -> Unit
+    onDaySelected: (DayOfWeek) -> Unit,
 ) {
     val today = LocalDate.now().dayOfWeek
 
@@ -246,10 +255,10 @@ private fun DaySelector(
                 start = 16.dp,
                 end = 16.dp,
                 top = 8.dp,
-                bottom = 12.dp
+                bottom = 12.dp,
             ),
         horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         DayOfWeek.entries.forEach { day ->
             val selected = day == selectedDay
@@ -261,7 +270,7 @@ private fun DaySelector(
                 isToday = isToday,
                 onClick = {
                     onDaySelected(day)
-                }
+                },
             )
         }
     }
@@ -272,7 +281,7 @@ private fun DaySelectorItem(
     day: DayOfWeek,
     selected: Boolean,
     isToday: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val backgroundColor = when {
         selected -> MaterialTheme.colorScheme.primary
@@ -290,23 +299,23 @@ private fun DaySelectorItem(
         modifier = Modifier
             .width(42.dp)
             .clickable(onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
                 .background(backgroundColor),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = day.getDisplayName(
                     TextStyle.NARROW,
-                    LocalLocale.current.platformLocale
+                    LocalLocale.current.platformLocale,
                 ).uppercase(),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
-                color = contentColor
+                color = contentColor,
             )
         }
 
@@ -317,7 +326,7 @@ private fun DaySelectorItem(
                 .size(4.dp)
                 .clip(CircleShape)
                 .alpha(if (isToday) 1f else 0f)
-                .background(MaterialTheme.colorScheme.primary)
+                .background(MaterialTheme.colorScheme.primary),
         )
     }
 }
@@ -328,23 +337,23 @@ private fun EmptyDayState() {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 32.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Box(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Restaurant,
                     contentDescription = null,
                     modifier = Modifier.size(30.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -354,7 +363,7 @@ private fun EmptyDayState() {
                 text = stringResource(R.string.no_meals_for_day),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -362,7 +371,7 @@ private fun EmptyDayState() {
             Text(
                 text = stringResource(R.string.add_meal),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -371,12 +380,11 @@ private fun EmptyDayState() {
 @Composable
 private fun MealTimelineItem(
     mealDetails: MealWithDetails,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val mealIcon = getMealIcon(mealDetails)
 
-    val mealLabel = mealDetails.meal.customTypeLabel
-        ?: stringResource(mealDetails.meal.type.resId)
+    val mealLabel = mealDetails.meal.customTypeLabel ?: stringResource(mealDetails.meal.type.resId)
 
     val hour = mealDetails.meal.timeMinutes / 60
     val minute = mealDetails.meal.timeMinutes % 60
@@ -384,17 +392,17 @@ private fun MealTimelineItem(
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Top,
     ) {
         Column(
             modifier = Modifier.width(58.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = time,
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -404,12 +412,13 @@ private fun MealTimelineItem(
                     .size(34.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     painter = painterResource(mealIcon),
                     contentDescription = null,
-                    modifier = Modifier.size(19.dp)
+                    modifier = Modifier.size(19.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
             }
         }
@@ -422,29 +431,29 @@ private fun MealTimelineItem(
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.surface,
             ),
             elevation = CardDefaults.elevatedCardElevation(
-                defaultElevation = 2.dp
-            )
+                defaultElevation = 2.dp,
+            ),
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
                         horizontal = 16.dp,
-                        vertical = 15.dp
+                        vertical = 15.dp,
                     ),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     Text(
                         text = mealLabel,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
 
                     if (mealDetails.meal.description.isNotBlank()) {
@@ -454,7 +463,7 @@ private fun MealTimelineItem(
                             text = mealDetails.meal.description,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2
+                            maxLines = 2,
                         )
                     }
 
@@ -464,11 +473,11 @@ private fun MealTimelineItem(
                         Text(
                             text = stringResource(
                                 R.string.courses_count,
-                                mealDetails.courses.size
+                                mealDetails.courses.size,
                             ),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -478,7 +487,7 @@ private fun MealTimelineItem(
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -486,7 +495,7 @@ private fun MealTimelineItem(
 }
 
 private fun getMealIcon(
-    mealDetails: MealWithDetails
+    mealDetails: MealWithDetails,
 ): Int {
     return when (mealDetails.meal.type) {
         MealType.BREAKFAST -> R.drawable.ic_breakfast
@@ -495,5 +504,44 @@ private fun getMealIcon(
         MealType.AFTERNOON_SNACK -> R.drawable.ic_afternoon_snack
         MealType.DINNER -> R.drawable.ic_dinner
         MealType.OTHER -> R.drawable.ic_other_meal
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DietConfigContentPreview() {
+    DietTheme {
+        DietConfigContent(
+            dietName = "Summer Diet",
+            selectedDay = DayOfWeek.MONDAY,
+            dietMeals = listOf(
+                MealWithDetails(
+                    meal = Meal(
+                        id = 1,
+                        dietId = 1,
+                        type = MealType.BREAKFAST,
+                        timeMinutes = 480,
+                        dayOfWeek = DayOfWeek.MONDAY,
+                        description = "Healthy breakfast"
+                    ),
+                    courses = emptyList()
+                ),
+                MealWithDetails(
+                    meal = Meal(
+                        id = 2,
+                        dietId = 1,
+                        type = MealType.LUNCH,
+                        timeMinutes = 780,
+                        dayOfWeek = DayOfWeek.MONDAY,
+                        description = "Light lunch"
+                    ),
+                    courses = emptyList()
+                )
+            ),
+            onBack = {},
+            onDaySelected = {},
+            onAddMeal = {},
+            onEditMeal = {}
+        )
     }
 }

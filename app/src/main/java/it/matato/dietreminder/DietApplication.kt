@@ -6,9 +6,9 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import it.matato.dietreminder.data.database.AppDatabase
 import it.matato.dietreminder.data.repository.DietRepository
-import it.matato.dietreminder.util.AlarmSyncHelper
 import it.matato.dietreminder.util.AppLog
-import it.matato.dietreminder.util.worker.AlarmCheckerWorker
+import it.matato.dietreminder.util.alarm.AlarmDataObserver
+import it.matato.dietreminder.util.alarm.AlarmSyncHelper
 import it.matato.dietreminder.widget.WidgetRefreshWorker
 import java.util.concurrent.TimeUnit
 
@@ -32,18 +32,16 @@ class DietApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         AppLog.i("=== Application Initializing ===")
-        
+
         // Sync alarms at startup
         AlarmSyncHelper.syncAlarms(this)
+        AlarmDataObserver.start(this)
 
         AppLog.d("Setting up Periodic Workers")
 
         val widgetRequest = PeriodicWorkRequestBuilder<WidgetRefreshWorker>(15, TimeUnit.MINUTES).build()
         WorkManager.getInstance(this)
             .enqueueUniquePeriodicWork(WidgetRefreshWorker.WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, widgetRequest)
-
-        val checkerRequest = PeriodicWorkRequestBuilder<AlarmCheckerWorker>(1, TimeUnit.HOURS).build()
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork("AlarmChecker", ExistingPeriodicWorkPolicy.KEEP, checkerRequest)
 
         AppLog.i("=== Application Ready ===")
     }

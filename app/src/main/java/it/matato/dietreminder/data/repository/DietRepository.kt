@@ -8,11 +8,12 @@ import it.matato.dietreminder.data.database.dao.DietDao
 import it.matato.dietreminder.data.database.dao.FoodItemDao
 import it.matato.dietreminder.data.database.dao.MealDao
 import it.matato.dietreminder.data.database.entity.AppConfig
+import it.matato.dietreminder.data.database.entity.ConfigKey
 import it.matato.dietreminder.data.database.entity.Course
 import it.matato.dietreminder.data.database.entity.Diet
 import it.matato.dietreminder.data.database.entity.FoodItem
-import it.matato.dietreminder.data.database.entity.MealDefaultTime
 import it.matato.dietreminder.data.database.entity.Meal
+import it.matato.dietreminder.data.database.entity.MealDefaultTime
 import it.matato.dietreminder.data.database.relation.CourseWithItems
 import it.matato.dietreminder.data.export.CourseExport
 import it.matato.dietreminder.data.export.DietExport
@@ -31,50 +32,45 @@ class DietRepository(
     private val courses: CourseDao,
     private val foodItems: FoodItemDao,
     private val config: ConfigDao,
-    private val jsonCodec: DietJsonCodec = DietJsonCodec()
+    private val jsonCodec: DietJsonCodec = DietJsonCodec(),
 ) {
 
     val all: Flow<List<Diet>> = diets.observeAll()
 
     val active: Flow<Diet?> = diets.observeActive()
 
-    val defaultTimes: Flow<List<MealDefaultTime>> =
-        config.observeDefaultTimes()
+    val defaultTimes: Flow<List<MealDefaultTime>> = config.observeDefaultTimes()
 
     suspend fun saveDefaultTime(type: MealType, timeMinutes: Int) {
         config.insertDefaultTime(
             MealDefaultTime(
                 type = type,
-                timeMinutes = timeMinutes
-            )
+                timeMinutes = timeMinutes,
+            ),
         )
     }
 
-    fun observeConfig(key: String): Flow<AppConfig?> =
-        config.observeConfig(key)
+    fun observeConfig(key: ConfigKey): Flow<AppConfig?> = config.observeConfig(key)
 
-    suspend fun saveConfig(key: String, value: String) {
+    suspend fun saveConfig(key: ConfigKey, value: String) {
         config.insertConfig(
             AppConfig(
                 key = key,
-                value = value
-            )
+                value = value,
+            ),
         )
     }
 
-    fun observeMeals(dietId: Long) =
-        meals.observeWithDetails(dietId)
+    fun observeMeals(dietId: Long) = meals.observeWithDetails(dietId)
 
-    suspend fun getMeals(dietId: Long) =
-        meals.getAllWithDetails(dietId)
+    suspend fun getMeals(dietId: Long) = meals.getAllWithDetails(dietId)
 
-    suspend fun create(name: String, window: Int): Long =
-        diets.insert(
-            Diet(
-                name = name,
-                nextMealWindowMinutes = window
-            )
-        )
+    suspend fun create(name: String, window: Int): Long = diets.insert(
+        Diet(
+            name = name,
+            nextMealWindowMinutes = window,
+        ),
+    )
 
     suspend fun activate(id: Long) {
         database.withTransaction {
@@ -83,17 +79,14 @@ class DietRepository(
         }
     }
 
-    suspend fun delete(id: Long): Int =
-        diets.delete(id)
+    suspend fun delete(id: Long): Int = diets.delete(id)
 
     suspend fun saveMeal(
         meal: Meal,
-        mealCourses: List<CourseWithItems>
+        mealCourses: List<CourseWithItems>,
     ) {
         database.withTransaction {
-            AppLog.i(
-                "Saving meal: Type=${meal.type}, Time=${meal.timeMinutes}min"
-            )
+            AppLog.i("Saving meal: Type=${meal.type}, Time=${meal.timeMinutes}min")
 
             val mealId = if (meal.id == 0L) {
                 val id = meals.insert(meal)
@@ -105,8 +98,7 @@ class DietRepository(
                 val existingCourses = courses.getForMeal(meal.id)
 
                 AppLog.t(
-                    "Clearing ${existingCourses.size} courses " +
-                            "for meal ID: ${meal.id}"
+                    "Clearing ${existingCourses.size} courses " + "for meal ID: ${meal.id}",
                 )
 
                 existingCourses.forEach { course ->
@@ -121,13 +113,12 @@ class DietRepository(
                     courseWithItems.course.copy(
                         id = 0,
                         mealId = mealId,
-                        order = courseIndex
-                    )
+                        order = courseIndex,
+                    ),
                 )
 
                 AppLog.t(
-                    "Saved course: ${courseWithItems.course.name} " +
-                            "(ID: $courseId)"
+                    "Saved course: ${courseWithItems.course.name} " + "(ID: $courseId)",
                 )
 
                 courseWithItems.items.forEachIndexed { itemIndex, item ->
@@ -135,8 +126,8 @@ class DietRepository(
                         item.copy(
                             id = 0,
                             courseId = courseId,
-                            order = itemIndex
-                        )
+                            order = itemIndex,
+                        ),
                     )
                 }
             }
@@ -145,8 +136,7 @@ class DietRepository(
         }
     }
 
-    suspend fun deleteMeal(id: Long): Int =
-        meals.delete(id)
+    suspend fun deleteMeal(id: Long): Int = meals.delete(id)
 
     suspend fun resetDatabase() {
         database.withTransaction {
@@ -156,54 +146,51 @@ class DietRepository(
         }
     }
 
-    suspend fun duplicate(id: Long): Long =
-        database.withTransaction {
-            val source = diets.get(id)
-                ?: error("Diet not found")
+    suspend fun duplicate(id: Long): Long = database.withTransaction {
+        val source = diets.get(id) ?: error("Diet not found")
 
-            val newDietId = diets.insert(
-                source.copy(
+        val newDietId = diets.insert(
+            source.copy(
+                id = 0,
+                name = "${source.name} copia",
+                isActive = false,
+            ),
+        )
+
+        val mealDetails = meals.getAllWithDetails(id)
+
+        mealDetails.forEach { mealDetails ->
+            val newMealId = meals.insert(
+                mealDetails.meal.copy(
                     id = 0,
-                    name = "${source.name} copia",
-                    isActive = false
-                )
+                    dietId = newDietId,
+                ),
             )
 
-            val mealDetails = meals.getAllWithDetails(id)
-
-            mealDetails.forEach { mealDetails ->
-                val newMealId = meals.insert(
-                    mealDetails.meal.copy(
+            mealDetails.courses.forEach { courseDetails ->
+                val newCourseId = courses.insert(
+                    courseDetails.course.copy(
                         id = 0,
-                        dietId = newDietId
-                    )
+                        mealId = newMealId,
+                    ),
                 )
 
-                mealDetails.courses.forEach { courseDetails ->
-                    val newCourseId = courses.insert(
-                        courseDetails.course.copy(
+                courseDetails.items.forEach { item ->
+                    foodItems.insert(
+                        item.copy(
                             id = 0,
-                            mealId = newMealId
-                        )
+                            courseId = newCourseId,
+                        ),
                     )
-
-                    courseDetails.items.forEach { item ->
-                        foodItems.insert(
-                            item.copy(
-                                id = 0,
-                                courseId = newCourseId
-                            )
-                        )
-                    }
                 }
             }
-
-            newDietId
         }
 
+        newDietId
+    }
+
     suspend fun exportJson(id: Long): String {
-        val diet = diets.get(id)
-            ?: return ""
+        val diet = diets.get(id) ?: return ""
 
         val mealDetails = meals.getAllWithDetails(id)
 
@@ -217,7 +204,7 @@ class DietRepository(
                     type = mealDetails.meal.type,
                     time = "%02d:%02d".format(
                         mealDetails.meal.timeMinutes / 60,
-                        mealDetails.meal.timeMinutes % 60
+                        mealDetails.meal.timeMinutes % 60,
                     ),
                     description = mealDetails.meal.description,
                     customTypeLabel = mealDetails.meal.customTypeLabel,
@@ -229,98 +216,118 @@ class DietRepository(
                                 FoodItemExport(
                                     name = item.name,
                                     quantities = item.quantities,
-                                    order = item.order
+                                    order = item.order,
                                 )
-                            }
+                            },
                         )
-                    }
+                    },
                 )
-            }
+            },
         )
 
         return jsonCodec.encode(export)
     }
 
-    fun parseDietJson(json: String): DietExport =
-        jsonCodec.decode(json)
+    fun parseDietJson(json: String): DietExport = jsonCodec.decode(json)
 
-    suspend fun dietExists(uuid: String): Boolean =
-        diets.getByUuid(uuid) != null
+    suspend fun dietExists(uuid: String): Boolean = diets.getByUuid(uuid) != null
 
     suspend fun importJson(
         json: String,
-        overwrite: Boolean = false
+        overwrite: Boolean = false,
     ) {
         database.withTransaction {
-            try {
-                AppLog.d("Starting import process...")
+            AppLog.d("Starting import process...")
 
-                val data = parseDietJson(json)
-                val existing = data.uuid?.let { diets.getByUuid(it) }
+            val data = parseDietJson(json)
+            validateDietExport(data)
 
-                if (existing != null) {
-                    if (overwrite) {
-                        AppLog.d(
-                            "Overwriting existing diet: ${existing.name}"
-                        )
-                        diets.delete(existing.id)
-                    } else {
-                        AppLog.d(
-                            "Diet with UUID ${data.uuid} already exists, " +
-                                    "skipping."
-                        )
-                        return@withTransaction
-                    }
-                }
+            val existing = data.uuid?.let { diets.getByUuid(it) }
 
-                val dietId = diets.insert(
-                    Diet(
-                        uuid = data.uuid ?: UUID.randomUUID().toString(),
-                        name = data.name,
-                        nextMealWindowMinutes = data.nextMealWindowMinutes
+            if (existing != null) {
+                if (overwrite) {
+                    AppLog.d(
+                        "Overwriting existing diet: ${existing.name}",
                     )
+                    diets.delete(existing.id)
+                } else {
+                    AppLog.d(
+                        "Diet with UUID ${data.uuid} already exists, " + "skipping.",
+                    )
+                    return@withTransaction
+                }
+            }
+
+            val dietId = diets.insert(
+                Diet(
+                    uuid = data.uuid ?: UUID.randomUUID().toString(),
+                    name = data.name,
+                    nextMealWindowMinutes = data.nextMealWindowMinutes,
+                ),
+            )
+
+            AppLog.d("Diet inserted with ID: $dietId")
+
+            data.meals.forEach { meal ->
+                val mealId = meals.insert(
+                    Meal(
+                        dietId = dietId,
+                        dayOfWeek = meal.day,
+                        type = meal.type,
+                        timeMinutes = parseTime(meal.time),
+                        description = meal.description,
+                        customTypeLabel = meal.customTypeLabel,
+                    ),
                 )
 
-                AppLog.d("Diet inserted with ID: $dietId")
-
-                data.meals.forEach { meal ->
-                    val mealId = meals.insert(
-                        Meal(
-                            dietId = dietId,
-                            dayOfWeek = meal.day,
-                            type = meal.type,
-                            timeMinutes = parseTime(meal.time),
-                            description = meal.description,
-                            customTypeLabel = meal.customTypeLabel
-                        )
+                meal.courses.forEach { course ->
+                    val courseId = courses.insert(
+                        Course(
+                            mealId = mealId,
+                            name = course.name,
+                            order = course.order,
+                        ),
                     )
 
-                    meal.courses.forEach { course ->
-                        val courseId = courses.insert(
-                            Course(
-                                mealId = mealId,
-                                name = course.name,
-                                order = course.order
-                            )
+                    course.items.forEach { item ->
+                        foodItems.insert(
+                            FoodItem(
+                                courseId = courseId,
+                                name = item.name,
+                                quantities = item.quantities,
+                                order = item.order,
+                            ),
                         )
-
-                        course.items.forEach { item ->
-                            foodItems.insert(
-                                FoodItem(
-                                    courseId = courseId,
-                                    name = item.name,
-                                    quantities = item.quantities,
-                                    order = item.order
-                                )
-                            )
-                        }
                     }
                 }
+            }
 
-                AppLog.d("Import completed successfully")
-            } catch (e: Exception) {
-                AppLog.e("Error during importJson", e)
-                throw e
+            AppLog.d("Import completed successfully")
+        }
+    }
+
+    private fun validateDietExport(data: DietExport) {
+        require(data.name.isNotBlank()) {
+            "Diet name cannot be empty"
+        }
+
+        require(data.nextMealWindowMinutes >= 0) {
+            "Invalid meal window"
+        }
+
+        data.meals.forEach { meal ->
+            parseTime(meal.time)
+
+            meal.courses.forEach { course ->
+                require(course.name.isNotBlank()) {
+                    "Course name cannot be empty"
+                }
+
+                course.items.forEach { item ->
+                    require(item.name.isNotBlank()) {
+                        "Food item name cannot be empty"
+                    }
+                }
             }
         }
     }
@@ -328,12 +335,20 @@ class DietRepository(
     private fun parseTime(value: String): Int {
         val parts = value.split(":")
 
-        if (parts.size != 2) {
-            return 0
+        require(parts.size == 2) {
+            "Invalid meal time: $value"
         }
 
-        val hours = parts[0].trim().toIntOrNull() ?: 0
-        val minutes = parts[1].trim().toIntOrNull() ?: 0
+        val hours = parts[0].trim().toIntOrNull()
+        val minutes = parts[1].trim().toIntOrNull()
+
+        require(hours != null && minutes != null) {
+            "Invalid meal time: $value"
+        }
+
+        require(hours in 0 .. 23 && minutes in 0 .. 59) {
+            "Invalid meal time: $value"
+        }
 
         return hours * 60 + minutes
     }

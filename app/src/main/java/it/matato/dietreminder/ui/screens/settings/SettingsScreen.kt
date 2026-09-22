@@ -1,67 +1,20 @@
 package it.matato.dietreminder.ui.screens.settings
 
-import android.Manifest
 import android.app.LocaleManager
-import android.content.pm.PackageManager
 import android.os.LocaleList
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccessTime
-import androidx.compose.material.icons.rounded.Backup
-import androidx.compose.material.icons.rounded.Brightness4
-import androidx.compose.material.icons.rounded.ColorLens
-import androidx.compose.material.icons.rounded.DeveloperMode
-import androidx.compose.material.icons.rounded.FileDownload
-import androidx.compose.material.icons.rounded.FileOpen
-import androidx.compose.material.icons.rounded.FileUpload
-import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.SettingsApplications
-import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimeInput
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -70,47 +23,44 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import it.matato.dietreminder.R
+import it.matato.dietreminder.data.database.entity.Diet
+import it.matato.dietreminder.data.database.entity.MealDefaultTime
 import it.matato.dietreminder.data.model.MealType
-import it.matato.dietreminder.ui.viewmodel.DietViewModel
+import it.matato.dietreminder.permission.PermissionManager
+import it.matato.dietreminder.ui.dialog.ColorPickerDialog
+import it.matato.dietreminder.ui.dialog.ImportDialog
+import it.matato.dietreminder.ui.dialog.LanguagePickerDialog
+import it.matato.dietreminder.ui.dialog.TimePickerDialog
+import it.matato.dietreminder.ui.theme.DietTheme
+import it.matato.dietreminder.viewmodel.DietViewModel
+import it.matato.dietreminder.viewmodel.ImportCheckResult
 import java.io.OutputStreamWriter
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     vm: DietViewModel,
-    padding: PaddingValues,
-    onNavigateToDeveloper: () -> Unit = {}
+    onNavigateToDeveloper: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val diets by vm.diets.collectAsState()
-    val isDevMode by vm.isDeveloperMode.collectAsState()
+    val isDeveloperMode by vm.isDeveloperMode.collectAsState()
     val currentTheme by vm.theme.collectAsState()
-    val dynamicEnabled by vm.useDynamicColors.collectAsState()
+    val dynamicColorsEnabled by vm.useDynamicColors.collectAsState()
     val seedColorHex by vm.seedColor.collectAsState()
-    val currentLang by vm.language.collectAsState()
-    val defaultTimesState by vm.defaultTimes.collectAsState()
+    val currentLanguage by vm.language.collectAsState()
+    val defaultTimes by vm.defaultTimes.collectAsState()
     val mealRemindersEnabled by vm.mealRemindersEnabled.collectAsState()
 
     val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    val importSuccessMessage = stringResource(R.string.import_success)
-    val exportSuccessMessage = stringResource(R.string.json_exported)
-    val exportFailedMessage = stringResource(R.string.export_failed)
-    val importFailedMessage = stringResource(R.string.import_failed)
-    val greetingMessage = stringResource(R.string.greeting)
+    val snackBarHostState = remember { SnackbarHostState() }
 
     var pendingImportJson by remember { mutableStateOf<String?>(null) }
     var showOverwriteDialog by remember { mutableStateOf(false) }
@@ -119,38 +69,67 @@ fun SettingsScreen(
     var mealTypeToEdit by remember { mutableStateOf<MealType?>(null) }
     var showColorPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
-    var devClickCount by remember { mutableIntStateOf(0) }
+    var developerClickCount by remember { mutableIntStateOf(0) }
 
-    val handleImport = { json: String ->
+    val importSuccessMessage = stringResource(R.string.import_success)
+    val exportSuccessMessage = stringResource(R.string.json_exported)
+    val exportFailedMessage = stringResource(R.string.export_failed)
+    val importFailedMessage = stringResource(R.string.import_failed)
+    val greetingMessage = stringResource(R.string.greeting)
+    val invalidImportMessage = stringResource(R.string.import_invalid_json)
+
+    val developerClicksRemaining = stringResource(
+        R.string.developer_clicks_remaining,
+        7 - developerClickCount,
+    )
+
+    fun showImportError() {
         scope.launch {
-            if (vm.checkImportConflict(json)) {
-                pendingImportJson = json
-                showOverwriteDialog = true
-            } else {
-                vm.importDiet(json)
-                snackbarHostState.showSnackbar(importSuccessMessage)
+            snackBarHostState.showSnackbar(invalidImportMessage)
+        }
+    }
+
+    fun handleImport(json: String) {
+        scope.launch {
+            when (val result = vm.checkImportConflict(json)) {
+                ImportCheckResult.Valid -> {
+                    vm.importDiet(json).onSuccess {
+                        snackBarHostState.showSnackbar(importSuccessMessage)
+                    }.onFailure {
+                        snackBarHostState.showSnackbar(importFailedMessage)
+                    }
+                }
+
+                ImportCheckResult.Conflict -> {
+                    pendingImportJson = json
+                    showOverwriteDialog = true
+                }
+
+                is ImportCheckResult.Invalid -> {
+                    showImportError()
+                }
             }
         }
     }
 
     val exportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("application/json")
+        ActivityResultContracts.CreateDocument("application/vnd.matato.dietreminder"),
     ) { uri ->
-        uri?.let {
-            dietToExport?.let { id ->
+        uri?.let { selectedUri ->
+            dietToExport?.let { dietId ->
                 scope.launch {
                     try {
-                        val json = vm.exportDiet(id)
+                        val json = vm.exportDiet(dietId)
 
-                        context.contentResolver.openOutputStream(it)?.use { output ->
+                        context.contentResolver.openOutputStream(selectedUri)?.use { output ->
                             OutputStreamWriter(output).use { writer ->
                                 writer.write(json)
                             }
                         }
 
-                        snackbarHostState.showSnackbar(exportSuccessMessage)
+                        snackBarHostState.showSnackbar(exportSuccessMessage)
                     } catch (_: Exception) {
-                        snackbarHostState.showSnackbar(exportFailedMessage)
+                        snackBarHostState.showSnackbar(exportFailedMessage)
                     }
                 }
             }
@@ -160,12 +139,12 @@ fun SettingsScreen(
     }
 
     val importLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
+        ActivityResultContracts.OpenDocument(),
     ) { uri ->
-        uri?.let {
+        uri?.let { selectedUri ->
             scope.launch {
                 try {
-                    context.contentResolver.openInputStream(it)?.use { input ->
+                    context.contentResolver.openInputStream(selectedUri)?.use { input ->
                         val json = input.bufferedReader().use { reader ->
                             reader.readText()
                         }
@@ -173,329 +152,81 @@ fun SettingsScreen(
                         handleImport(json)
                     }
                 } catch (_: Exception) {
-                    snackbarHostState.showSnackbar(importFailedMessage)
+                    snackBarHostState.showSnackbar(importFailedMessage)
                 }
             }
         }
     }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            vm.syncAlarms()
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) {
+            vm.setMealRemindersEnabled(true)
         }
     }
 
-    fun requestNotificationPermission(): Boolean {
-        if (
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
+    fun setMealRemindersEnabled(enabled: Boolean) {
+        if (!enabled) {
+            vm.setMealRemindersEnabled(false)
+            return
+        }
+
+        if (PermissionManager.hasNotificationPermission(context)) {
+            vm.setMealRemindersEnabled(true)
+        } else {
             notificationPermissionLauncher.launch(
-                Manifest.permission.POST_NOTIFICATIONS
+                PermissionManager.notificationPermission(),
             )
-            return false
         }
-
-        return true
     }
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(snackbarHostState)
+    SettingsContent(
+        diets = diets,
+        isDeveloperMode = isDeveloperMode,
+        currentTheme = currentTheme,
+        dynamicColorsEnabled = dynamicColorsEnabled,
+        seedColorHex = seedColorHex,
+        currentLanguage = currentLanguage,
+        defaultTimes = defaultTimes,
+        mealRemindersEnabled = mealRemindersEnabled,
+        onNavigateToDeveloper = onNavigateToDeveloper,
+        onThemeChange = vm::setTheme,
+        onDynamicColorsChange = vm::setUseDynamicColors,
+        onColorClick = { showColorPicker = true },
+        onLanguageClick = { showLanguagePicker = true },
+        onMealTypeClick = { mealTypeToEdit = it },
+        onRemindersEnabledChange = ::setMealRemindersEnabled,
+        onImportClick = { showImportDialog = true },
+        onExportClick = { dietId, fileName ->
+            dietToExport = dietId
+            exportLauncher.launch(fileName)
         },
-        modifier = Modifier.padding(padding)
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            contentPadding = PaddingValues(
-                horizontal = 20.dp,
-                vertical = 24.dp
-            )
-        ) {
-            item {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.settings),
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+        onVersionClick = {
+            if (!isDeveloperMode) {
+                developerClickCount++
 
-            item {
-                SettingsSection(
-                    title = stringResource(R.string.appearance_personalization),
-                    icon = Icons.Rounded.Tune
-                ) {
-                    SettingsListItem(
-                        title = stringResource(R.string.theme),
-                        subtitle = when (currentTheme) {
-                            "light" -> stringResource(R.string.theme_light)
-                            "dark" -> stringResource(R.string.theme_dark)
-                            else -> stringResource(R.string.theme_system)
-                        },
-                        leadingIcon = Icons.Rounded.Brightness4,
-                        onClick = {
-                            val next = when (currentTheme) {
-                                "system" -> "light"
-                                "light" -> "dark"
-                                else -> "system"
-                            }
+                when {
+                    developerClickCount >= 7 -> {
+                        vm.setDeveloperMode(true)
+                        developerClickCount = 0
 
-                            vm.setTheme(next)
+                        scope.launch {
+                            snackBarHostState.showSnackbar(greetingMessage)
                         }
-                    )
-
-                    SettingsDivider()
-
-                    SettingsListItem(
-                        title = stringResource(R.string.dynamic_colors),
-                        subtitle = stringResource(R.string.dynamic_colors_desc),
-                        leadingIcon = Icons.Rounded.ColorLens,
-                        trailingContent = {
-                            Switch(
-                                checked = dynamicEnabled,
-                                onCheckedChange = vm::setUseDynamicColors
-                            )
-                        },
-                        onClick = {
-                            vm.setUseDynamicColors(!dynamicEnabled)
-                        }
-                    )
-
-                    SettingsDivider()
-
-                    val seedColor = Color(
-                        seedColorHex
-                            .removePrefix("0x")
-                            .toLong(16)
-                    )
-
-                    SettingsListItem(
-                        title = stringResource(R.string.app_color),
-                        subtitle = stringResource(R.string.app_color_desc),
-                        leadingIcon = Icons.Rounded.ColorLens,
-                        trailingContent = {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(
-                                        color = seedColor,
-                                        shape = CircleShape
-                                    )
-                            )
-                        },
-                        onClick = {
-                            showColorPicker = true
-                        }
-                    )
-
-                    SettingsDivider()
-
-                    SettingsListItem(
-                        title = stringResource(R.string.language),
-                        subtitle = if (currentLang == "it") {
-                            stringResource(R.string.lang_it)
-                        } else {
-                            stringResource(R.string.lang_en)
-                        },
-                        leadingIcon = Icons.Rounded.Language,
-                        onClick = {
-                            showLanguagePicker = true
-                        }
-                    )
-                }
-            }
-
-            item {
-                SettingsSection(
-                    title = stringResource(R.string.planning),
-                    icon = Icons.Rounded.AccessTime
-                ) {
-                    listOf(
-                        MealType.BREAKFAST,
-                        MealType.MORNING_SNACK,
-                        MealType.LUNCH,
-                        MealType.AFTERNOON_SNACK,
-                        MealType.DINNER,
-                        MealType.OTHER
-                    ).forEachIndexed { index, type ->
-                        if (index > 0) {
-                            SettingsDivider()
-                        }
-
-                        val timeMinutes =
-                            defaultTimesState.find { it.type == type }?.timeMinutes
-                                ?: vm.getDefaultFallback(type)
-
-                        SettingsListItem(
-                            title = stringResource(type.resId),
-                            subtitle = stringResource(R.string.default_time),
-                            leadingIcon = Icons.Rounded.AccessTime,
-                            trailingContent = {
-                                Text(
-                                    text = "%02d:%02d".format(
-                                        timeMinutes / 60,
-                                        timeMinutes % 60
-                                    ),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            },
-                            onClick = {
-                                mealTypeToEdit = type
-                            }
-                        )
                     }
-                }
-            }
 
-            item {
-                SettingsSection(
-                    title = stringResource(R.string.notifications_alarms),
-                    icon = Icons.Rounded.Notifications
-                ) {
-                    SettingsListItem(
-                        title = stringResource(R.string.meal_reminders),
-                        subtitle = stringResource(R.string.meal_reminders_desc),
-                        leadingIcon = Icons.Rounded.Notifications,
-                        trailingContent = {
-                            Switch(
-                                checked = mealRemindersEnabled,
-                                onCheckedChange = { enabled ->
-                                    if (enabled && !requestNotificationPermission()) {
-                                        return@Switch
-                                    }
-
-                                    vm.setMealRemindersEnabled(enabled)
-                                }
-                            )
-                        },
-                        onClick = {
-                            val next = !mealRemindersEnabled
-
-                            if (next && !requestNotificationPermission()) {
-                                return@SettingsListItem
-                            }
-
-                            vm.setMealRemindersEnabled(next)
-                        }
-                    )
-                }
-            }
-
-            item {
-                SettingsSection(
-                    title = stringResource(R.string.backup_data),
-                    icon = Icons.Rounded.Backup
-                ) {
-                    SettingsListItem(
-                        title = stringResource(R.string.import_diet),
-                        subtitle = stringResource(R.string.import_desc),
-                        leadingIcon = Icons.Rounded.FileUpload,
-                        onClick = {
-                            showImportDialog = true
-                        }
-                    )
-
-                    if (diets.isNotEmpty()) {
-                        SettingsDivider()
-
-                        diets.forEachIndexed { index, diet ->
-                            if (index > 0) {
-                                SettingsDivider()
-                            }
-
-                            SettingsListItem(
-                                title = stringResource(
-                                    R.string.export_name,
-                                    diet.name
-                                ),
-                                leadingIcon = Icons.Rounded.FileDownload,
-                                onClick = {
-                                    dietToExport = diet.id
-                                    exportLauncher.launch(
-                                        "${diet.name.lowercase().replace(" ", "_")}.dr"
-                                    )
-                                }
-                            )
+                    developerClickCount > 3 -> {
+                        scope.launch {
+                            snackBarHostState.showSnackbar(developerClicksRemaining)
                         }
                     }
                 }
             }
-
-            if (isDevMode) {
-                item {
-                    SettingsSection(
-                        title = stringResource(R.string.developer_settings),
-                        icon = Icons.Rounded.DeveloperMode
-                    ) {
-                        SettingsListItem(
-                            title = stringResource(R.string.developer_settings),
-                            subtitle = stringResource(
-                                R.string.developer_settings_description
-                            ),
-                            leadingIcon = Icons.Rounded.SettingsApplications,
-                            onClick = onNavigateToDeveloper
-                        )
-                    }
-                }
-            }
-
-            item {
-                SettingsSection(
-                    title = stringResource(R.string.app_info),
-                    icon = Icons.Rounded.Person
-                ) {
-                    SettingsListItem(
-                        title = stringResource(R.string.version),
-                        subtitle = "1.0.0 (Build 20261027)",
-                        leadingIcon = Icons.Rounded.Update,
-                        onClick = {
-                            if (!isDevMode) {
-                                devClickCount++
-
-                                if (devClickCount >= 7) {
-                                    vm.setDeveloperMode(true)
-
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(greetingMessage)
-                                    }
-
-                                    devClickCount = 0
-                                } else if (devClickCount > 3) {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            "Ti mancano ${7 - devClickCount} clic"
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    )
-
-                    SettingsDivider()
-
-                    SettingsListItem(
-                        title = stringResource(R.string.developer),
-                        subtitle = "Matteo Tatoni",
-                        leadingIcon = Icons.Rounded.Person,
-                        onClick = {}
-                    )
-                }
-            }
-        }
-    }
+        },
+        snackBarHostState = snackBarHostState,
+        getFallbackTime = { vm.getDefaultFallback(it) }
+    )
 
     if (showOverwriteDialog && pendingImportJson != null) {
         AlertDialog(
@@ -512,18 +243,19 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        vm.importDiet(
-                            pendingImportJson!!,
-                            overwrite = true
-                        )
+                        pendingImportJson?.let { json ->
+                            scope.launch {
+                                vm.importDiet(json).onSuccess {
+                                    snackBarHostState.showSnackbar(importSuccessMessage)
+                                }.onFailure {
+                                    snackBarHostState.showSnackbar(importFailedMessage)
+                                }
+                            }
+                        }
 
                         showOverwriteDialog = false
                         pendingImportJson = null
-
-                        scope.launch {
-                            snackbarHostState.showSnackbar(importSuccessMessage)
-                        }
-                    }
+                    },
                 ) {
                     Text(stringResource(R.string.overwrite))
                 }
@@ -533,11 +265,11 @@ fun SettingsScreen(
                     onClick = {
                         showOverwriteDialog = false
                         pendingImportJson = null
-                    }
+                    },
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
-            }
+            },
         )
     }
 
@@ -553,7 +285,7 @@ fun SettingsScreen(
             onPickFile = {
                 showImportDialog = false
                 importLauncher.launch(arrayOf("*/*"))
-            }
+            },
         )
     }
 
@@ -564,11 +296,10 @@ fun SettingsScreen(
             },
             onColorSelected = { color ->
                 vm.setSeedColor(
-                    "0x" + Integer.toHexString(color.toArgb()).uppercase()
+                    "0x${Integer.toHexString(color.toArgb()).uppercase()}",
                 )
-
                 showColorPicker = false
-            }
+            },
         )
     }
 
@@ -577,423 +308,151 @@ fun SettingsScreen(
             onDismiss = {
                 showLanguagePicker = false
             },
-            onLanguageSelected = { lang ->
-                vm.setLanguage(lang)
+            onLanguageSelected = { language ->
+                vm.setLanguage(language)
 
-                val localeManager =
-                    context.getSystemService(LocaleManager::class.java)
-
-                localeManager?.applicationLocales =
-                    LocaleList.forLanguageTags(lang)
+                context.getSystemService(LocaleManager::class.java)?.applicationLocales = LocaleList.forLanguageTags(language)
 
                 showLanguagePicker = false
-            }
+            },
         )
     }
 
     mealTypeToEdit?.let { type ->
-        val currentTime = vm.getDefaultTime(type)
-
-        val timeState = rememberTimePickerState(
-            initialHour = currentTime / 60,
-            initialMinute = currentTime % 60,
-            is24Hour = true
-        )
-
-        BasicAlertDialog(
-            onDismissRequest = {
+        TimePickerDialog(
+            title = stringResource(R.string.set_default_time),
+            initialTimeMinutes = vm.getDefaultTime(type),
+            onDismiss = {
                 mealTypeToEdit = null
-            }
-        ) {
-            ElevatedCard(
-                shape = MaterialTheme.shapes.extraLarge
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = stringResource(R.string.set_default_time),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    TimeInput(state = timeState)
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        TextButton(
-                            onClick = {
-                                mealTypeToEdit = null
-                            }
-                        ) {
-                            Text(stringResource(R.string.cancel))
-                        }
-
-                        Button(
-                            onClick = {
-                                vm.saveDefaultTime(
-                                    type,
-                                    timeState.hour * 60 + timeState.minute
-                                )
-
-                                mealTypeToEdit = null
-                            }
-                        ) {
-                            Text(stringResource(R.string.save))
-                        }
-                    }
-                }
-            }
-        }
+            },
+            onTimeSelected = { timeMinutes ->
+                vm.saveDefaultTime(type, timeMinutes)
+                mealTypeToEdit = null
+            },
+        )
     }
 }
 
 @Composable
-private fun SettingsSection(
-    title: String,
-    icon: ImageVector,
-    content: @Composable ColumnScope.() -> Unit
+fun SettingsContent(
+    diets: List<Diet>,
+    isDeveloperMode: Boolean,
+    currentTheme: String,
+    dynamicColorsEnabled: Boolean,
+    seedColorHex: String,
+    currentLanguage: String,
+    defaultTimes: List<MealDefaultTime>,
+    mealRemindersEnabled: Boolean,
+    onNavigateToDeveloper: () -> Unit,
+    onThemeChange: (String) -> Unit,
+    onDynamicColorsChange: (Boolean) -> Unit,
+    onColorClick: () -> Unit,
+    onLanguageClick: () -> Unit,
+    onMealTypeClick: (MealType) -> Unit,
+    onRemindersEnabledChange: (Boolean) -> Unit,
+    onImportClick: () -> Unit,
+    onExportClick: (Long, String) -> Unit,
+    onVersionClick: () -> Unit,
+    snackBarHostState: SnackbarHostState,
+    getFallbackTime: (MealType) -> Int,
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
-            )
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
-            colors = CardDefaults.outlinedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
-            Column(content = content)
-        }
-    }
-}
-
-@Composable
-private fun SettingsDivider() {
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = 16.dp)
-    )
-}
-
-@Composable
-private fun SettingsListItem(
-    title: String,
-    subtitle: String? = null,
-    leadingIcon: ImageVector? = null,
-    trailingContent: @Composable (() -> Unit)? = null,
-    onClick: () -> Unit
-) {
-    ListItem(
-        headlineContent = {
-            Text(
-                text = title,
-                fontWeight = FontWeight.SemiBold
-            )
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(snackBarHostState)
         },
-        supportingContent = subtitle?.let {
-            {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        },
-        leadingContent = leadingIcon?.let {
-            {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = it,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        },
-        trailingContent = trailingContent,
-        modifier = Modifier.clickable(onClick = onClick)
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ImportDialog(
-    onDismiss: () -> Unit,
-    onImportText: (String) -> Unit,
-    onPickFile: () -> Unit
-) {
-    var json by remember { mutableStateOf("") }
-    var tabIndex by remember { mutableIntStateOf(0) }
-
-    BasicAlertDialog(
-        onDismissRequest = onDismiss
-    ) {
-        ElevatedCard(
-            shape = MaterialTheme.shapes.extraLarge
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+            contentPadding = PaddingValues(
+                horizontal = 20.dp,
+                vertical = 24.dp,
+            ),
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.import_diet),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+            item {
+                SettingsHeader()
+            }
+
+            item {
+                SettingsAppearanceSection(
+                    currentTheme = currentTheme,
+                    dynamicEnabled = dynamicColorsEnabled,
+                    seedColorHex = seedColorHex,
+                    currentLanguage = currentLanguage,
+                    onThemeChange = onThemeChange,
+                    onDynamicColorsChange = onDynamicColorsChange,
+                    onColorClick = onColorClick,
+                    onLanguageClick = onLanguageClick,
                 )
+            }
 
-                SecondaryTabRow(
-                    selectedTabIndex = tabIndex
-                ) {
-                    Tab(
-                        selected = tabIndex == 0,
-                        onClick = {
-                            tabIndex = 0
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(R.string.import_text),
-                            modifier = Modifier.padding(12.dp)
-                        )
-                    }
+            item {
+                SettingsPlanningSectionContent(
+                    defaultTimes = defaultTimes,
+                    onMealTypeClick = onMealTypeClick,
+                    getFallbackTime = getFallbackTime
+                )
+            }
 
-                    Tab(
-                        selected = tabIndex == 1,
-                        onClick = {
-                            tabIndex = 1
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(R.string.import_file),
-                            modifier = Modifier.padding(12.dp)
-                        )
-                    }
-                }
+            item {
+                SettingsNotificationsSection(
+                    enabled = mealRemindersEnabled,
+                    onEnabledChange = onRemindersEnabledChange,
+                )
+            }
 
-                if (tabIndex == 0) {
-                    OutlinedTextField(
-                        value = json,
-                        onValueChange = {
-                            json = it
-                        },
-                        label = {
-                            Text(stringResource(R.string.json_content))
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        shape = MaterialTheme.shapes.medium
+            item {
+                SettingsBackupSection(
+                    diets = diets,
+                    onImport = onImportClick,
+                    onExport = onExportClick,
+                )
+            }
+
+            if (isDeveloperMode) {
+                item {
+                    SettingsDeveloperSection(
+                        onNavigateToDeveloper = onNavigateToDeveloper,
                     )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Button(
-                            onClick = onPickFile
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.FileOpen,
-                                contentDescription = null
-                            )
-
-                            Spacer(Modifier.width(8.dp))
-
-                            Text(stringResource(R.string.import_file))
-                        }
-                    }
                 }
+            }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(
-                        onClick = onDismiss
-                    ) {
-                        Text(stringResource(R.string.cancel))
-                    }
-
-                    if (tabIndex == 0) {
-                        Button(
-                            onClick = {
-                                onImportText(json)
-                            },
-                            enabled = json.isNotBlank()
-                        ) {
-                            Text(stringResource(R.string.import_label))
-                        }
-                    }
-                }
+            item {
+                SettingsAboutSection(
+                    onVersionClick = onVersionClick,
+                )
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Preview(showBackground = true)
 @Composable
-private fun ColorPickerDialog(
-    onDismiss: () -> Unit,
-    onColorSelected: (Color) -> Unit
-) {
-    val colors = listOf(
-        Color(0xFF6750A4),
-        Color(0xFF9C27B0),
-        Color(0xFFE91E63),
-        Color(0xFFF44336),
-        Color(0xFFFF9800),
-        Color(0xFF4CAF50),
-        Color(0xFF00BCD4),
-        Color(0xFF2196F3)
-    )
-
-    BasicAlertDialog(
-        onDismissRequest = onDismiss
-    ) {
-        ElevatedCard(
-            shape = MaterialTheme.shapes.extraLarge
-        ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.choose_seed_color),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    colors.forEach { color ->
-                        Box(
-                            modifier = Modifier
-                                .size(52.dp)
-                                .background(
-                                    color = color,
-                                    shape = CircleShape
-                                )
-                                .clickable {
-                                    onColorSelected(color)
-                                }
-                        )
-                    }
-                }
-
-                TextButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun LanguagePickerDialog(
-    onDismiss: () -> Unit,
-    onLanguageSelected: (String) -> Unit
-) {
-    BasicAlertDialog(
-        onDismissRequest = onDismiss
-    ) {
-        ElevatedCard(
-            shape = MaterialTheme.shapes.extraLarge
-        ) {
-            Column(
-                modifier = Modifier.padding(vertical = 12.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.select_language),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(
-                        horizontal = 24.dp,
-                        vertical = 16.dp
-                    )
-                )
-
-                ListItem(
-                    headlineContent = {
-                        Text(stringResource(R.string.lang_it))
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Language,
-                            contentDescription = null
-                        )
-                    },
-                    modifier = Modifier.clickable {
-                        onLanguageSelected("it")
-                    }
-                )
-
-                ListItem(
-                    headlineContent = {
-                        Text(stringResource(R.string.lang_en))
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Language,
-                            contentDescription = null
-                        )
-                    },
-                    modifier = Modifier.clickable {
-                        onLanguageSelected("en")
-                    }
-                )
-
-                Spacer(Modifier.height(4.dp))
-
-                TextButton(
-                    onClick = onDismiss,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(horizontal = 16.dp)
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        }
+private fun SettingsContentPreview() {
+    DietTheme {
+        SettingsContent(
+            diets = listOf(Diet(id = 1L, name = "Summer Diet", nextMealWindowMinutes = 90, isActive = true)),
+            isDeveloperMode = true,
+            currentTheme = "system",
+            dynamicColorsEnabled = true,
+            seedColorHex = "0xFF6750A4",
+            currentLanguage = "en",
+            defaultTimes = emptyList(),
+            mealRemindersEnabled = true,
+            onNavigateToDeveloper = {},
+            onThemeChange = {},
+            onDynamicColorsChange = {},
+            onColorClick = {},
+            onLanguageClick = {},
+            onMealTypeClick = {},
+            onRemindersEnabledChange = {},
+            onImportClick = {},
+            onExportClick = { _, _ -> },
+            onVersionClick = {},
+            snackBarHostState = SnackbarHostState(),
+            getFallbackTime = { 0 }
+        )
     }
 }

@@ -8,8 +8,8 @@
 
     <application
         android:name=".DietApplication"
-        android:label="@string/app_name"
         android:icon="@mipmap/app_icon"
+        android:label="@string/app_name"
         android:roundIcon="@mipmap/app_icon_round"
         android:theme="@style/Theme.DietReminder">
         <activity
@@ -38,11 +38,16 @@
         </receiver>
 
         <receiver
-            android:name=".util.AlarmReceiver"
+            android:name=".util.notification.receiver.TestAlarmReceiver"
             android:exported="false" />
-
         <receiver
-            android:name=".util.HydrationReceiver"
+            android:name=".util.notification.receiver.AlarmSyncReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".util.notification.receiver.CourseReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".util.notification.receiver.HydrationReceiver"
             android:exported="false" />
 
         <receiver
