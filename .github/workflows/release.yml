@@ -53,12 +53,15 @@ jobs:
       - name: Decode Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
         run: |
           echo "$KEYSTORE_BASE64" | base64 -d > $RUNNER_TEMP/keystore.jks
           if [ ! -s $RUNNER_TEMP/keystore.jks ]; then
             echo "::error::Decoded keystore.jks is empty or invalid base64!"
             exit 1
           fi
+          echo "=== Keystore verification ==="
+          keytool -list -keystore $RUNNER_TEMP/keystore.jks -storepass "$STORE_PASSWORD" | grep -i "Alias" || true
 
       - name: Build Release APK
         env:

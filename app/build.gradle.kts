@@ -24,9 +24,9 @@ android {
             val storeFilePath = System.getenv("KEYSTORE_FILE")
             if (!storeFilePath.isNullOrEmpty() && file(storeFilePath).exists()) {
                 storeFile = file(storeFilePath)
-                storePassword = System.getenv("STORE_PASSWORD")
-                keyAlias = System.getenv("KEY_ALIAS")
-                val envKeyPassword = System.getenv("KEY_PASSWORD")
+                storePassword = System.getenv("STORE_PASSWORD")?.trim()
+                keyAlias = System.getenv("KEY_ALIAS")?.trim()
+                val envKeyPassword = System.getenv("KEY_PASSWORD")?.trim()
                 keyPassword = if (!envKeyPassword.isNullOrEmpty()) envKeyPassword else storePassword
             } else {
                 initWith(getByName("debug"))
