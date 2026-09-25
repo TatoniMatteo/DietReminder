@@ -60,11 +60,12 @@ jobs:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > $RUNNER_TEMP/keystore.jks
+          echo "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 -d -i > $RUNNER_TEMP/keystore.jks
           if [ ! -s $RUNNER_TEMP/keystore.jks ]; then
             echo "::error::Decoded keystore.jks is empty or invalid base64!"
             exit 1
           fi
+          echo "Decoded Keystore size: $(stat -c%s $RUNNER_TEMP/keystore.jks) bytes"
           echo "=== Keystore contents ==="
           keytool -list -keystore $RUNNER_TEMP/keystore.jks -storepass "$STORE_PASSWORD"
           echo "=== Expected alias ==="
