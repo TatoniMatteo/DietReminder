@@ -22,11 +22,12 @@ android {
     signingConfigs {
         create("release") {
             val storeFilePath = System.getenv("KEYSTORE_FILE")
-            if (storeFilePath != null && file(storeFilePath).exists()) {
+            if (!storeFilePath.isNullOrEmpty() && file(storeFilePath).exists()) {
                 storeFile = file(storeFilePath)
                 storePassword = System.getenv("STORE_PASSWORD")
                 keyAlias = System.getenv("KEY_ALIAS")
-                keyPassword = System.getenv("KEY_PASSWORD")
+                val envKeyPassword = System.getenv("KEY_PASSWORD")
+                keyPassword = if (!envKeyPassword.isNullOrEmpty()) envKeyPassword else storePassword
             } else {
                 initWith(getByName("debug"))
             }

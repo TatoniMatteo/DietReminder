@@ -31,17 +31,32 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Validate Release Secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::GitHub Secret 'KEYSTORE_BASE64' is missing or empty!"
+            exit 1
+          fi
+          if [ -z "$STORE_PASSWORD" ]; then
+            echo "::error::GitHub Secret 'STORE_PASSWORD' is missing or empty!"
+            exit 1
+          fi
+          if [ -z "$KEY_ALIAS" ]; then
+            echo "::error::GitHub Secret 'KEY_ALIAS' is missing or empty!"
+            exit 1
+          fi
+
       - name: Decode Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "ERROR: Secret KEYSTORE_BASE64 is empty or not configured!"
-            exit 1
-          fi
           echo "$KEYSTORE_BASE64" | base64 -d > $RUNNER_TEMP/keystore.jks
           if [ ! -s $RUNNER_TEMP/keystore.jks ]; then
-            echo "ERROR: Decoded keystore.jks is empty or invalid!"
+            echo "::error::Decoded keystore.jks is empty or invalid base64!"
             exit 1
           fi
 
