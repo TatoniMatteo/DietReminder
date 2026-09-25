@@ -108,6 +108,11 @@ object AlarmSyncHelper {
                 return@forEach
             }
 
+            if (!activeDiet.isDayNotificationEnabled(occurrence.dayOfWeek)) {
+                AppLog.d("Notifications for ${occurrence.dayOfWeek} are disabled in diet ${activeDiet.name}")
+                return@forEach
+            }
+
             val meal = matchingMeals.firstOrNull {
                 it.meal.dayOfWeek == occurrence.dayOfWeek &&
                         it.meal.timeMinutes == occurrence.hour * 60 + occurrence.minute
@@ -115,6 +120,11 @@ object AlarmSyncHelper {
 
             if (meal == null) {
                 AppLog.w("Unable to find meal ID for ${type.name} at $occurrence")
+                return@forEach
+            }
+
+            if (!meal.meal.isNotificationEnabled) {
+                AppLog.d("Notification disabled for meal ID ${meal.meal.id}")
                 return@forEach
             }
 

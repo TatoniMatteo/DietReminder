@@ -6,20 +6,21 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import it.matato.dietreminder.data.database.AppDatabase
 import it.matato.dietreminder.data.repository.DietRepository
+import it.matato.dietreminder.data.repository.RoomDietRepository
 import it.matato.dietreminder.util.AppLog
 import it.matato.dietreminder.util.alarm.AlarmDataObserver
 import it.matato.dietreminder.util.alarm.AlarmSyncHelper
 import it.matato.dietreminder.widget.WidgetRefreshWorker
 import java.util.concurrent.TimeUnit
 
-class DietApplication : Application() {
+open class DietApplication : Application() {
 
     val database by lazy {
         AppDatabase.create(this)
     }
 
-    val repository by lazy {
-        DietRepository(
+    open val repository: DietRepository by lazy {
+        RoomDietRepository(
             database = database,
             diets = database.dietDao(),
             meals = database.mealDao(),
@@ -31,6 +32,10 @@ class DietApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        initServices()
+    }
+
+    open fun initServices() {
         AppLog.i("=== Application Initializing ===")
 
         // Sync alarms at startup

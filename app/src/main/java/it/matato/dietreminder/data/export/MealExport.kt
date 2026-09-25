@@ -11,5 +11,6 @@ data class MealExport(
     val time: String,
     val description: String = "",
     val customTypeLabel: String? = null,
+    val isNotificationEnabled: Boolean = true,
     val courses: List<CourseExport> = emptyList()
 )

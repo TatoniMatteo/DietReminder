@@ -9,36 +9,54 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import it.matato.dietreminder.permission.rememberPermissionRequester
 import it.matato.dietreminder.ui.navigation.AppNavigation
 import it.matato.dietreminder.ui.navigation.AppNavigator
 import it.matato.dietreminder.ui.navigation.RootDestination
 import it.matato.dietreminder.ui.theme.DietTheme
+import it.matato.dietreminder.util.FirstLaunchManager
 import it.matato.dietreminder.viewmodel.DietViewModel
 
 @Composable
 fun App() {
+    val context = LocalContext.current
     val navController = rememberNavController()
     val navigator = AppNavigator(navController)
-    val vm: DietViewModel = viewModel()
+    val vm: DietViewModel = viewModel(factory = DietViewModel.Factory)
+
+    val requestPermissions = rememberPermissionRequester(
+        context = context,
+        onCompleted = {
+            FirstLaunchManager.markCompleted(context)
+        },
+    )
+
+    LaunchedEffect(Unit) {
+        if (FirstLaunchManager.isFirstLaunch(context)) {
+            requestPermissions()
+        }
+    }
 
     val useDynamicColors by vm.useDynamicColors.collectAsState()
     val seedColor by vm.seedColor.collectAsState()
     val theme by vm.theme.collectAsState()
+
     val isDarkTheme = when (theme) {
         "dark" -> true
         "light" -> false
         else -> isSystemInDarkTheme()
     }
-
 
     DietTheme(
         darkTheme = isDarkTheme,
@@ -58,7 +76,7 @@ fun App() {
                     vm = vm,
                     contentPadding = padding,
                 )
-            }
+            },
         )
     }
 }
@@ -68,7 +86,7 @@ fun AppContent(
     currentRoute: String?,
     showBottomBar: Boolean,
     onNavigateToRoot: (RootDestination) -> Unit,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
         bottomBar = {
@@ -125,9 +143,9 @@ private fun AppContentPreview() {
             content = { padding ->
                 Text(
                     text = "App Content",
-                    modifier = Modifier.padding(padding)
+                    modifier = Modifier.padding(padding),
                 )
-            }
+            },
         )
     }
 }

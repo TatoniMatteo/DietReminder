@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.DropdownMenu
@@ -17,6 +19,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
@@ -38,6 +42,9 @@ fun MealInformationSection(
     onTimeClick: () -> Unit,
     type: MealType,
     onTypeChange: (MealType) -> Unit,
+    isNotificationEnabled: Boolean,
+    onNotificationEnabledChange: (Boolean) -> Unit,
+    isNotificationSwitchEnabled: Boolean = true,
 ) {
     var typeMenuExpanded by remember { mutableStateOf(false) }
 
@@ -46,17 +53,12 @@ fun MealInformationSection(
         shape = MaterialTheme.shapes.large,
     ) {
         Column {
+            // Row 1: Time
             ListItem(
                 headlineContent = {
                     Text(
-                        text = stringResource(R.string.time_label),
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
-                    )
-                },
-                supportingContent = {
-                    Text(
                         text = stringResource(R.string.meal_time),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.SemiBold,
                     )
                 },
                 leadingContent = {
@@ -80,6 +82,7 @@ fun MealInformationSection(
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            // Row 2: Meal Type
             Box {
                 ListItem(
                     modifier = Modifier.clickable {
@@ -88,7 +91,7 @@ fun MealInformationSection(
                     headlineContent = {
                         Text(
                             text = stringResource(R.string.meal_type),
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                            fontWeight = FontWeight.SemiBold,
                         )
                     },
                     supportingContent = {
@@ -121,6 +124,42 @@ fun MealInformationSection(
                     }
                 }
             }
+
+            HorizontalDivider(
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            // Row 3: Meal Notifications
+            ListItem(
+                headlineContent = {
+                    Text(
+                        text = stringResource(R.string.meal_notifications),
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                },
+                supportingContent = {
+                    Text(
+                        text = if (isNotificationEnabled) {
+                            stringResource(R.string.notification_enabled)
+                        } else {
+                            stringResource(R.string.notification_disabled)
+                        },
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                leadingContent = {
+                    IconContainer(
+                        icon = if (isNotificationEnabled) Icons.Rounded.Notifications else Icons.Rounded.NotificationsOff
+                    )
+                },
+                trailingContent = {
+                    Switch(
+                        checked = isNotificationEnabled,
+                        onCheckedChange = onNotificationEnabledChange,
+                        enabled = isNotificationSwitchEnabled,
+                    )
+                }
+            )
         }
     }
 }
@@ -141,6 +180,8 @@ private fun MealInformationSectionPreview() {
             onTimeClick = {},
             type = MealType.LUNCH,
             onTypeChange = {},
+            isNotificationEnabled = true,
+            onNotificationEnabledChange = {},
         )
     }
 }

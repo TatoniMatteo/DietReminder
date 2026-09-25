@@ -1,7 +1,5 @@
 package it.matato.dietreminder.ui.screens.developer
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,14 +26,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.model.ScheduledAlarm
-import it.matato.dietreminder.permission.PermissionManager
+import it.matato.dietreminder.permission.rememberPermissionRequester
 import it.matato.dietreminder.ui.theme.DietTheme
-import it.matato.dietreminder.util.alarm.AlarmScheduler
-import it.matato.dietreminder.util.alarm.AlarmSyncHelper
-import it.matato.dietreminder.util.alarm.AlarmTracker
 import it.matato.dietreminder.util.AppLog
 import it.matato.dietreminder.util.LogEntry
 import it.matato.dietreminder.util.LogLevel
+import it.matato.dietreminder.util.alarm.AlarmScheduler
+import it.matato.dietreminder.util.alarm.AlarmSyncHelper
+import it.matato.dietreminder.util.alarm.AlarmTracker
 import it.matato.dietreminder.viewmodel.DietViewModel
 
 @Composable
@@ -47,49 +45,13 @@ fun DeveloperScreen(
     val logs by vm.appLogs.collectAsState()
     val scheduledAlarms by AlarmTracker.observeAlarms(context).collectAsState(initial = emptyList())
 
-    val specialPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult(),
-    ) {
-        AppLog.d("Returned from special permission settings")
-    }
-
-    val runtimePermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) {
-        AppLog.d("Returned from runtime permission request")
-    }
-
-    fun checkPermissions() {
-        val runtimePermission = PermissionManager.getNextPermissionToRequest(context)
-
-        if (runtimePermission != null) {
-            AppLog.i("Requesting runtime permission: $runtimePermission")
-            runtimePermissionLauncher.launch(runtimePermission)
-            return
-        }
-
-        val specialPermission = PermissionManager.getNextSpecialPermission(context)
-
-        if (specialPermission != null) {
-            val intent = PermissionManager.createSpecialPermissionIntent(context, specialPermission)
-
-            if (intent != null) {
-                AppLog.i("Opening special permission settings: $specialPermission")
-                specialPermissionLauncher.launch(intent)
-                return
-            }
-
-            AppLog.w("No settings intent available for special permission: $specialPermission")
-        }
-
-        AppLog.i("All supported application permissions are granted")
-    }
+    val requestPermissions = rememberPermissionRequester(context)
 
     DeveloperContent(
         logs = logs,
         scheduledAlarms = scheduledAlarms,
         onBack = onBack,
-        onCheckPermissions = ::checkPermissions,
+        onCheckPermissions = requestPermissions,
         onClearLogs = AppLog::clear,
         onCancelAlarm = { alarm ->
             AlarmScheduler.cancelAlarm(context, alarm.id)
@@ -100,7 +62,9 @@ fun DeveloperScreen(
         onClearAlarms = {
             AlarmScheduler.cancelAllAlarms(context)
         },
-        onScheduledTrigger = { vm.scheduleTestAlarm(10) },
+        onScheduledTrigger = {
+            vm.scheduleTestAlarm(10)
+        },
         onResetDatabase = {},
         onDisableDeveloperMode = {
             vm.setDeveloperMode(false)
@@ -125,6 +89,7 @@ fun DeveloperContent(
     onDisableDeveloperMode: () -> Unit,
 ) {
     var selectedLevel by remember { mutableStateOf(LogLevel.TRACE) }
+
     val filteredLogs = remember(logs, selectedLevel) {
         logs.filter { it.level.priority >= selectedLevel.priority }
     }
@@ -203,7 +168,12 @@ private fun DeveloperContentPreview() {
                 LogEntry("12:00:01", LogLevel.DEBUG, "Loading settings..."),
             ),
             scheduledAlarms = listOf(
-                ScheduledAlarm(1, "MEAL", System.currentTimeMillis() + 3600000, "Lunch"),
+                ScheduledAlarm(
+                    1,
+                    "MEAL",
+                    System.currentTimeMillis() + 3600000,
+                    "Lunch",
+                ),
             ),
             onBack = {},
             onCheckPermissions = {},

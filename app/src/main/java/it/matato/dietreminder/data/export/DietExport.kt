@@ -7,5 +7,6 @@ data class DietExport(
     val uuid: String? = null,
     val name: String,
     val nextMealWindowMinutes: Int,
+    val disabledNotificationDays: String = "",
     val meals: List<MealExport>
 )

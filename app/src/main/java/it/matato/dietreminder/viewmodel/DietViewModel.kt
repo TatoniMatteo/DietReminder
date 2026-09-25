@@ -2,7 +2,9 @@ package it.matato.dietreminder.viewmodel
 
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewModelScope
 import it.matato.dietreminder.DietApplication
 import it.matato.dietreminder.data.database.entity.ConfigKey
@@ -11,10 +13,12 @@ import it.matato.dietreminder.data.database.relation.CourseWithItems
 import it.matato.dietreminder.data.database.relation.MealWithDetails
 import it.matato.dietreminder.data.model.HydrationRange
 import it.matato.dietreminder.data.model.MealType
+import it.matato.dietreminder.data.repository.DietRepository
 import it.matato.dietreminder.domain.NextMeal
 import it.matato.dietreminder.domain.nextMeal
 import it.matato.dietreminder.util.AppLog
 import it.matato.dietreminder.util.alarm.AlarmScheduler
+import it.matato.dietreminder.util.alarm.AlarmSyncHelper
 import it.matato.dietreminder.widget.DietReminder
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -34,9 +38,28 @@ sealed interface ImportCheckResult {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DietViewModel(app: Application) : AndroidViewModel(app) {
+class DietViewModel(
+    private val application: Application,
+    private val repository: DietRepository
+) : ViewModel() {
 
-    private val repository = (app as DietApplication).repository
+    companion object {
+        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                val app = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
+                val repository = if (app is DietApplication) {
+                    app.repository
+                } else {
+                    // Fallback per l'ambiente di test (es. TestDietApplication)
+                    val repoField = app?.javaClass?.getMethod("getRepository")?.invoke(app) as? DietRepository
+                        ?: (app?.javaClass?.getField("repository")?.get(app) as DietRepository)
+                    repoField
+                }
+                return DietViewModel(app, repository) as T
+            }
+        }
+    }
 
     val diets = repository.all.stateIn(
         viewModelScope,
@@ -236,6 +259,17 @@ class DietViewModel(app: Application) : AndroidViewModel(app) {
                 ConfigKey.MEAL_REMINDERS_ENABLED,
                 enabled.toString(),
             )
+            AlarmSyncHelper.syncAlarms(application)
+        }
+    }
+
+    fun setDietDayNotificationEnabled(dietId: Long, day: DayOfWeek, enabled: Boolean) {
+        viewModelScope.launch {
+            val diet = diets.value.find { it.id == dietId } ?: return@launch
+            val updated = diet.withDayNotificationToggled(day, enabled)
+            repository.updateDiet(updated)
+            DietReminder.updateAll(application)
+            AlarmSyncHelper.syncAlarms(application)
         }
     }
 
@@ -292,7 +326,7 @@ class DietViewModel(app: Application) : AndroidViewModel(app) {
         AppLog.d("Scheduling test alarm in $seconds seconds...")
 
         AlarmScheduler.scheduleTestAlarm(
-            context = getApplication(),
+            context = application,
             delayMillis = seconds * 1000L
         )
     }
@@ -318,14 +352,14 @@ class DietViewModel(app: Application) : AndroidViewModel(app) {
     fun activate(id: Long) {
         viewModelScope.launch {
             repository.activate(id)
-            DietReminder.updateAll(getApplication())
+            DietReminder.updateAll(application)
         }
     }
 
     fun deleteDiet(id: Long) {
         viewModelScope.launch {
             repository.delete(id)
-            DietReminder.updateAll(getApplication())
+            DietReminder.updateAll(application)
         }
     }
 
@@ -338,14 +372,14 @@ class DietViewModel(app: Application) : AndroidViewModel(app) {
     fun saveMeal(meal: Meal, courses: List<CourseWithItems>) {
         viewModelScope.launch {
             repository.saveMeal(meal, courses)
-            DietReminder.updateAll(getApplication())
+            DietReminder.updateAll(application)
         }
     }
 
     fun deleteMeal(id: Long) {
         viewModelScope.launch {
             repository.deleteMeal(id)
-            DietReminder.updateAll(getApplication())
+            DietReminder.updateAll(application)
         }
     }
 

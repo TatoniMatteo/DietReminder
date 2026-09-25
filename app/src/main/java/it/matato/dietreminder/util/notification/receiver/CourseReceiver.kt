@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import it.matato.dietreminder.R
 import it.matato.dietreminder.util.alarm.AlarmSyncHelper
 import it.matato.dietreminder.util.AppLog
+import it.matato.dietreminder.util.notification.NotificationChannelConfig
 import it.matato.dietreminder.util.notification.NotificationHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,7 +62,14 @@ class CourseReceiver : BroadcastReceiver() {
             notificationId = notificationId,
             title = title,
             message = message,
-            contentIntent = contentIntent
+            contentIntent = contentIntent,
+            channel = NotificationChannelConfig(
+                id = "corse_alarm",
+                sound = NotificationChannelConfig.customSound(
+                    context,
+                    R.raw.meal_alarm,
+                ),
+            ),
         )
 
         AlarmSyncHelper.doSync(context)

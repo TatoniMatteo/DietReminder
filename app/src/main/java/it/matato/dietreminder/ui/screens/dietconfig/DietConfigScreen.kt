@@ -30,14 +30,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,10 +63,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.database.entity.Diet
 import it.matato.dietreminder.data.database.entity.Meal
 import it.matato.dietreminder.data.database.relation.MealWithDetails
 import it.matato.dietreminder.data.model.MealType
+import it.matato.dietreminder.ui.components.IconContainer
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
 import java.time.DayOfWeek
@@ -76,14 +81,16 @@ fun DietConfigScreen(
     onAddMeal: (Long, DayOfWeek) -> Unit,
     onEditMeal: (Long, DayOfWeek) -> Unit,
 ) {
-    var diet by remember { mutableStateOf<Diet?>(null) }
+    val diets by vm.diets.collectAsState()
     val meals by vm.meals.collectAsState()
+    val mealRemindersEnabled by vm.mealRemindersEnabled.collectAsState()
+
     var selectedDay by rememberSaveable {
         mutableStateOf(LocalDate.now().dayOfWeek)
     }
 
-    LaunchedEffect(dietId) {
-        diet = vm.diets.value.find { it.id == dietId }
+    val diet = remember(diets, dietId) {
+        diets.find { it.id == dietId }
     }
 
     var dietMeals by remember {
@@ -100,10 +107,17 @@ fun DietConfigScreen(
         dietMeals = allMeals.filter { it.meal.dayOfWeek == selectedDay }.sortedBy { it.meal.timeMinutes }
     }
 
+    val isDayNotificationEnabled = diet?.isDayNotificationEnabled(selectedDay) == true && mealRemindersEnabled
+
     DietConfigContent(
         dietName = diet?.name ?: stringResource(R.string.configure_diet),
         selectedDay = selectedDay,
         dietMeals = dietMeals,
+        isDayNotificationEnabled = isDayNotificationEnabled,
+        isDayNotificationSwitchEnabled = mealRemindersEnabled,
+        onToggleDayNotification = { enabled ->
+            vm.setDietDayNotificationEnabled(dietId, selectedDay, enabled)
+        },
         onBack = onBack,
         onDaySelected = { selectedDay = it },
         onAddMeal = { onAddMeal(dietId, selectedDay) },
@@ -117,6 +131,9 @@ fun DietConfigContent(
     dietName: String,
     selectedDay: DayOfWeek,
     dietMeals: List<MealWithDetails>,
+    isDayNotificationEnabled: Boolean,
+    isDayNotificationSwitchEnabled: Boolean,
+    onToggleDayNotification: (Boolean) -> Unit,
     onBack: () -> Unit,
     onDaySelected: (DayOfWeek) -> Unit,
     onAddMeal: () -> Unit,
@@ -151,6 +168,12 @@ fun DietConfigContent(
                 onDaySelected = onDaySelected,
             )
 
+            DayNotificationHeaderCard(
+                isEnabled = isDayNotificationEnabled,
+                isSwitchEnabled = isDayNotificationSwitchEnabled,
+                onToggle = onToggleDayNotification,
+            )
+
             AnimatedContent(
                 targetState = selectedDay,
                 transitionSpec = {
@@ -164,7 +187,6 @@ fun DietConfigContent(
                 },
                 label = "day_change",
             ) { targetDay ->
-                // Note: dietMeals is already filtered by selectedDay in the parent Screen
                 if (dietMeals.isEmpty()) {
                     EmptyDayState()
                 } else {
@@ -193,6 +215,47 @@ fun DietConfigContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DayNotificationHeaderCard(
+    isEnabled: Boolean,
+    isSwitchEnabled: Boolean,
+    onToggle: (Boolean) -> Unit,
+) {
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 4.dp),
+        shape = MaterialTheme.shapes.large,
+    ) {
+        ListItem(
+            headlineContent = {
+                Text(
+                    text = stringResource(R.string.day_notifications),
+                    fontWeight = FontWeight.SemiBold,
+                )
+            },
+            supportingContent = {
+                Text(
+                    text = if (isEnabled) stringResource(R.string.notification_enabled) else stringResource(R.string.notification_disabled),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+            leadingContent = {
+                IconContainer(
+                    icon = if (isEnabled) Icons.Rounded.Notifications else Icons.Rounded.NotificationsOff
+                )
+            },
+            trailingContent = {
+                Switch(
+                    checked = isEnabled,
+                    onCheckedChange = onToggle,
+                    enabled = isSwitchEnabled,
+                )
+            }
+        )
     }
 }
 
@@ -255,7 +318,7 @@ private fun DaySelector(
                 start = 16.dp,
                 end = 16.dp,
                 top = 8.dp,
-                bottom = 12.dp,
+                bottom = 8.dp,
             ),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
@@ -525,19 +588,11 @@ private fun DietConfigContentPreview() {
                         description = "Healthy breakfast"
                     ),
                     courses = emptyList()
-                ),
-                MealWithDetails(
-                    meal = Meal(
-                        id = 2,
-                        dietId = 1,
-                        type = MealType.LUNCH,
-                        timeMinutes = 780,
-                        dayOfWeek = DayOfWeek.MONDAY,
-                        description = "Light lunch"
-                    ),
-                    courses = emptyList()
                 )
             ),
+            isDayNotificationEnabled = true,
+            isDayNotificationSwitchEnabled = true,
+            onToggleDayNotification = {},
             onBack = {},
             onDaySelected = {},
             onAddMeal = {},

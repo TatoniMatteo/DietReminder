@@ -195,4 +195,9 @@
     <string name="version">Versione</string>
     <string name="developer">Sviluppatore</string>
     <string name="daily_alarm_sync">Sincronizzazione giornaliera</string>
+
+    <string name="day_notifications">Notifiche del giorno</string>
+    <string name="meal_notifications">Notifiche pasto</string>
+    <string name="notification_enabled">Notifica attiva</string>
+    <string name="notification_disabled">Notifica disattivata</string>
 </resources>

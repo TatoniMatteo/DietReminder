@@ -27,5 +27,6 @@ data class Meal(
     val type: MealType,
     val timeMinutes: Int,
     val description: String = "",
-    val customTypeLabel: String? = null
+    val customTypeLabel: String? = null,
+    val isNotificationEnabled: Boolean = true
 )

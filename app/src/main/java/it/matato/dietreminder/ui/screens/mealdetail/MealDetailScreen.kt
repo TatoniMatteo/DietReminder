@@ -10,6 +10,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +41,9 @@ fun MealDetailScreen(
     dayOfWeek: DayOfWeek,
     onBack: () -> Unit,
 ) {
+    val diets by vm.diets.collectAsState()
+    val mealRemindersEnabled by vm.mealRemindersEnabled.collectAsState()
+
     var meal by remember { mutableStateOf<Meal?>(null) }
     var courses by remember { mutableStateOf<List<CourseWithItems>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -48,8 +52,13 @@ fun MealDetailScreen(
     var timeMinutes by remember { mutableIntStateOf(0) }
     var type by remember { mutableStateOf(MealType.LUNCH) }
     var customLabel by remember { mutableStateOf("") }
+    var isNotificationEnabled by remember { mutableStateOf(true) }
 
     var showTimePicker by rememberSaveable { mutableStateOf(false) }
+
+    val diet = remember(diets, dietId) {
+        diets.find { it.id == dietId }
+    }
 
     LaunchedEffect(mealId, dietId, dayOfWeek) {
         val mealWithDetails = vm.getMeal(mealId)
@@ -61,6 +70,7 @@ fun MealDetailScreen(
             timeMinutes = mealWithDetails.meal.timeMinutes
             type = mealWithDetails.meal.type
             customLabel = mealWithDetails.meal.customTypeLabel.orEmpty()
+            isNotificationEnabled = mealWithDetails.meal.isNotificationEnabled
         } else {
             val defaultTime = vm.getDefaultTime(MealType.BREAKFAST)
 
@@ -69,9 +79,11 @@ fun MealDetailScreen(
                 dayOfWeek = dayOfWeek,
                 type = MealType.LUNCH,
                 timeMinutes = defaultTime,
+                isNotificationEnabled = true,
             )
 
             timeMinutes = defaultTime
+            isNotificationEnabled = true
         }
 
         isLoading = false
@@ -89,6 +101,7 @@ fun MealDetailScreen(
             } else {
                 null
             },
+            isNotificationEnabled = isNotificationEnabled,
         )
 
         vm.saveMeal(updatedMeal, courses)
@@ -116,6 +129,9 @@ fun MealDetailScreen(
         )
     }
 
+    val isDayNotificationEnabled = diet?.isDayNotificationEnabled(dayOfWeek) != false
+    val isNotificationSwitchEnabled = mealRemindersEnabled && isDayNotificationEnabled
+
     MealDetailContent(
         isLoading = isLoading,
         isNew = mealId == 0L,
@@ -123,6 +139,8 @@ fun MealDetailScreen(
         timeMinutes = timeMinutes,
         customLabel = customLabel,
         description = description,
+        isNotificationEnabled = isNotificationEnabled,
+        isNotificationSwitchEnabled = isNotificationSwitchEnabled,
         courses = courses,
         onBack = onBack,
         onSave = ::saveMeal,
@@ -134,6 +152,7 @@ fun MealDetailScreen(
         },
         onCustomLabelChange = { customLabel = it },
         onDescriptionChange = { description = it },
+        onNotificationEnabledChange = { isNotificationEnabled = it },
         onAddCourse = ::addCourse,
         onUpdateCourse = { index, updated ->
             courses = courses.toMutableList().apply {
@@ -170,6 +189,8 @@ fun MealDetailContent(
     timeMinutes: Int,
     customLabel: String,
     description: String,
+    isNotificationEnabled: Boolean,
+    isNotificationSwitchEnabled: Boolean,
     courses: List<CourseWithItems>,
     onBack: () -> Unit,
     onSave: () -> Unit,
@@ -178,6 +199,7 @@ fun MealDetailContent(
     onTypeChange: (MealType) -> Unit,
     onCustomLabelChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
+    onNotificationEnabledChange: (Boolean) -> Unit,
     onAddCourse: () -> Unit,
     onUpdateCourse: (Int, CourseWithItems) -> Unit,
     onDeleteCourse: (Int) -> Unit,
@@ -222,6 +244,9 @@ fun MealDetailContent(
                         onTimeClick = onTimeClick,
                         type = type,
                         onTypeChange = onTypeChange,
+                        isNotificationEnabled = isNotificationEnabled,
+                        onNotificationEnabledChange = onNotificationEnabledChange,
+                        isNotificationSwitchEnabled = isNotificationSwitchEnabled,
                     )
                 }
 
@@ -277,6 +302,8 @@ private fun MealDetailContentPreview() {
             timeMinutes = 780,
             customLabel = "",
             description = "Test notes",
+            isNotificationEnabled = true,
+            isNotificationSwitchEnabled = true,
             courses = listOf(
                 CourseWithItems(
                     course = Course(id = 1, mealId = 1, name = "Pasta", order = 0),
@@ -292,6 +319,7 @@ private fun MealDetailContentPreview() {
             onTypeChange = {},
             onCustomLabelChange = {},
             onDescriptionChange = {},
+            onNotificationEnabledChange = {},
             onAddCourse = {},
             onUpdateCourse = { _, _ -> },
             onDeleteCourse = {},
@@ -310,6 +338,8 @@ private fun MealDetailContentLoadingPreview() {
             timeMinutes = 480,
             customLabel = "",
             description = "",
+            isNotificationEnabled = true,
+            isNotificationSwitchEnabled = true,
             courses = emptyList(),
             onBack = {},
             onSave = {},
@@ -318,6 +348,7 @@ private fun MealDetailContentLoadingPreview() {
             onTypeChange = {},
             onCustomLabelChange = {},
             onDescriptionChange = {},
+            onNotificationEnabledChange = {},
             onAddCourse = {},
             onUpdateCourse = { _, _ -> },
             onDeleteCourse = {},

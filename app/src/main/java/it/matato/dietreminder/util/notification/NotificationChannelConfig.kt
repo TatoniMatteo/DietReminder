@@ -4,41 +4,33 @@ import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.Context
 import android.media.AudioAttributes
-import android.net.Uri
-import it.matato.dietreminder.R
 import androidx.core.net.toUri
+import it.matato.dietreminder.R
 
 data class NotificationChannelConfig(
-    val id: String,
-    val version: Int,
-    val nameResId: Int,
-    val descriptionResId: Int,
-    val importance: Int,
-    val sound: Uri?,
-    val audioAttributes: AudioAttributes?,
-    val enableLights: Boolean,
-    val enableVibration: Boolean
+    val id: String = "default_alarms",
+    val version: Int = 1,
+    val nameResId: Int = R.string.notifications_alarms,
+    val descriptionResId: Int = R.string.meal_reminders_desc,
+    val importance: Int = NotificationManager.IMPORTANCE_HIGH,
+    val sound: NotificationSound = NotificationSound.Default,
+    val enableLights: Boolean = false,
+    val enableVibration: Boolean = true,
 ) {
     companion object {
-        fun default(context: Context): NotificationChannelConfig {
-            val sound = "${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/${R.raw.meal_alarm}".toUri()
+        fun customSound(
+            context: Context,
+            soundResId: Int,
+        ): NotificationSound.Custom {
+            val sound = "${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/$soundResId"
+                .toUri()
 
             val audioAttributes = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ALARM)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build()
 
-            return NotificationChannelConfig(
-                id = "diet_alarms",
-                version = 2,
-                nameResId = R.string.notifications_alarms,
-                descriptionResId = R.string.meal_reminders_desc,
-                importance = NotificationManager.IMPORTANCE_HIGH,
-                sound = sound,
-                audioAttributes = audioAttributes,
-                enableLights = false,
-                enableVibration = true
-            )
+            return NotificationSound.Custom(sound, audioAttributes)
         }
     }
 }

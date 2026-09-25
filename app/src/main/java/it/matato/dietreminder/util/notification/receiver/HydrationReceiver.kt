@@ -5,8 +5,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
 import it.matato.dietreminder.R
-import it.matato.dietreminder.util.alarm.AlarmSyncHelper
 import it.matato.dietreminder.util.AppLog
+import it.matato.dietreminder.util.alarm.AlarmSyncHelper
+import it.matato.dietreminder.util.notification.NotificationChannelConfig
 import it.matato.dietreminder.util.notification.NotificationHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +35,7 @@ class HydrationReceiver : BroadcastReceiver() {
 
         val notificationIntent = Intent(
             Intent.ACTION_VIEW,
-            "dietreminder://hydration".toUri()
+            "dietreminder://hydration".toUri(),
         ).apply {
             setPackage(context.packageName)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -45,14 +46,21 @@ class HydrationReceiver : BroadcastReceiver() {
         val contentIntent = NotificationHelper.createActivityPendingIntent(
             context = context,
             requestCode = notificationId,
-            intent = notificationIntent
+            intent = notificationIntent,
         )
 
         NotificationHelper(context).show(
             notificationId = notificationId,
             title = context.getString(R.string.hydration_notification_title),
             message = context.getString(R.string.hydration_notification_message),
-            contentIntent = contentIntent
+            contentIntent = contentIntent,
+            channel = NotificationChannelConfig(
+                id = "hydration_alarm",
+                sound = NotificationChannelConfig.customSound(
+                    context,
+                    R.raw.hydration_alarm,
+                ),
+            ),
         )
 
         AlarmSyncHelper.doSync(context)

@@ -195,4 +195,9 @@
     <string name="version">Version</string>
     <string name="developer">Developer</string>
     <string name="daily_alarm_sync">Daily alarm sync</string>
+
+    <string name="day_notifications">Day notifications</string>
+    <string name="meal_notifications">Meal notifications</string>
+    <string name="notification_enabled">Notification active</string>
+    <string name="notification_disabled">Notification disabled</string>
 </resources>
