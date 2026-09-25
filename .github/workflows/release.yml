@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-  release:
-    types: [published]
   workflow_dispatch:
 
 concurrency:
@@ -29,7 +27,7 @@ jobs:
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '21'
 
       - name: Setup Gradle
@@ -40,41 +38,69 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           if [ -z "$KEYSTORE_BASE64" ]; then
             echo "::error::GitHub Secret 'KEYSTORE_BASE64' is missing or empty!"
             exit 1
           fi
+          
           if [ -z "$STORE_PASSWORD" ]; then
             echo "::error::GitHub Secret 'STORE_PASSWORD' is missing or empty!"
             exit 1
           fi
+          
           if [ -z "$KEY_ALIAS" ]; then
             echo "::error::GitHub Secret 'KEY_ALIAS' is missing or empty!"
+            exit 1
+          fi
+          
+          if [ -z "$KEY_PASSWORD" ]; then
+            echo "::error::GitHub Secret 'KEY_PASSWORD' is missing or empty!"
+            exit 1
+          fi
+
+      - name: Validate Release Tag
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid release tag '$TAG_NAME'. Expected format: v1.2.3"
             exit 1
           fi
 
       - name: Decode Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          echo "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 -d -i > $RUNNER_TEMP/keystore.jks
-          if [ ! -s $RUNNER_TEMP/keystore.jks ]; then
+          echo "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 -d -i > "$RUNNER_TEMP/keystore.jks"
+          
+          if [ ! -s "$RUNNER_TEMP/keystore.jks" ]; then
             echo "::error::Decoded keystore.jks is empty or invalid base64!"
             exit 1
           fi
-          echo "Decoded Keystore size: $(stat -c%s $RUNNER_TEMP/keystore.jks) bytes"
-          echo "=== Keystore contents ==="
-          keytool -list -keystore $RUNNER_TEMP/keystore.jks -storepass "$STORE_PASSWORD"
-          echo "=== Expected alias ==="
-          echo "Configured KEY_ALIAS: '$KEY_ALIAS'"
+          
+          echo "Decoded Keystore size: $(stat -c%s "$RUNNER_TEMP/keystore.jks") bytes"
+
+      - name: Validate Keystore
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          if ! keytool -list \
+              -keystore "$RUNNER_TEMP/keystore.jks" \
+              -storepass "$STORE_PASSWORD" \
+              -alias "$KEY_ALIAS" > /dev/null; then
+            echo "::error::The configured KEY_ALIAS was not found in the keystore or the keystore password is invalid."
+            exit 1
+          fi
+          
+          echo "Keystore and configured alias validated successfully."
 
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
 
-      - name: Build Release Artifacts (APK & AAB)
+      - name: Build Release Artifacts
         env:
           KEYSTORE_FILE: ${{ runner.temp }}/keystore.jks
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
@@ -83,28 +109,35 @@ jobs:
         run: ./gradlew assembleRelease bundleRelease
 
       - name: Prepare Release Artifacts & Checksums
+        env:
+          TAG_NAME: ${{ github.ref_name }}
         run: |
-          TAG_NAME="${GITHUB_REF_NAME}"
-          if [ -z "$TAG_NAME" ] || [ "$TAG_NAME" = "master" ]; then
-            TAG_NAME="v1.0.0"
+          APK_PATH="app/build/outputs/apk/release/app-release.apk"
+          AAB_PATH="app/build/outputs/bundle/release/app-release.aab"
+          
+          if [ ! -f "$APK_PATH" ]; then
+            echo "::error::Release APK was not generated."
+            exit 1
+          fi
+          
+          if [ ! -f "$AAB_PATH" ]; then
+            echo "::error::Release AAB was not generated."
+            exit 1
           fi
           
           mkdir -p artifacts
           
-          # Copy and rename APK
-          if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
-            cp app/build/outputs/apk/release/app-release.apk artifacts/DietReminder-${TAG_NAME}.apk
-          fi
+          cp "$APK_PATH" "artifacts/DietReminder-${TAG_NAME}.apk"
+          cp "$AAB_PATH" "artifacts/DietReminder-${TAG_NAME}.aab"
           
-          # Copy and rename AAB (Android App Bundle for Play Store or backup)
-          if [ -f "app/build/outputs/bundle/release/app-release.aab" ]; then
-            cp app/build/outputs/bundle/release/app-release.aab artifacts/DietReminder-${TAG_NAME}.aab
-          fi
-          
-          # Generate SHA-256 Checksums
           cd artifacts
-          sha256sum * > SHA256SUMS.txt
-          cd ..
+          sha256sum *.apk *.aab > SHA256SUMS.txt
+          
+          echo "Release artifacts:"
+          ls -lh
+          
+          echo "SHA-256 checksums:"
+          cat SHA256SUMS.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
