@@ -1,0 +1,91 @@
+name: Feature Request
+description: Proponi una nuova funzionalità per l'applicazione
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie per la tua proposta! Descrivi la funzionalità che vorresti vedere aggiunta all'app.
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Cosa si vuole proporre
+      description: Descrivi la nuova funzionalità da aggiungere
+      placeholder: Vorrei aggiungere...
+    validations:
+      required: true
+
+  - type: textarea
+    id: why_needed
+    attributes:
+      label: Perché è necessaria
+      description: Spiega il valore e il beneficio della funzionalità (fortemente consigliato)
+      placeholder: Questa funzionalità è utile perché...
+    validations:
+      required: false
+
+  - type: textarea
+    id: implementation_proposal
+    attributes:
+      label: Proposte di implementazione
+      description: Condividi idee su come potrebbe essere realizzata
+      placeholder: |
+        Potrebbe essere implementata:
+        - aggiungendo una nuova schermata...
+        - modificando il flusso...
+        - creando un nuovo modulo...
+    validations:
+      required: false
+
+  - type: input
+    id: version_start
+    attributes:
+      label: Versione di partenza
+      description: La versione attuale da cui parte la proposta
+      placeholder: es. 1.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: version_implementation
+    attributes:
+      label: Versione di implementazione
+      description: La versione stimata in cui verrà introdotta la feature (opzionale)
+      placeholder: es. 1.1.0
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorità
+      description: Quanto è importante questa funzionalità?
+      options:
+        - Critica (essenziale per l'app)
+        - Alta (molto importante)
+        - Media (importante)
+        - Bassa (nice to have)
+      default: 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Contesto aggiuntivo
+      description: Screenshot, mockup, link o altre informazioni utili
+      placeholder: Aggiungi riferimenti o dettagli aggiuntivi...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Conferma
+      options:
+        - label: Ho verificato che la feature non è già stata proposta
+          required: true
+        - label: Ho fornito una descrizione chiara e utile
+          required: true

@@ -1,0 +1,90 @@
+name: Bug Report
+description: Segnala un bug trovato nell'applicazione
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie per aver segnalato il problema! Compila i dettagli qui sotto per aiutarci a risolverlo nel modo più rapido possibile.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrizione del bug
+      description: Descrivi chiaramente il problema che hai riscontrato
+      placeholder: Spiega cosa sta andando storto...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce_steps
+    attributes:
+      label: Step per riprodurre
+      description: Fornisci i passaggi esatti per riprodurre il problema (fortemente consigliato)
+      placeholder: |
+        1. Vai a...
+        2. Clicca su...
+        3. Osserva il problema...
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Comportamento atteso
+      description: Descrivi cosa dovrebbe accadere invece
+      placeholder: Mi aspetto che...
+    validations:
+      required: false
+
+  - type: input
+    id: version_encountered
+    attributes:
+      label: Versione riscontrata
+      description: La versione dell'app in cui hai trovato il bug
+      placeholder: es. 1.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: version_fix
+    attributes:
+      label: Versione di fix
+      description: La versione in cui pensi verrà risolto il bug (opzionale)
+      placeholder: es. 1.0.1
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorità
+      description: Quanto è critico questo bug?
+      options:
+        - Critica (app non funziona)
+        - Alta (funzionalità importante compromessa)
+        - Media (funzionalità parzialmente compromessa)
+        - Bassa (problema minore o cosmetico)
+      default: 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: Informazioni aggiuntive
+      description: Screenshot, log, errori o altre informazioni utili
+      placeholder: Aggiungi qualsiasi dettaglio utile...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Conferma
+      options:
+        - label: Ho verificato che il bug non è già stato segnalato
+          required: true
+        - label: Ho fornito i dettagli necessari per aiutare a risolverlo
+          required: true
