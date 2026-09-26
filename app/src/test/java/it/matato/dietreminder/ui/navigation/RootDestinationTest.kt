@@ -11,6 +11,7 @@ class RootDestinationTest {
     fun rootDestinations_routeReturnsValidRouteObjects() {
         assertNotNull(RootDestination.WEEK.route())
         assertNotNull(RootDestination.DIETS.route())
+        assertNotNull(RootDestination.INGREDIENTS.route())
         assertNotNull(RootDestination.HYDRATION.route())
         assertNotNull(RootDestination.SETTINGS.route())
     }
@@ -19,6 +20,7 @@ class RootDestinationTest {
     fun rootDestinations_matchesRouteStrings() {
         assertTrue(RootDestination.WEEK.matches("it.matato.dietreminder.ui.navigation.WeekRoute"))
         assertTrue(RootDestination.DIETS.matches("it.matato.dietreminder.ui.navigation.DietsRoute"))
+        assertTrue(RootDestination.INGREDIENTS.matches("it.matato.dietreminder.ui.navigation.IngredientsRoute"))
         assertTrue(RootDestination.HYDRATION.matches("it.matato.dietreminder.ui.navigation.HydrationRoute"))
         assertTrue(RootDestination.SETTINGS.matches("it.matato.dietreminder.ui.navigation.SettingsRoute"))
 

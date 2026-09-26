@@ -14,8 +14,10 @@ import it.matato.dietreminder.data.database.relation.MealWithDetails
 import it.matato.dietreminder.data.model.HydrationRange
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.repository.DietRepository
+import it.matato.dietreminder.domain.IngredientSummary
 import it.matato.dietreminder.domain.NextMeal
 import it.matato.dietreminder.domain.nextMeal
+import it.matato.dietreminder.domain.toIngredientSummaries
 import it.matato.dietreminder.util.AppLog
 import it.matato.dietreminder.util.alarm.AlarmScheduler
 import it.matato.dietreminder.util.alarm.AlarmSyncHelper
@@ -76,6 +78,20 @@ class DietViewModel(
     val meals = active
         .flatMapLatest { diet ->
             diet?.let { repository.observeMeals(it.id) } ?: flowOf(emptyList())
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList(),
+        )
+
+    val existingFoodNames = meals
+        .map { mealsList ->
+            mealsList
+                .flatMap { m -> m.courses.flatMap { c -> c.items.map { i -> i.name.trim() } } }
+                .filter { it.isNotBlank() }
+                .distinct()
+                .sortedWith(String.CASE_INSENSITIVE_ORDER)
         }
         .stateIn(
             viewModelScope,
@@ -301,6 +317,10 @@ class DietViewModel(
     }
 
     suspend fun getDietMeals(id: Long) = repository.getMeals(id)
+
+    suspend fun getDietIngredients(id: Long): List<IngredientSummary> {
+        return repository.getMeals(id).toIngredientSummaries()
+    }
 
     suspend fun getMeal(id: Long): MealWithDetails? {
         if (id == 0L) {

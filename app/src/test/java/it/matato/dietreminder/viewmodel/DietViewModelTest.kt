@@ -4,7 +4,10 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import it.matato.dietreminder.TestDietApplication
+import it.matato.dietreminder.data.database.entity.Course
+import it.matato.dietreminder.data.database.entity.FoodItem
 import it.matato.dietreminder.data.database.entity.Meal
+import it.matato.dietreminder.data.database.relation.CourseWithItems
 import it.matato.dietreminder.data.export.DietExport
 import it.matato.dietreminder.data.export.DietJsonCodec
 import it.matato.dietreminder.data.model.HydrationRange
@@ -261,5 +264,35 @@ class DietViewModelTest {
 
         val result2 = viewModel.checkImportConflict(json)
         assertEquals(ImportCheckResult.Conflict, result2)
+    }
+
+    @Test
+    fun getDietIngredients_returnsGroupedIngredients() = runTest {
+        backgroundScope.launch { viewModel.diets.collect {} }
+
+        viewModel.create("Dieta Ingredienti", 60)
+        advanceUntilIdle()
+
+        val dietId = viewModel.diets.value[0].id
+        val meal = Meal(
+            dietId = dietId,
+            dayOfWeek = DayOfWeek.MONDAY,
+            type = MealType.LUNCH,
+            timeMinutes = 13 * 60,
+        )
+        val course = CourseWithItems(
+            course = Course(id = 1, mealId = 1, name = "Primo"),
+            items = listOf(
+                FoodItem(id = 1, courseId = 1, name = "Riso", quantities = "80g")
+            )
+        )
+
+        viewModel.saveMeal(meal, listOf(course))
+        advanceUntilIdle()
+
+        val ingredients = viewModel.getDietIngredients(dietId)
+        assertEquals(1, ingredients.size)
+        assertEquals("Riso", ingredients[0].name)
+        assertEquals(listOf("80g"), ingredients[0].dailyQuantities[DayOfWeek.MONDAY])
     }
 }

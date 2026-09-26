@@ -32,3 +32,8 @@ data class MealDetailRoute(
 data class DietConfigRoute(
     val dietId: Long,
 )
+
+@Serializable
+data class IngredientsRoute(
+    val dietId: Long? = null,
+)
