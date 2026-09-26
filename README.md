@@ -42,23 +42,13 @@ Diet Reminder offre una soluzione completa per organizzare programmi alimentari 
 
 ## Interfaccia Utente
 
-![Programma Settimanale](docs/images/screenshot_week.png)
-*Programma Settimanale*
+|                   Programma Settimanale                   |                   Gestione Diete                    |                      Lista Ingredienti                       |
+|:---------------------------------------------------------:|:---------------------------------------------------:|:------------------------------------------------------------:|
+| ![Programma Settimanale](docs/images/screenshot_week.png) | ![Gestione Diete](docs/images/screenshot_diets.png) | ![Lista Ingredienti](docs/images/screenshot_ingredients.png) |
 
-![Gestione Diete](docs/images/screenshot_diets.png)
-*Gestione Diete*
-
-![Lista Ingredienti](docs/images/screenshot_ingredients.png)
-*Lista Ingredienti*
-
-![Monitoraggio Idratazione](docs/images/screenshot_hydration.png)
-*Monitoraggio Idratazione*
-
-![Impostazioni](docs/images/screenshot_settings.png)
-*Impostazioni*
-
-![Widget Home Screen](docs/images/screenshot_widget.png)
-*Widget Home Screen*
+|                     Monitoraggio Idratazione                      |                     Impostazioni                     |                    Widget Home Screen                    |
+|:-----------------------------------------------------------------:|:----------------------------------------------------:|:--------------------------------------------------------:|
+| ![Monitoraggio Idratazione](docs/images/screenshot_hydration.png) | ![Impostazioni](docs/images/screenshot_settings.png) | ![Widget Home Screen](docs/images/screenshot_widget.png) |
 
 ## Architettura Tecnica
 
@@ -123,23 +113,13 @@ Diet Reminder provides an end-to-end solution for organizing structured meal pla
 
 ## User Interface Screenshots
 
-![Weekly Schedule](docs/images/screenshot_week.png)
-*Weekly Schedule*
+|                   Weekly Schedule                   |                   Diets Management                    |                      Ingredients List                       |
+|:---------------------------------------------------:|:-----------------------------------------------------:|:-----------------------------------------------------------:|
+| ![Weekly Schedule](docs/images/screenshot_week.png) | ![Diets Management](docs/images/screenshot_diets.png) | ![Ingredients List](docs/images/screenshot_ingredients.png) |
 
-![Diets Management](docs/images/screenshot_diets.png)
-*Diets Management*
-
-![Ingredients List](docs/images/screenshot_ingredients.png)
-*Ingredients List*
-
-![Hydration Tracker](docs/images/screenshot_hydration.png)
-*Hydration Tracker*
-
-![Settings](docs/images/screenshot_settings.png)
-*Settings*
-
-![Home Screen Widget](docs/images/screenshot_widget.png)
-*Home Screen Widget*
+|                     Hydration Tracker                      |                     Settings                     |                    Home Screen Widget                    |
+|:----------------------------------------------------------:|:------------------------------------------------:|:--------------------------------------------------------:|
+| ![Hydration Tracker](docs/images/screenshot_hydration.png) | ![Settings](docs/images/screenshot_settings.png) | ![Home Screen Widget](docs/images/screenshot_widget.png) |
 
 ## Technical Architecture
 
