@@ -51,6 +51,7 @@ class AppNavigationFunctionalTest {
 
         appRobot(composeTestRule) {
             navigateToDiets()
+            navigateToIngredients()
             navigateToHydration()
             navigateToSettings()
             navigateToWeek()

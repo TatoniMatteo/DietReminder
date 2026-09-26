@@ -3,6 +3,7 @@ package it.matato.dietreminder.ui.navigation
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Kitchen
 import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.WaterDrop
@@ -21,6 +22,10 @@ enum class RootDestination(
         icon = Icons.Rounded.Restaurant,
         labelRes = R.string.diets,
     ),
+    INGREDIENTS(
+        icon = Icons.Rounded.Kitchen,
+        labelRes = R.string.ingredients,
+    ),
     HYDRATION(
         icon = Icons.Rounded.WaterDrop,
         labelRes = R.string.hydration_title,
@@ -34,6 +39,7 @@ enum class RootDestination(
         return when (this) {
             WEEK -> WeekRoute()
             DIETS -> DietsRoute
+            INGREDIENTS -> IngredientsRoute()
             HYDRATION -> HydrationRoute
             SETTINGS -> SettingsRoute
         }
@@ -43,6 +49,7 @@ enum class RootDestination(
         return when (this) {
             WEEK -> route?.contains("WeekRoute") == true
             DIETS -> route?.contains("DietsRoute") == true
+            INGREDIENTS -> route?.contains("IngredientsRoute") == true
             HYDRATION -> route?.contains("HydrationRoute") == true
             SETTINGS -> route?.contains("SettingsRoute") == true
         }

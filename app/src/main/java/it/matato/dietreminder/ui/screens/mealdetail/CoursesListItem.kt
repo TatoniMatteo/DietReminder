@@ -39,6 +39,7 @@ import it.matato.dietreminder.ui.theme.DietTheme
 fun CourseListItem(
     index: Int,
     courseWithItems: CourseWithItems,
+    suggestions: List<String> = emptyList(),
     onUpdate: (CourseWithItems) -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -98,6 +99,7 @@ fun CourseListItem(
         courseWithItems.items.forEachIndexed { itemIndex, item ->
             FoodItemRow(
                 item = item,
+                suggestions = suggestions,
                 onUpdate = { updatedItem ->
                     val updatedItems = courseWithItems.items.toMutableList().apply {
                         set(itemIndex, updatedItem)

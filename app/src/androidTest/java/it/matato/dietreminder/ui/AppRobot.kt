@@ -5,6 +5,8 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import it.matato.dietreminder.ui.screens.diets.DietsScreenRobot
 import it.matato.dietreminder.ui.screens.diets.dietsRobot
+import it.matato.dietreminder.ui.screens.ingredients.IngredientsScreenRobot
+import it.matato.dietreminder.ui.screens.ingredients.ingredientsRobot
 
 fun appRobot(
     composeTestRule: SemanticsNodeInteractionsProvider,
@@ -23,6 +25,11 @@ class AppRobot(private val composeTestRule: SemanticsNodeInteractionsProvider) {
             .performClick()
     }
 
+    fun navigateToIngredients() {
+        composeTestRule.onNode(hasText("Ingredienti") or hasText("Ingredients"))
+            .performClick()
+    }
+
     fun navigateToHydration() {
         composeTestRule.onNode(hasText("Idratazione") or hasText("Hydration"))
             .performClick()
@@ -36,5 +43,9 @@ class AppRobot(private val composeTestRule: SemanticsNodeInteractionsProvider) {
     // Helper per saltare al robot specifico della schermata
     fun onDietsScreen(block: DietsScreenRobot.() -> Unit) {
         dietsRobot(composeTestRule, block)
+    }
+
+    fun onIngredientsScreen(block: IngredientsScreenRobot.() -> Unit) {
+        ingredientsRobot(composeTestRule, block)
     }
 }

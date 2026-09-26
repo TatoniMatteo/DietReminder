@@ -78,6 +78,7 @@ fun DietConfigScreen(
     vm: DietViewModel,
     dietId: Long,
     onBack: () -> Unit,
+    onIngredientsClick: () -> Unit,
     onAddMeal: (Long, DayOfWeek) -> Unit,
     onEditMeal: (Long, DayOfWeek) -> Unit,
 ) {
@@ -119,6 +120,7 @@ fun DietConfigScreen(
             vm.setDietDayNotificationEnabled(dietId, selectedDay, enabled)
         },
         onBack = onBack,
+        onIngredientsClick = onIngredientsClick,
         onDaySelected = { selectedDay = it },
         onAddMeal = { onAddMeal(dietId, selectedDay) },
         onEditMeal = { mealId -> onEditMeal(mealId, selectedDay) }
@@ -135,6 +137,7 @@ fun DietConfigContent(
     isDayNotificationSwitchEnabled: Boolean,
     onToggleDayNotification: (Boolean) -> Unit,
     onBack: () -> Unit,
+    onIngredientsClick: () -> Unit,
     onDaySelected: (DayOfWeek) -> Unit,
     onAddMeal: () -> Unit,
     onEditMeal: (Long) -> Unit,
@@ -161,6 +164,7 @@ fun DietConfigContent(
             DietConfigHeader(
                 dietName = dietName,
                 onBack = onBack,
+                onIngredientsClick = onIngredientsClick,
             )
 
             DaySelector(
@@ -263,13 +267,14 @@ private fun DayNotificationHeaderCard(
 private fun DietConfigHeader(
     dietName: String,
     onBack: () -> Unit,
+    onIngredientsClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
                 start = 12.dp,
-                end = 24.dp,
+                end = 16.dp,
                 top = 10.dp,
                 bottom = 8.dp,
             ),
@@ -285,7 +290,9 @@ private fun DietConfigHeader(
         }
 
         Column(
-            modifier = Modifier.padding(start = 4.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 4.dp),
         ) {
             Text(
                 text = stringResource(R.string.configure_diet),
@@ -299,6 +306,16 @@ private fun DietConfigHeader(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
+            )
+        }
+
+        IconButton(
+            onClick = onIngredientsClick,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Restaurant,
+                contentDescription = stringResource(R.string.ingredients_title),
+                tint = MaterialTheme.colorScheme.primary,
             )
         }
     }
@@ -594,6 +611,7 @@ private fun DietConfigContentPreview() {
             isDayNotificationSwitchEnabled = true,
             onToggleDayNotification = {},
             onBack = {},
+            onIngredientsClick = {},
             onDaySelected = {},
             onAddMeal = {},
             onEditMeal = {}

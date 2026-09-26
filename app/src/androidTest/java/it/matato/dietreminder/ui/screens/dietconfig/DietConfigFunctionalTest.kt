@@ -50,6 +50,7 @@ class DietConfigFunctionalTest {
                     vm = viewModel,
                     dietId = dietId,
                     onBack = { backClicked = true },
+                    onIngredientsClick = {},
                     onAddMeal = { _, _ -> addMealClicked = true },
                     onEditMeal = { _, _ -> }
                 )

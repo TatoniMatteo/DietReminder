@@ -20,6 +20,7 @@ import it.matato.dietreminder.ui.screens.developer.DeveloperScreen
 import it.matato.dietreminder.ui.screens.dietconfig.DietConfigScreen
 import it.matato.dietreminder.ui.screens.diets.DietsScreen
 import it.matato.dietreminder.ui.screens.hydration.HydrationScreen
+import it.matato.dietreminder.ui.screens.ingredients.IngredientsScreen
 import it.matato.dietreminder.ui.screens.mealdetail.MealDetailScreen
 import it.matato.dietreminder.ui.screens.settings.SettingsScreen
 import it.matato.dietreminder.ui.screens.week.WeekScreen
@@ -166,6 +167,9 @@ fun AppNavigation(
                 vm = vm,
                 dietId = route.dietId,
                 onBack = navigator::navigateUp,
+                onIngredientsClick = {
+                    navigator.navigate(IngredientsRoute(route.dietId))
+                },
                 onAddMeal = { mealId, dayOfWeek ->
                     navigator.navigate(
                         MealDetailRoute(
@@ -184,6 +188,22 @@ fun AppNavigation(
                         ),
                     )
                 },
+            )
+        }
+
+        composable<IngredientsRoute>(
+            deepLinks = listOf(
+                navDeepLink<IngredientsRoute>(
+                    basePath = "dietreminder://ingredients",
+                ),
+            ),
+        ) {
+            val route = it.toRoute<IngredientsRoute>()
+
+            IngredientsScreen(
+                vm = vm,
+                dietId = route.dietId,
+                onBack = if (route.dietId != null) { { navigator.navigateUp() } } else null,
             )
         }
 

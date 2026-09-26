@@ -43,6 +43,7 @@ fun MealDetailScreen(
 ) {
     val diets by vm.diets.collectAsState()
     val mealRemindersEnabled by vm.mealRemindersEnabled.collectAsState()
+    val suggestions by vm.existingFoodNames.collectAsState()
 
     var meal by remember { mutableStateOf<Meal?>(null) }
     var courses by remember { mutableStateOf<List<CourseWithItems>>(emptyList()) }
@@ -72,7 +73,7 @@ fun MealDetailScreen(
             customLabel = mealWithDetails.meal.customTypeLabel.orEmpty()
             isNotificationEnabled = mealWithDetails.meal.isNotificationEnabled
         } else {
-            val defaultTime = vm.getDefaultTime(MealType.BREAKFAST)
+            val defaultTime = vm.getDefaultTime(MealType.LUNCH)
 
             meal = Meal(
                 dietId = dietId,
@@ -82,6 +83,10 @@ fun MealDetailScreen(
                 isNotificationEnabled = true,
             )
 
+            courses = emptyList()
+            description = ""
+            type = MealType.LUNCH
+            customLabel = ""
             timeMinutes = defaultTime
             isNotificationEnabled = true
         }
@@ -142,6 +147,7 @@ fun MealDetailScreen(
         isNotificationEnabled = isNotificationEnabled,
         isNotificationSwitchEnabled = isNotificationSwitchEnabled,
         courses = courses,
+        suggestions = suggestions,
         onBack = onBack,
         onSave = ::saveMeal,
         onDelete = ::deleteMeal,
@@ -192,6 +198,7 @@ fun MealDetailContent(
     isNotificationEnabled: Boolean,
     isNotificationSwitchEnabled: Boolean,
     courses: List<CourseWithItems>,
+    suggestions: List<String> = emptyList(),
     onBack: () -> Unit,
     onSave: () -> Unit,
     onDelete: () -> Unit,
@@ -280,6 +287,7 @@ fun MealDetailContent(
                     item {
                         CoursesList(
                             courses = courses,
+                            suggestions = suggestions,
                             onUpdate = onUpdateCourse,
                             onDelete = onDeleteCourse,
                             onAddCourse = onAddCourse,

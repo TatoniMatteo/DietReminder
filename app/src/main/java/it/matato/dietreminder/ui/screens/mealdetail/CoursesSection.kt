@@ -69,6 +69,7 @@ fun CoursesHeader(count: Int) {
 @Composable
 fun CoursesList(
     courses: List<CourseWithItems>,
+    suggestions: List<String> = emptyList(),
     onUpdate: (Int, CourseWithItems) -> Unit,
     onDelete: (Int) -> Unit,
     onAddCourse: () -> Unit,
@@ -82,6 +83,7 @@ fun CoursesList(
                 CourseListItem(
                     index = index,
                     courseWithItems = course,
+                    suggestions = suggestions,
                     onUpdate = {
                         onUpdate(index, it)
                     },
