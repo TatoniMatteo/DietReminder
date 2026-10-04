@@ -6,7 +6,7 @@ import it.matato.dietreminder.data.model.MealType
 
 @Entity(tableName = "meal_default_times")
 data class MealDefaultTime(
-    @PrimaryKey
-    val type: MealType,
-    val timeMinutes: Int
+	@PrimaryKey
+	val type: MealType,
+	val timeMinutes: Int
 )

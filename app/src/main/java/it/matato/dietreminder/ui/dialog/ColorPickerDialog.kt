@@ -31,76 +31,76 @@ import it.matato.dietreminder.ui.theme.DietTheme
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ColorPickerDialog(
-    onDismiss: () -> Unit,
-    onColorSelected: (Color) -> Unit,
+	onDismiss: () -> Unit,
+	onColorSelected: (Color) -> Unit,
 ) {
-    val colors = listOf(
-        Color(0xFF6750A4),
-        Color(0xFF9C27B0),
-        Color(0xFFE91E63),
-        Color(0xFFF44336),
-        Color(0xFFFF9800),
-        Color(0xFF4CAF50),
-        Color(0xFF00BCD4),
-        Color(0xFF2196F3),
-    )
+	val colors = listOf(
+		Color(0xFF6750A4),
+		Color(0xFF9C27B0),
+		Color(0xFFE91E63),
+		Color(0xFFF44336),
+		Color(0xFFFF9800),
+		Color(0xFF4CAF50),
+		Color(0xFF00BCD4),
+		Color(0xFF2196F3),
+	)
 
-    BasicAlertDialog(
-        onDismissRequest = onDismiss,
-    ) {
-        ElevatedCard(
-            shape = MaterialTheme.shapes.extraLarge,
-        ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.choose_seed_color),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                )
+	BasicAlertDialog(
+		onDismissRequest = onDismiss,
+	) {
+		ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge,
+		) {
+			Column(
+				modifier = Modifier.padding(24.dp),
+				verticalArrangement = Arrangement.spacedBy(20.dp),
+			) {
+				Text(
+					text = stringResource(R.string.choose_seed_color),
+					style = MaterialTheme.typography.headlineSmall,
+					fontWeight = FontWeight.Bold,
+				)
 
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
-                ) {
-                    colors.forEach { color ->
-                        Box(
-                            modifier = Modifier
-                                .size(52.dp)
-                                .background(
-                                    color = color,
-                                    shape = CircleShape,
-                                )
-                                .clickable {
-                                    onColorSelected(color)
-                                },
-                        )
-                    }
-                }
+				FlowRow(
+					modifier = Modifier.fillMaxWidth(),
+					horizontalArrangement = Arrangement.spacedBy(14.dp),
+					verticalArrangement = Arrangement.spacedBy(14.dp),
+				) {
+					colors.forEach { color ->
+						Box(
+							modifier = Modifier
+								.size(52.dp)
+								.background(
+									color = color,
+									shape = CircleShape,
+								)
+								.clickable {
+									onColorSelected(color)
+								},
+						)
+					}
+				}
 
-                TextButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.align(
-                        Alignment.End,
-                    ),
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        }
-    }
+				TextButton(
+					onClick = onDismiss,
+					modifier = Modifier.align(
+						Alignment.End,
+					),
+				) {
+					Text(stringResource(R.string.cancel))
+				}
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun ColorPickerDialogPreview() {
-    DietTheme {
-        ColorPickerDialog(
-            onDismiss = {},
-            onColorSelected = {},
-        )
-    }
+	DietTheme {
+		ColorPickerDialog(
+			onDismiss = {},
+			onColorSelected = {},
+		)
+	}
 }

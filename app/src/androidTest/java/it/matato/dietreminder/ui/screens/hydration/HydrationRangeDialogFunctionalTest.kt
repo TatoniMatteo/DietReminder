@@ -14,24 +14,24 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class HydrationRangeDialogFunctionalTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testHydrationRangeDialogContent_Exists() {
-        composeTestRule.setContent {
-            val startState = rememberTimePickerState(initialHour = 9, initialMinute = 0, is24Hour = true)
-            val endState = rememberTimePickerState(initialHour = 18, initialMinute = 0, is24Hour = true)
-            DietTheme {
-                AddHydrationRangeDialogContent(
-                    startState = startState,
-                    endState = endState,
-                    onDismiss = {},
-                    onAdd = {}
-                )
-            }
-        }
+	@Test
+	fun testHydrationRangeDialogContent_Exists() {
+		composeTestRule.setContent {
+			val startState = rememberTimePickerState(initialHour = 9, initialMinute = 0, is24Hour = true)
+			val endState = rememberTimePickerState(initialHour = 18, initialMinute = 0, is24Hour = true)
+			DietTheme {
+				AddHydrationRangeDialogContent(
+					startState = startState,
+					endState = endState,
+					onDismiss = {},
+					onAdd = {}
+				)
+			}
+		}
 
-        composeTestRule.onNode(isRoot()).assertExists()
-    }
+		composeTestRule.onNode(isRoot()).assertExists()
+	}
 }

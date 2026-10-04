@@ -12,23 +12,23 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class TimePickerDialogFunctionalTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testTimePickerDialog_DisplaysTitle() {
-        composeTestRule.setContent {
-            DietTheme {
-                TimePickerDialog(
-                    title = "Orario pasto",
-                    initialTimeMinutes = 12 * 60,
-                    onDismiss = {},
-                    onTimeSelected = {}
-                )
-            }
-        }
+	@Test
+	fun testTimePickerDialog_DisplaysTitle() {
+		composeTestRule.setContent {
+			DietTheme {
+				TimePickerDialog(
+					title = "Orario pasto",
+					initialTimeMinutes = 12 * 60,
+					onDismiss = {},
+					onTimeSelected = {}
+				)
+			}
+		}
 
-        composeTestRule.onNode(hasText("Orario pasto"), useUnmergedTree = true)
-            .assertIsDisplayed()
-    }
+		composeTestRule.onNode(hasText("Orario pasto"), useUnmergedTree = true)
+			.assertIsDisplayed()
+	}
 }

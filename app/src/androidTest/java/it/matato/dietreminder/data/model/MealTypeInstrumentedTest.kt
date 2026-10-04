@@ -7,8 +7,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class MealTypeInstrumentedTest {
-    @Test
-    fun testMealTypes() {
-        assertNotNull(MealType.entries)
-    }
+	@Test
+	fun testMealTypes() {
+		assertNotNull(MealType.entries)
+	}
 }

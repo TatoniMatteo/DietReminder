@@ -20,30 +20,30 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun IconContainer(
-    icon: ImageVector,
-    size: Dp = 40.dp,
-    iconSize: Dp = 21.dp,
+	icon: ImageVector,
+	size: Dp = 40.dp,
+	iconSize: Dp = 21.dp,
 ) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.size(iconSize),
-        )
-    }
+	Box(
+		modifier = Modifier
+			.size(size)
+			.clip(CircleShape)
+			.background(MaterialTheme.colorScheme.primaryContainer),
+		contentAlignment = Alignment.Center,
+	) {
+		Icon(
+			imageVector = icon,
+			contentDescription = null,
+			tint = MaterialTheme.colorScheme.onPrimaryContainer,
+			modifier = Modifier.size(iconSize),
+		)
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun IconContainerPreview() {
-    DietTheme {
-        IconContainer(icon = Icons.Rounded.Restaurant)
-    }
+	DietTheme {
+		IconContainer(icon = Icons.Rounded.Restaurant)
+	}
 }

@@ -9,21 +9,21 @@ import it.matato.dietreminder.data.database.entity.Course
 @Dao
 interface CourseDao {
 
-    @Insert
-    suspend fun insert(course: Course): Long
+	@Insert
+	suspend fun insert(course: Course): Long
 
-    @Update
-    suspend fun update(course: Course): Int
+	@Update
+	suspend fun update(course: Course): Int
 
-    @Query("DELETE FROM courses WHERE id = :id")
-    suspend fun delete(id: Long): Int
+	@Query("DELETE FROM courses WHERE id = :id")
+	suspend fun delete(id: Long): Int
 
-    @Query(
-        """
+	@Query(
+		"""
         SELECT * FROM courses
         WHERE mealId = :mealId
         ORDER BY `order` ASC
     """
-    )
-    suspend fun getForMeal(mealId: Long): List<Course>
+	)
+	suspend fun getForMeal(mealId: Long): List<Course>
 }

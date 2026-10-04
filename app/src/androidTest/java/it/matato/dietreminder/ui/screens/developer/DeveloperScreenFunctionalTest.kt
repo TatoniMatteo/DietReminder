@@ -15,21 +15,21 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class DeveloperScreenFunctionalTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testDeveloperScreen_Exists() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val fakeRepository = FakeDietRepository()
-        val viewModel = DietViewModel(context, fakeRepository)
+	@Test
+	fun testDeveloperScreen_Exists() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val fakeRepository = FakeDietRepository()
+		val viewModel = DietViewModel(context, fakeRepository)
 
-        composeTestRule.setContent {
-            DietTheme {
-                DeveloperScreen(vm = viewModel, onBack = {})
-            }
-        }
+		composeTestRule.setContent {
+			DietTheme {
+				DeveloperScreen(vm = viewModel, onBack = {})
+			}
+		}
 
-        composeTestRule.onNode(isRoot()).assertExists()
-    }
+		composeTestRule.onNode(isRoot()).assertExists()
+	}
 }

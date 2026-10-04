@@ -18,25 +18,25 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class HydrationRangeDialogTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testHydrationRangeDialogContent_DisplaysTitle() {
-        composeTestRule.setContent {
-            val startState = rememberTimePickerState(initialHour = 9, initialMinute = 0, is24Hour = true)
-            val endState = rememberTimePickerState(initialHour = 18, initialMinute = 0, is24Hour = true)
-            DietTheme {
-                AddHydrationRangeDialogContent(
-                    startState = startState,
-                    endState = endState,
-                    onDismiss = {},
-                    onAdd = {}
-                )
-            }
-        }
+	@Test
+	fun testHydrationRangeDialogContent_DisplaysTitle() {
+		composeTestRule.setContent {
+			val startState = rememberTimePickerState(initialHour = 9, initialMinute = 0, is24Hour = true)
+			val endState = rememberTimePickerState(initialHour = 18, initialMinute = 0, is24Hour = true)
+			DietTheme {
+				AddHydrationRangeDialogContent(
+					startState = startState,
+					endState = endState,
+					onDismiss = {},
+					onAdd = {}
+				)
+			}
+		}
 
-        composeTestRule.onNode(hasText("Nuova finestra") or hasText("New window"), useUnmergedTree = true)
-            .assertIsDisplayed()
-    }
+		composeTestRule.onNode(hasText("Nuova finestra") or hasText("New window"), useUnmergedTree = true)
+			.assertIsDisplayed()
+	}
 }

@@ -17,38 +17,38 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class AlarmTrackerTest {
 
-    private lateinit var context: Application
+	private lateinit var context: Application
 
-    @Before
-    fun setUp() {
-        context = ApplicationProvider.getApplicationContext()
-        runBlocking {
-            AlarmTracker.clearAll(context)
-        }
-    }
+	@Before
+	fun setUp() {
+		context = ApplicationProvider.getApplicationContext()
+		runBlocking {
+			AlarmTracker.clearAll(context)
+		}
+	}
 
-    @Test
-    fun registerAndGetAlarms_worksCorrectly() = runBlocking {
-        val alarm = ScheduledAlarm(id = 101, type = "MEAL", timeMillis = 100000L, label = "Pranzo")
-        AlarmTracker.registerAlarm(context, alarm)
+	@Test
+	fun registerAndGetAlarms_worksCorrectly() = runBlocking {
+		val alarm = ScheduledAlarm(id = 101, type = "MEAL", timeMillis = 100000L, label = "Pranzo")
+		AlarmTracker.registerAlarm(context, alarm)
 
-        Thread.sleep(100)
+		Thread.sleep(100)
 
-        val alarms = AlarmTracker.getAlarms(context)
-        assertEquals(1, alarms.size)
-        assertEquals(101, alarms[0].id)
-    }
+		val alarms = AlarmTracker.getAlarms(context)
+		assertEquals(1, alarms.size)
+		assertEquals(101, alarms[0].id)
+	}
 
-    @Test
-    fun unregisterAlarm_removesAlarmFromRegistry() = runBlocking {
-        val alarm = ScheduledAlarm(id = 102, type = "HYDRATION", timeMillis = 200000L, label = "Idratazione")
-        AlarmTracker.registerAlarm(context, alarm)
-        Thread.sleep(100)
+	@Test
+	fun unregisterAlarm_removesAlarmFromRegistry() = runBlocking {
+		val alarm = ScheduledAlarm(id = 102, type = "HYDRATION", timeMillis = 200000L, label = "Idratazione")
+		AlarmTracker.registerAlarm(context, alarm)
+		Thread.sleep(100)
 
-        AlarmTracker.unregisterAlarm(context, 102)
-        Thread.sleep(100)
+		AlarmTracker.unregisterAlarm(context, 102)
+		Thread.sleep(100)
 
-        val alarms = AlarmTracker.getAlarms(context)
-        assertTrue(alarms.isEmpty())
-    }
+		val alarms = AlarmTracker.getAlarms(context)
+		assertTrue(alarms.isEmpty())
+	}
 }

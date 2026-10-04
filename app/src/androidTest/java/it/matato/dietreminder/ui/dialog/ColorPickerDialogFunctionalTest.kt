@@ -12,21 +12,23 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ColorPickerDialogFunctionalTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testColorPickerDialog_DisplaysTitle() {
-        composeTestRule.setContent {
-            DietTheme {
-                ColorPickerDialog(
-                    onDismiss = {},
-                    onColorSelected = {}
-                )
-            }
-        }
+	@Test
+	fun testColorPickerDialog_DisplaysTitle() {
+		composeTestRule.setContent {
+			DietTheme {
+				ColorPickerDialog(
+					onDismiss = {},
+					onColorSelected = {}
+				)
+			}
+		}
 
-        composeTestRule.onNode(hasText("Scegli colore principale") or hasText("Choose seed color") or hasText("Choose primary color"), useUnmergedTree = true)
-            .assertIsDisplayed()
-    }
+		composeTestRule.onNode(
+			hasText("Scegli colore principale") or hasText("Choose seed color") or hasText("Choose primary color"),
+			useUnmergedTree = true)
+			.assertIsDisplayed()
+	}
 }

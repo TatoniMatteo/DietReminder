@@ -16,29 +16,29 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun HydrationHeader() {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.hydration_title),
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-        )
+	Column(
+		verticalArrangement = Arrangement.spacedBy(6.dp),
+	) {
+		Text(
+			text = stringResource(R.string.hydration_title),
+			style = MaterialTheme.typography.headlineLarge,
+			fontWeight = FontWeight.Bold,
+		)
 
-        Text(
-            text = stringResource(R.string.hydration_reminders_desc),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+		Text(
+			text = stringResource(R.string.hydration_reminders_desc),
+			style = MaterialTheme.typography.bodyMedium,
+			color = MaterialTheme.colorScheme.onSurfaceVariant,
+		)
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun HydrationHeaderPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            HydrationHeader()
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			HydrationHeader()
+		}
+	}
 }

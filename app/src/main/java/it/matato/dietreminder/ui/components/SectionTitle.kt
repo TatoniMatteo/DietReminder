@@ -19,38 +19,38 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun SectionTitle(
-    title: String,
-    icon: ImageVector,
-    modifier: Modifier = Modifier,
+	title: String,
+	icon: ImageVector,
+	modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier.padding(horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(20.dp),
-        )
+	Row(
+		modifier = modifier.padding(horizontal = 4.dp),
+		verticalAlignment = Alignment.CenterVertically,
+	) {
+		Icon(
+			imageVector = icon,
+			contentDescription = null,
+			tint = MaterialTheme.colorScheme.primary,
+			modifier = Modifier.size(20.dp),
+		)
 
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 8.dp),
-        )
-    }
+		Text(
+			text = title,
+			style = MaterialTheme.typography.titleMedium,
+			color = MaterialTheme.colorScheme.primary,
+			fontWeight = FontWeight.Bold,
+			modifier = Modifier.padding(start = 8.dp),
+		)
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SectionTitlePreview() {
-    DietTheme {
-        SectionTitle(
-            title = "Section Title",
-            icon = Icons.Rounded.Restaurant,
-        )
-    }
+	DietTheme {
+		SectionTitle(
+			title = "Section Title",
+			icon = Icons.Rounded.Restaurant,
+		)
+	}
 }

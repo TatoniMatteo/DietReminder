@@ -15,38 +15,38 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun SettingsAboutSection(
-    onVersionClick: () -> Unit,
+	onVersionClick: () -> Unit,
 ) {
-    SettingsSection(
-        title = stringResource(R.string.app_info),
-        icon = Icons.Rounded.Person,
-    ) {
-        SettingsListItem(
-            title = stringResource(R.string.version),
-            subtitle = "1.0.0 (Build 20261027)",
-            leadingIcon = Icons.Rounded.Update,
-            onClick = onVersionClick,
-        )
+	SettingsSection(
+		title = stringResource(R.string.app_info),
+		icon = Icons.Rounded.Person,
+	) {
+		SettingsListItem(
+			title = stringResource(R.string.version),
+			subtitle = "1.0.0 (Build 20261027)",
+			leadingIcon = Icons.Rounded.Update,
+			onClick = onVersionClick,
+		)
 
-        SettingsDivider()
+		SettingsDivider()
 
-        SettingsListItem(
-            title = stringResource(R.string.developer),
-            subtitle = "Matteo Tatoni",
-            leadingIcon = Icons.Rounded.Person,
-            onClick = {},
-        )
-    }
+		SettingsListItem(
+			title = stringResource(R.string.developer),
+			subtitle = "Matteo Tatoni",
+			leadingIcon = Icons.Rounded.Person,
+			onClick = {},
+		)
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SettingsAboutSectionPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            SettingsAboutSection(
-                onVersionClick = {},
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			SettingsAboutSection(
+				onVersionClick = {},
+			)
+		}
+	}
 }

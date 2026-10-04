@@ -27,90 +27,90 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun HydrationRangeItem(
-    range: HydrationRange,
-    onDelete: () -> Unit,
+	range: HydrationRange,
+	onDelete: () -> Unit,
 ) {
-    var menuExpanded by rememberSaveable(
-        range.startMinutes,
-        range.endMinutes,
-    ) {
-        mutableStateOf(false)
-    }
+	var menuExpanded by rememberSaveable(
+		range.startMinutes,
+		range.endMinutes,
+	) {
+		mutableStateOf(false)
+	}
 
-    ListItem(
-        headlineContent = {
-            Text(
-                text = formatRange(range),
-                fontWeight = FontWeight.SemiBold,
-            )
-        },
-        supportingContent = {
-            Text(
-                text = stringResource(R.string.hydration_windows),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        },
-        leadingContent = {
-            IconContainer(
-                icon = Icons.Rounded.Schedule,
-            )
-        },
-        trailingContent = {
-            Box {
-                IconButton(
-                    onClick = { menuExpanded = true },
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.MoreVert,
-                        contentDescription = stringResource(R.string.delete),
-                    )
-                }
+	ListItem(
+		headlineContent = {
+			Text(
+				text = formatRange(range),
+				fontWeight = FontWeight.SemiBold,
+			)
+		},
+		supportingContent = {
+			Text(
+				text = stringResource(R.string.hydration_windows),
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
+			)
+		},
+		leadingContent = {
+			IconContainer(
+				icon = Icons.Rounded.Schedule,
+			)
+		},
+		trailingContent = {
+			Box {
+				IconButton(
+					onClick = { menuExpanded = true },
+				) {
+					Icon(
+						imageVector = Icons.Rounded.MoreVert,
+						contentDescription = stringResource(R.string.delete),
+					)
+				}
 
-                DropdownMenu(
-                    expanded = menuExpanded,
-                    onDismissRequest = { menuExpanded = false },
-                ) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = stringResource(R.string.delete),
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Delete,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error,
-                            )
-                        },
-                        onClick = {
-                            menuExpanded = false
-                            onDelete()
-                        },
-                    )
-                }
-            }
-        },
-    )
+				DropdownMenu(
+					expanded = menuExpanded,
+					onDismissRequest = { menuExpanded = false },
+				) {
+					DropdownMenuItem(
+						text = {
+							Text(
+								text = stringResource(R.string.delete),
+								color = MaterialTheme.colorScheme.error,
+							)
+						},
+						leadingIcon = {
+							Icon(
+								imageVector = Icons.Rounded.Delete,
+								contentDescription = null,
+								tint = MaterialTheme.colorScheme.error,
+							)
+						},
+						onClick = {
+							menuExpanded = false
+							onDelete()
+						},
+					)
+				}
+			}
+		},
+	)
 }
 
 private fun formatRange(range: HydrationRange): String {
-    return "%02d:%02d – %02d:%02d".format(
-        range.startMinutes / 60,
-        range.startMinutes % 60,
-        range.endMinutes / 60,
-        range.endMinutes % 60,
-    )
+	return "%02d:%02d – %02d:%02d".format(
+		range.startMinutes / 60,
+		range.startMinutes % 60,
+		range.endMinutes / 60,
+		range.endMinutes % 60,
+	)
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun HydrationRangeItemPreview() {
-    DietTheme {
-        HydrationRangeItem(
-            range = HydrationRange(540, 1080),
-            onDelete = {},
-        )
-    }
+	DietTheme {
+		HydrationRangeItem(
+			range = HydrationRange(540, 1080),
+			onDelete = {},
+		)
+	}
 }

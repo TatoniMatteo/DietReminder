@@ -15,23 +15,23 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class TimePickerDialogTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testTimePickerDialog_DisplaysTitle() {
-        composeTestRule.setContent {
-            DietTheme {
-                TimePickerDialog(
-                    title = "Orario pasto",
-                    initialTimeMinutes = 12 * 60 + 30,
-                    onDismiss = {},
-                    onTimeSelected = {}
-                )
-            }
-        }
+	@Test
+	fun testTimePickerDialog_DisplaysTitle() {
+		composeTestRule.setContent {
+			DietTheme {
+				TimePickerDialog(
+					title = "Orario pasto",
+					initialTimeMinutes = 12 * 60 + 30,
+					onDismiss = {},
+					onTimeSelected = {}
+				)
+			}
+		}
 
-        composeTestRule.onNode(hasText("Orario pasto"), useUnmergedTree = true)
-            .assertIsDisplayed()
-    }
+		composeTestRule.onNode(hasText("Orario pasto"), useUnmergedTree = true)
+			.assertIsDisplayed()
+	}
 }

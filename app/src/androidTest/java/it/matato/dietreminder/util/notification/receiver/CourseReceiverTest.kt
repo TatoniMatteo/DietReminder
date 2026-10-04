@@ -10,11 +10,11 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class CourseReceiverTest {
 
-    @Test
-    fun testCourseReceiver() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val receiver = CourseReceiver()
-        assertNotNull(receiver)
-        assertNotNull(context)
-    }
+	@Test
+	fun testCourseReceiver() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val receiver = CourseReceiver()
+		assertNotNull(receiver)
+		assertNotNull(context)
+	}
 }

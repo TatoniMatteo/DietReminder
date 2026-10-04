@@ -10,26 +10,26 @@ import it.matato.dietreminder.util.notification.NotificationHelper
 
 class TestAlarmReceiver : BroadcastReceiver() {
 
-    override fun onReceive(context: Context, intent: Intent) {
-        AppLog.d("TestAlarmReceiver: test alarm received")
+	override fun onReceive(context: Context, intent: Intent) {
+		AppLog.d("TestAlarmReceiver: test alarm received")
 
-        val notificationHelper = NotificationHelper(context)
+		val notificationHelper = NotificationHelper(context)
 
-        val contentIntent = NotificationHelper.createActivityPendingIntent(
-            context = context,
-            requestCode = TEST_NOTIFICATION_ID,
-            intent = Intent(context, MainActivity::class.java)
-        )
+		val contentIntent = NotificationHelper.createActivityPendingIntent(
+			context = context,
+			requestCode = TEST_NOTIFICATION_ID,
+			intent = Intent(context, MainActivity::class.java)
+		)
 
-        notificationHelper.show(
-            notificationId = TEST_NOTIFICATION_ID,
-            title = context.getString(R.string.test_scheduler),
-            message = context.getString(R.string.test_scheduler_desc),
-            contentIntent = contentIntent
-        )
-    }
+		notificationHelper.show(
+			notificationId = TEST_NOTIFICATION_ID,
+			title = context.getString(R.string.test_scheduler),
+			message = context.getString(R.string.test_scheduler_desc),
+			contentIntent = contentIntent
+		)
+	}
 
-    companion object {
-        const val TEST_NOTIFICATION_ID = 10_001
-    }
+	companion object {
+		const val TEST_NOTIFICATION_ID = 10_001
+	}
 }

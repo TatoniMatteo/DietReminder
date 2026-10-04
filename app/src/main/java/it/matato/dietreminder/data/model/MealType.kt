@@ -7,21 +7,21 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class MealType(val resId: Int) {
 
-    @SerialName("BREAKFAST")
-    BREAKFAST(R.string.meal_breakfast),
+	@SerialName("BREAKFAST")
+	BREAKFAST(R.string.meal_breakfast),
 
-    @SerialName("MORNING_SNACK")
-    MORNING_SNACK(R.string.meal_morning_snack),
+	@SerialName("MORNING_SNACK")
+	MORNING_SNACK(R.string.meal_morning_snack),
 
-    @SerialName("LUNCH")
-    LUNCH(R.string.meal_lunch),
+	@SerialName("LUNCH")
+	LUNCH(R.string.meal_lunch),
 
-    @SerialName("AFTERNOON_SNACK")
-    AFTERNOON_SNACK(R.string.meal_afternoon_snack),
+	@SerialName("AFTERNOON_SNACK")
+	AFTERNOON_SNACK(R.string.meal_afternoon_snack),
 
-    @SerialName("DINNER")
-    DINNER(R.string.meal_dinner),
+	@SerialName("DINNER")
+	DINNER(R.string.meal_dinner),
 
-    @SerialName("OTHER")
-    OTHER(R.string.meal_other)
+	@SerialName("OTHER")
+	OTHER(R.string.meal_other)
 }

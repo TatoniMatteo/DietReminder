@@ -31,140 +31,140 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun WeekScreen(
-    vm: DietViewModel,
-    targetMealId: Long? = null,
-    targetDayName: String? = null,
+	vm: DietViewModel,
+	targetMealId: Long? = null,
+	targetDayName: String? = null,
 ) {
-    val active by vm.active.collectAsState()
-    val meals by vm.meals.collectAsState()
+	val active by vm.active.collectAsState()
+	val meals by vm.meals.collectAsState()
 
-    val days = DayOfWeek.entries
-    val today = LocalDate.now().dayOfWeek
+	val days = DayOfWeek.entries
+	val today = LocalDate.now().dayOfWeek
 
-    val initialPage = remember {
-        val targetDay = targetDayName
-            ?.let { name -> runCatching { DayOfWeek.valueOf(name) }.getOrNull() }
-            ?: today
+	val initialPage = remember {
+		val targetDay = targetDayName
+			?.let { name -> runCatching { DayOfWeek.valueOf(name) }.getOrNull() }
+			?: today
 
-        days.indexOf(targetDay).coerceAtLeast(0)
-    }
+		days.indexOf(targetDay).coerceAtLeast(0)
+	}
 
-    val pagerState = rememberPagerState(
-        initialPage = initialPage,
-        pageCount = { days.size },
-    )
+	val pagerState = rememberPagerState(
+		initialPage = initialPage,
+		pageCount = { days.size },
+	)
 
-    val scope = rememberCoroutineScope()
+	val scope = rememberCoroutineScope()
 
-    LaunchedEffect(targetDayName) {
-        val targetDay = targetDayName
-            ?.let { name -> runCatching { DayOfWeek.valueOf(name) }.getOrNull() }
-            ?: return@LaunchedEffect
+	LaunchedEffect(targetDayName) {
+		val targetDay = targetDayName
+			?.let { name -> runCatching { DayOfWeek.valueOf(name) }.getOrNull() }
+			?: return@LaunchedEffect
 
-        val index = days.indexOf(targetDay)
-        if (index >= 0 && index != pagerState.currentPage) {
-            pagerState.animateScrollToPage(index)
-        }
-    }
+		val index = days.indexOf(targetDay)
+		if (index >= 0 && index != pagerState.currentPage) {
+			pagerState.animateScrollToPage(index)
+		}
+	}
 
-    WeekContent(
-        dietName = active?.name,
-        meals = meals,
-        targetMealId = targetMealId,
-        days = days,
-        today = today,
-        pagerState = pagerState,
-        onDaySelected = { index ->
-            scope.launch {
-                pagerState.animateScrollToPage(index)
-            }
-        },
-    )
+	WeekContent(
+		dietName = active?.name,
+		meals = meals,
+		targetMealId = targetMealId,
+		days = days,
+		today = today,
+		pagerState = pagerState,
+		onDaySelected = { index ->
+			scope.launch {
+				pagerState.animateScrollToPage(index)
+			}
+		},
+	)
 }
 
 @Composable
 fun WeekContent(
-    dietName: String?,
-    meals: List<MealWithDetails>,
-    targetMealId: Long?,
-    days: List<DayOfWeek>,
-    today: DayOfWeek,
-    pagerState: PagerState,
-    onDaySelected: (Int) -> Unit,
+	dietName: String?,
+	meals: List<MealWithDetails>,
+	targetMealId: Long?,
+	days: List<DayOfWeek>,
+	today: DayOfWeek,
+	pagerState: PagerState,
+	onDaySelected: (Int) -> Unit,
 ) {
-    Scaffold { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-        ) {
-            WeekHeader(
-                dietName = dietName,
-            )
+	Scaffold { innerPadding ->
+		Column(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(innerPadding),
+		) {
+			WeekHeader(
+				dietName = dietName,
+			)
 
-            WeekDaySelector(
-                days = days,
-                selectedPage = pagerState.currentPage,
-                today = today,
-                onDaySelected = onDaySelected,
-            )
+			WeekDaySelector(
+				days = days,
+				selectedPage = pagerState.currentPage,
+				today = today,
+				onDaySelected = onDaySelected,
+			)
 
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                verticalAlignment = Alignment.Top,
-            ) { page ->
-                val selectedDay = days[page]
+			HorizontalPager(
+				state = pagerState,
+				modifier = Modifier
+					.fillMaxWidth()
+					.weight(1f),
+				verticalAlignment = Alignment.Top,
+			) { page ->
+				val selectedDay = days[page]
 
-                val dayMeals = remember(meals, selectedDay) {
-                    meals
-                        .filter { it.meal.dayOfWeek == selectedDay }
-                        .sortedBy { it.meal.timeMinutes }
-                }
+				val dayMeals = remember(meals, selectedDay) {
+					meals
+						.filter { it.meal.dayOfWeek == selectedDay }
+						.sortedBy { it.meal.timeMinutes }
+				}
 
-                if (dayMeals.isEmpty()) {
-                    EmptyDayState()
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
-                            start = 20.dp,
-                            end = 20.dp,
-                            top = 12.dp,
-                            bottom = 28.dp,
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(14.dp),
-                    ) {
-                        items(
-                            items = dayMeals,
-                            key = { it.meal.id },
-                        ) { mealDetails ->
-                            MealTimelineItem(
-                                mealDetails = mealDetails,
-                                initiallyExpanded = mealDetails.meal.id == targetMealId,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
+				if (dayMeals.isEmpty()) {
+					EmptyDayState()
+				} else {
+					LazyColumn(
+						modifier = Modifier.fillMaxSize(),
+						contentPadding = PaddingValues(
+							start = 20.dp,
+							end = 20.dp,
+							top = 12.dp,
+							bottom = 28.dp,
+						),
+						verticalArrangement = Arrangement.spacedBy(14.dp),
+					) {
+						items(
+							items = dayMeals,
+							key = { it.meal.id },
+						) { mealDetails ->
+							MealTimelineItem(
+								mealDetails = mealDetails,
+								initiallyExpanded = mealDetails.meal.id == targetMealId,
+							)
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun WeekContentPreview() {
-    DietTheme {
-        WeekContent(
-            dietName = "Summer Diet",
-            meals = emptyList(),
-            targetMealId = null,
-            days = DayOfWeek.entries,
-            today = DayOfWeek.MONDAY,
-            pagerState = rememberPagerState(pageCount = { 7 }),
-            onDaySelected = {}
-        )
-    }
+	DietTheme {
+		WeekContent(
+			dietName = "Summer Diet",
+			meals = emptyList(),
+			targetMealId = null,
+			days = DayOfWeek.entries,
+			today = DayOfWeek.MONDAY,
+			pagerState = rememberPagerState(pageCount = { 7 }),
+			onDaySelected = {}
+		)
+	}
 }

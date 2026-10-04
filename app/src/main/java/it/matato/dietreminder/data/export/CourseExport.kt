@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CourseExport(
-    val name: String,
-    val order: Int,
-    val items: List<FoodItemExport>
+	val name: String,
+	val order: Int = 0,
+	val items: List<FoodItemExport> = emptyList(),
 )

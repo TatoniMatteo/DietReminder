@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ScheduledAlarm(
-    val id: Int,
-    val type: String,
-    val timeMillis: Long,
-    val label: String
+	val id: Int,
+	val type: String,
+	val timeMillis: Long,
+	val label: String
 )

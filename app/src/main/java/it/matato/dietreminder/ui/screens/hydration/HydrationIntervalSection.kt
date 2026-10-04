@@ -25,87 +25,87 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun HydrationIntervalSection(
-    interval: Int,
-    onIntervalChange: (Int) -> Unit,
+	interval: Int,
+	onIntervalChange: (Int) -> Unit,
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        SectionTitle(
-            title = stringResource(R.string.hydration_interval),
-            icon = Icons.Rounded.Schedule,
-        )
+	Column(
+		verticalArrangement = Arrangement.spacedBy(8.dp),
+	) {
+		SectionTitle(
+			title = stringResource(R.string.hydration_interval),
+			icon = Icons.Rounded.Schedule,
+		)
 
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
-        ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = stringResource(R.string.hydration_interval),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.weight(1f),
-                    )
+		OutlinedCard(
+			modifier = Modifier.fillMaxWidth(),
+			shape = MaterialTheme.shapes.large,
+		) {
+			Column(
+				modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+				verticalArrangement = Arrangement.spacedBy(12.dp),
+			) {
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+				) {
+					Text(
+						text = stringResource(R.string.hydration_interval),
+						style = MaterialTheme.typography.bodyLarge,
+						fontWeight = FontWeight.Medium,
+						modifier = Modifier.weight(1f),
+					)
 
-                    Text(
-                        text = stringResource(
-                            R.string.window_minutes_value,
-                            interval,
-                        ),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier
-                            .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                    )
-                }
+					Text(
+						text = stringResource(
+							R.string.window_minutes_value,
+							interval,
+						),
+						style = MaterialTheme.typography.labelLarge,
+						fontWeight = FontWeight.Bold,
+						color = MaterialTheme.colorScheme.onPrimaryContainer,
+						modifier = Modifier
+							.clip(MaterialTheme.shapes.medium)
+							.background(MaterialTheme.colorScheme.primaryContainer)
+							.padding(horizontal = 12.dp, vertical = 6.dp),
+					)
+				}
 
-                Slider(
-                    value = interval.toFloat(),
-                    onValueChange = { onIntervalChange(it.toInt()) },
-                    valueRange = 15f .. 180f,
-                    steps = 10,
-                )
+				Slider(
+					value = interval.toFloat(),
+					onValueChange = { onIntervalChange(it.toInt()) },
+					valueRange = 15f .. 180f,
+					steps = 10,
+				)
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text(
-                        text = "15 min",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					horizontalArrangement = Arrangement.SpaceBetween,
+				) {
+					Text(
+						text = "15 min",
+						style = MaterialTheme.typography.labelSmall,
+						color = MaterialTheme.colorScheme.onSurfaceVariant,
+					)
 
-                    Text(
-                        text = "180 min",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
-    }
+					Text(
+						text = "180 min",
+						style = MaterialTheme.typography.labelSmall,
+						color = MaterialTheme.colorScheme.onSurfaceVariant,
+					)
+				}
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun HydrationIntervalSectionPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            HydrationIntervalSection(
-                interval = 45,
-                onIntervalChange = {},
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			HydrationIntervalSection(
+				interval = 45,
+				onIntervalChange = {},
+			)
+		}
+	}
 }

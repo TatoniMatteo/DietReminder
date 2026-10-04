@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class HydrationRange(
-    val startMinutes: Int,
-    val endMinutes: Int
+	val startMinutes: Int,
+	val endMinutes: Int
 )

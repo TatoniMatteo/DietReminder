@@ -26,62 +26,62 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun ScheduledAlarmRow(
-    alarm: ScheduledAlarm,
-    onCancel: () -> Unit,
+	alarm: ScheduledAlarm,
+	onCancel: () -> Unit,
 ) {
-    val locale = LocalLocale.current.platformLocale
+	val locale = LocalLocale.current.platformLocale
 
-    val time = Instant.ofEpochMilli(alarm.timeMillis).atZone(ZoneId.systemDefault()).format(
-        DateTimeFormatter.ofPattern("EEE HH:mm", locale),
-    )
+	val time = Instant.ofEpochMilli(alarm.timeMillis).atZone(ZoneId.systemDefault()).format(
+		DateTimeFormatter.ofPattern("EEE HH:mm", locale),
+	)
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            Text(
-                text = alarm.label,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		horizontalArrangement = Arrangement.SpaceBetween,
+	) {
+		Column(
+			modifier = Modifier.weight(1f),
+			verticalArrangement = Arrangement.spacedBy(2.dp),
+		) {
+			Text(
+				text = alarm.label,
+				style = MaterialTheme.typography.bodyMedium,
+				fontWeight = FontWeight.SemiBold,
+			)
 
-            Text(
-                text = stringResource(
-                    R.string.alarm_time_and_id,
-                    time,
-                    alarm.id,
-                ),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+			Text(
+				text = stringResource(
+					R.string.alarm_time_and_id,
+					time,
+					alarm.id,
+				),
+				style = MaterialTheme.typography.bodySmall,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
+			)
+		}
 
-        IconButton(onClick = onCancel) {
-            Icon(
-                imageVector = Icons.Rounded.Cancel,
-                contentDescription = stringResource(R.string.cancel_alarm),
-                tint = MaterialTheme.colorScheme.error,
-            )
-        }
-    }
+		IconButton(onClick = onCancel) {
+			Icon(
+				imageVector = Icons.Rounded.Cancel,
+				contentDescription = stringResource(R.string.cancel_alarm),
+				tint = MaterialTheme.colorScheme.error,
+			)
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun ScheduledAlarmRowPreview() {
-    DietTheme {
-        ScheduledAlarmRow(
-            alarm = ScheduledAlarm(
-                id = 1,
-                type = "MEAL",
-                timeMillis = System.currentTimeMillis(),
-                label = "Lunch Time",
-            ),
-            onCancel = {},
-        )
-    }
+	DietTheme {
+		ScheduledAlarmRow(
+			alarm = ScheduledAlarm(
+				id = 1,
+				type = "MEAL",
+				timeMillis = System.currentTimeMillis(),
+				label = "Lunch Time",
+			),
+			onCancel = {},
+		)
+	}
 }

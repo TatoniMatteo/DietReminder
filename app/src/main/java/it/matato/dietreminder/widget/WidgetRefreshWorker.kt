@@ -5,15 +5,15 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 
 class WidgetRefreshWorker(
-    appContext: Context,
-    workerParams: WorkerParameters,
+	appContext: Context,
+	workerParams: WorkerParameters,
 ) : CoroutineWorker(appContext, workerParams) {
-    override suspend fun doWork(): Result {
-        DietReminder.updateAll(applicationContext)
-        return Result.success()
-    }
+	override suspend fun doWork(): Result {
+		DietReminder.updateAll(applicationContext)
+		return Result.success()
+	}
 
-    companion object {
-        const val WORK_NAME = "diet-widget-refresh"
-    }
+	companion object {
+		const val WORK_NAME = "diet-widget-refresh"
+	}
 }

@@ -16,22 +16,22 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class HydrationScreenFunctionalTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testHydrationScreen_DisplaysSections() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val fakeRepository = FakeDietRepository()
-        val viewModel = DietViewModel(context, fakeRepository)
+	@Test
+	fun testHydrationScreen_DisplaysSections() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val fakeRepository = FakeDietRepository()
+		val viewModel = DietViewModel(context, fakeRepository)
 
-        composeTestRule.setContent {
-            DietTheme {
-                HydrationScreen(vm = viewModel)
-            }
-        }
+		composeTestRule.setContent {
+			DietTheme {
+				HydrationScreen(vm = viewModel)
+			}
+		}
 
-        composeTestRule.onNode(hasText("Idratazione") or hasText("Hydration"), useUnmergedTree = true)
-            .assertIsDisplayed()
-    }
+		composeTestRule.onNode(hasText("Idratazione") or hasText("Hydration"), useUnmergedTree = true)
+			.assertIsDisplayed()
+	}
 }

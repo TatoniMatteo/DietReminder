@@ -10,9 +10,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class WidgetRefreshWorkerTest {
 
-    @Test
-    fun testWidgetRefreshWorkerCreation() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        assertNotNull(context)
-    }
+	@Test
+	fun testWidgetRefreshWorkerCreation() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		assertNotNull(context)
+	}
 }

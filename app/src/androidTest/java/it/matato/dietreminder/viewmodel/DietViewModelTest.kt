@@ -16,18 +16,18 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class DietViewModelTest {
 
-    @Test
-    fun testViewModelInitializationAndDietCreation() = runBlocking {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val repository = FakeDietRepository()
-        val viewModel = DietViewModel(context, repository)
+	@Test
+	fun testViewModelInitializationAndDietCreation() = runBlocking {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val repository = FakeDietRepository()
+		val viewModel = DietViewModel(context, repository)
 
-        assertTrue(repository.all.first().isEmpty())
-        viewModel.create("Test Instrumented Diet", 60)
-        delay(100.milliseconds)
+		assertTrue(repository.all.first().isEmpty())
+		viewModel.create("Test Instrumented Diet", 60)
+		delay(100.milliseconds)
 
-        val diets = repository.all.first()
-        assertEquals(1, diets.size)
-        assertEquals("Test Instrumented Diet", diets[0].name)
-    }
+		val diets = repository.all.first()
+		assertEquals(1, diets.size)
+		assertEquals("Test Instrumented Diet", diets[0].name)
+	}
 }

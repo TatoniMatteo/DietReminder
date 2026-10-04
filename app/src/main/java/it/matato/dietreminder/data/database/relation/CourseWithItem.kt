@@ -6,12 +6,12 @@ import it.matato.dietreminder.data.database.entity.Course
 import it.matato.dietreminder.data.database.entity.FoodItem
 
 data class CourseWithItems(
-    @Embedded
-    val course: Course,
+	@Embedded
+	val course: Course,
 
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "courseId"
-    )
-    val items: List<FoodItem>
+	@Relation(
+		parentColumn = "id",
+		entityColumn = "courseId"
+	)
+	val items: List<FoodItem>
 )

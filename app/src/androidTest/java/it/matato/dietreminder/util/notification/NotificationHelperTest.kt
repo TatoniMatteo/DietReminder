@@ -10,9 +10,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class NotificationHelperTest {
 
-    @Test
-    fun testNotificationHelperContext() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        assertNotNull(context)
-    }
+	@Test
+	fun testNotificationHelperContext() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		assertNotNull(context)
+	}
 }

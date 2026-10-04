@@ -23,44 +23,44 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun DeveloperNotificationSection(
-    onScheduledTrigger: () -> Unit,
+	onScheduledTrigger: () -> Unit,
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        SectionTitle(
-            title = stringResource(R.string.notification_tests),
-            icon = Icons.Rounded.NotificationsActive,
-        )
+	Column(
+		verticalArrangement = Arrangement.spacedBy(12.dp),
+	) {
+		SectionTitle(
+			title = stringResource(R.string.notification_tests),
+			icon = Icons.Rounded.NotificationsActive,
+		)
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            OutlinedButton(
-                onClick = onScheduledTrigger,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Timer,
-                    contentDescription = null,
-                )
+		Column(
+			verticalArrangement = Arrangement.spacedBy(8.dp),
+		) {
+			OutlinedButton(
+				onClick = onScheduledTrigger,
+				modifier = Modifier.fillMaxWidth(),
+			) {
+				Icon(
+					imageVector = Icons.Rounded.Timer,
+					contentDescription = null,
+				)
 
-                Spacer(modifier = Modifier.width(8.dp))
+				Spacer(modifier = Modifier.width(8.dp))
 
-                Text(stringResource(R.string.test_scheduler))
-            }
-        }
-    }
+				Text(stringResource(R.string.test_scheduler))
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DeveloperNotificationSectionPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            DeveloperNotificationSection(
-                onScheduledTrigger = {},
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			DeveloperNotificationSection(
+				onScheduledTrigger = {},
+			)
+		}
+	}
 }

@@ -10,10 +10,10 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class NotificationChannelManagerTest {
 
-    @Test
-    fun testNotificationChannelManager() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val manager = NotificationChannelManager(context)
-        assertNotNull(manager)
-    }
+	@Test
+	fun testNotificationChannelManager() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val manager = NotificationChannelManager(context)
+		assertNotNull(manager)
+	}
 }

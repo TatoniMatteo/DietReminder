@@ -12,25 +12,25 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ConfigDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDefaultTime(time: MealDefaultTime)
+	@Insert(onConflict = OnConflictStrategy.REPLACE)
+	suspend fun insertDefaultTime(time: MealDefaultTime)
 
-    @Query("SELECT * FROM meal_default_times")
-    fun observeDefaultTimes(): Flow<List<MealDefaultTime>>
+	@Query("SELECT * FROM meal_default_times")
+	fun observeDefaultTimes(): Flow<List<MealDefaultTime>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertConfig(config: AppConfig)
+	@Insert(onConflict = OnConflictStrategy.REPLACE)
+	suspend fun insertConfig(config: AppConfig)
 
-    @Query("SELECT * FROM app_config WHERE `key` = :key")
-    fun observeConfig(key: String): Flow<AppConfig?>
+	@Query("SELECT * FROM app_config WHERE `key` = :key")
+	fun observeConfig(key: String): Flow<AppConfig?>
 
-    fun observeConfig(key: ConfigKey): Flow<AppConfig?> {
-        return observeConfig(key.name)
-    }
+	fun observeConfig(key: ConfigKey): Flow<AppConfig?> {
+		return observeConfig(key.name)
+	}
 
-    @Query("DELETE FROM app_config")
-    suspend fun deleteAll()
+	@Query("DELETE FROM app_config")
+	suspend fun deleteAll()
 
-    @Query("DELETE FROM meal_default_times")
-    suspend fun deleteAllTimes()
+	@Query("DELETE FROM meal_default_times")
+	suspend fun deleteAllTimes()
 }

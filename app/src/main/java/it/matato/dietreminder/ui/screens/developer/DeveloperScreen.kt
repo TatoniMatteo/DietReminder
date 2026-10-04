@@ -38,152 +38,152 @@ import it.matato.dietreminder.viewmodel.DietViewModel
 
 @Composable
 fun DeveloperScreen(
-    vm: DietViewModel,
-    onBack: () -> Unit,
+	vm: DietViewModel,
+	onBack: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val logs by vm.appLogs.collectAsState()
-    val scheduledAlarms by AlarmTracker.observeAlarms(context).collectAsState(initial = emptyList())
+	val context = LocalContext.current
+	val logs by vm.appLogs.collectAsState()
+	val scheduledAlarms by AlarmTracker.observeAlarms(context).collectAsState(initial = emptyList())
 
-    val requestPermissions = rememberPermissionRequester(context)
+	val requestPermissions = rememberPermissionRequester(context)
 
-    DeveloperContent(
-        logs = logs,
-        scheduledAlarms = scheduledAlarms,
-        onBack = onBack,
-        onCheckPermissions = requestPermissions,
-        onClearLogs = AppLog::clear,
-        onCancelAlarm = { alarm ->
-            AlarmScheduler.cancelAlarm(context, alarm.id)
-        },
-        onRunChecker = {
-            AlarmSyncHelper.syncAlarms(context)
-        },
-        onClearAlarms = {
-            AlarmScheduler.cancelAllAlarms(context)
-        },
-        onScheduledTrigger = {
-            vm.scheduleTestAlarm(10)
-        },
-        onResetDatabase = {},
-        onDisableDeveloperMode = {
-            vm.setDeveloperMode(false)
-            onBack()
-        },
-    )
+	DeveloperContent(
+		logs = logs,
+		scheduledAlarms = scheduledAlarms,
+		onBack = onBack,
+		onCheckPermissions = requestPermissions,
+		onClearLogs = AppLog::clear,
+		onCancelAlarm = { alarm ->
+			AlarmScheduler.cancelAlarm(context, alarm.id)
+		},
+		onRunChecker = {
+			AlarmSyncHelper.syncAlarms(context)
+		},
+		onClearAlarms = {
+			AlarmScheduler.cancelAllAlarms(context)
+		},
+		onScheduledTrigger = {
+			vm.scheduleTestAlarm(10)
+		},
+		onResetDatabase = {},
+		onDisableDeveloperMode = {
+			vm.setDeveloperMode(false)
+			onBack()
+		},
+	)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeveloperContent(
-    logs: List<LogEntry>,
-    scheduledAlarms: List<ScheduledAlarm>,
-    onBack: () -> Unit,
-    onCheckPermissions: () -> Unit,
-    onClearLogs: () -> Unit,
-    onCancelAlarm: (ScheduledAlarm) -> Unit,
-    onRunChecker: () -> Unit,
-    onClearAlarms: () -> Unit,
-    onScheduledTrigger: () -> Unit,
-    onResetDatabase: () -> Unit,
-    onDisableDeveloperMode: () -> Unit,
+	logs: List<LogEntry>,
+	scheduledAlarms: List<ScheduledAlarm>,
+	onBack: () -> Unit,
+	onCheckPermissions: () -> Unit,
+	onClearLogs: () -> Unit,
+	onCancelAlarm: (ScheduledAlarm) -> Unit,
+	onRunChecker: () -> Unit,
+	onClearAlarms: () -> Unit,
+	onScheduledTrigger: () -> Unit,
+	onResetDatabase: () -> Unit,
+	onDisableDeveloperMode: () -> Unit,
 ) {
-    var selectedLevel by remember { mutableStateOf(LogLevel.TRACE) }
+	var selectedLevel by remember { mutableStateOf(LogLevel.TRACE) }
 
-    val filteredLogs = remember(logs, selectedLevel) {
-        logs.filter { it.level.priority >= selectedLevel.priority }
-    }
+	val filteredLogs = remember(logs, selectedLevel) {
+		logs.filter { it.level.priority >= selectedLevel.priority }
+	}
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(stringResource(R.string.developer_settings))
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                        )
-                    }
-                },
-            )
-        },
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-            item {
-                DeveloperPermissionsSection(
-                    onCheckPermissions = onCheckPermissions,
-                )
-            }
+	Scaffold(
+		topBar = {
+			TopAppBar(
+				title = {
+					Text(stringResource(R.string.developer_settings))
+				},
+				navigationIcon = {
+					IconButton(onClick = onBack) {
+						Icon(
+							imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+							contentDescription = stringResource(R.string.back),
+						)
+					}
+				},
+			)
+		},
+	) { padding ->
+		LazyColumn(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(padding),
+			contentPadding = PaddingValues(20.dp),
+			verticalArrangement = Arrangement.spacedBy(20.dp),
+		) {
+			item {
+				DeveloperPermissionsSection(
+					onCheckPermissions = onCheckPermissions,
+				)
+			}
 
-            item {
-                DeveloperLogSection(
-                    logs = filteredLogs,
-                    selectedLevel = selectedLevel,
-                    onLevelSelected = { selectedLevel = it },
-                    onClearLogs = onClearLogs,
-                )
-            }
+			item {
+				DeveloperLogSection(
+					logs = filteredLogs,
+					selectedLevel = selectedLevel,
+					onLevelSelected = { selectedLevel = it },
+					onClearLogs = onClearLogs,
+				)
+			}
 
-            item {
-                DeveloperAlarmsSection(
-                    alarms = scheduledAlarms,
-                    onCancelAlarm = onCancelAlarm,
-                    onRunChecker = onRunChecker,
-                    onClearAlarms = onClearAlarms,
-                )
-            }
+			item {
+				DeveloperAlarmsSection(
+					alarms = scheduledAlarms,
+					onCancelAlarm = onCancelAlarm,
+					onRunChecker = onRunChecker,
+					onClearAlarms = onClearAlarms,
+				)
+			}
 
-            item {
-                DeveloperNotificationSection(
-                    onScheduledTrigger = onScheduledTrigger,
-                )
-            }
+			item {
+				DeveloperNotificationSection(
+					onScheduledTrigger = onScheduledTrigger,
+				)
+			}
 
-            item {
-                DeveloperDangerZone(
-                    onResetDatabase = onResetDatabase,
-                    onDisableDeveloperMode = onDisableDeveloperMode,
-                )
-            }
-        }
-    }
+			item {
+				DeveloperDangerZone(
+					onResetDatabase = onResetDatabase,
+					onDisableDeveloperMode = onDisableDeveloperMode,
+				)
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DeveloperContentPreview() {
-    DietTheme {
-        DeveloperContent(
-            logs = listOf(
-                LogEntry("12:00:00", LogLevel.INFO, "Application started"),
-                LogEntry("12:00:01", LogLevel.DEBUG, "Loading settings..."),
-            ),
-            scheduledAlarms = listOf(
-                ScheduledAlarm(
-                    1,
-                    "MEAL",
-                    System.currentTimeMillis() + 3600000,
-                    "Lunch",
-                ),
-            ),
-            onBack = {},
-            onCheckPermissions = {},
-            onClearLogs = {},
-            onCancelAlarm = {},
-            onRunChecker = {},
-            onClearAlarms = {},
-            onScheduledTrigger = {},
-            onResetDatabase = {},
-            onDisableDeveloperMode = {},
-        )
-    }
+	DietTheme {
+		DeveloperContent(
+			logs = listOf(
+				LogEntry("12:00:00", LogLevel.INFO, "Application started"),
+				LogEntry("12:00:01", LogLevel.DEBUG, "Loading settings..."),
+			),
+			scheduledAlarms = listOf(
+				ScheduledAlarm(
+					1,
+					"MEAL",
+					System.currentTimeMillis() + 3600000,
+					"Lunch",
+				),
+			),
+			onBack = {},
+			onCheckPermissions = {},
+			onClearLogs = {},
+			onCancelAlarm = {},
+			onRunChecker = {},
+			onClearAlarms = {},
+			onScheduledTrigger = {},
+			onResetDatabase = {},
+			onDisableDeveloperMode = {},
+		)
+	}
 }

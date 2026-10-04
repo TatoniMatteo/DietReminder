@@ -16,45 +16,45 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class AppNavigationFunctionalTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    private fun setupViewModel(): DietViewModel {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val fakeRepository = FakeDietRepository()
-        return DietViewModel(context, fakeRepository)
-    }
+	private fun setupViewModel(): DietViewModel {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val fakeRepository = FakeDietRepository()
+		return DietViewModel(context, fakeRepository)
+	}
 
-    @Test
-    fun testAppNavigation_SwitchTabs() {
-        val viewModel = setupViewModel()
+	@Test
+	fun testAppNavigation_SwitchTabs() {
+		val viewModel = setupViewModel()
 
-        composeTestRule.setContent {
-            val navController = rememberNavController()
-            DietTheme {
-                AppContent(
-                    currentRoute = "WeekRoute",
-                    showBottomBar = true,
-                    onNavigateToRoot = { destination ->
-                        navController.navigate(destination.route())
-                    },
-                    content = { padding ->
-                        AppNavigation(
-                            navController = navController,
-                            vm = viewModel,
-                            contentPadding = padding
-                        )
-                    }
-                )
-            }
-        }
+		composeTestRule.setContent {
+			val navController = rememberNavController()
+			DietTheme {
+				AppContent(
+					currentRoute = "WeekRoute",
+					showBottomBar = true,
+					onNavigateToRoot = { destination ->
+						navController.navigate(destination.route())
+					},
+					content = { padding ->
+						AppNavigation(
+							navController = navController,
+							vm = viewModel,
+							contentPadding = padding
+						)
+					}
+				)
+			}
+		}
 
-        appRobot(composeTestRule) {
-            navigateToDiets()
-            navigateToIngredients()
-            navigateToHydration()
-            navigateToSettings()
-            navigateToWeek()
-        }
-    }
+		appRobot(composeTestRule) {
+			navigateToDiets()
+			navigateToShoppingList()
+			navigateToHydration()
+			navigateToSettings()
+			navigateToWeek()
+		}
+	}
 }

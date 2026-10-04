@@ -17,28 +17,28 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class LanguagePickerDialogTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testLanguagePickerDialog_DisplaysOptionsAndSelectsLanguage() {
-        var selectedLang: String? = null
+	@Test
+	fun testLanguagePickerDialog_DisplaysOptionsAndSelectsLanguage() {
+		var selectedLang: String? = null
 
-        composeTestRule.setContent {
-            DietTheme {
-                LanguagePickerDialog(
-                    onDismiss = {},
-                    onLanguageSelected = { selectedLang = it }
-                )
-            }
-        }
+		composeTestRule.setContent {
+			DietTheme {
+				LanguagePickerDialog(
+					onDismiss = {},
+					onLanguageSelected = { selectedLang = it }
+				)
+			}
+		}
 
-        composeTestRule.onNode(hasText("Seleziona lingua") or hasText("Select language"), useUnmergedTree = true)
-            .assertIsDisplayed()
+		composeTestRule.onNode(hasText("Seleziona lingua") or hasText("Select language"), useUnmergedTree = true)
+			.assertIsDisplayed()
 
-        composeTestRule.onNode(hasText("Italiano") or hasText("Italian"), useUnmergedTree = true)
-            .performClick()
+		composeTestRule.onNode(hasText("Italiano") or hasText("Italian"), useUnmergedTree = true)
+			.performClick()
 
-        assertEquals("it", selectedLang)
-    }
+		assertEquals("it", selectedLang)
+	}
 }

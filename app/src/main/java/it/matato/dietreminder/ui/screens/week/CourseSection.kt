@@ -22,74 +22,80 @@ import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.data.database.entity.Course
 import it.matato.dietreminder.data.database.entity.FoodItem
 import it.matato.dietreminder.data.database.relation.CourseWithItems
+import it.matato.dietreminder.data.model.QuantityUnit
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun CourseSection(course: CourseWithItems) {
-    Column {
-        Text(
-            text = course.course.name,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-        )
+	Column {
+		Text(
+			text = course.course.name,
+			style = MaterialTheme.typography.labelLarge,
+			fontWeight = FontWeight.Bold,
+			color = MaterialTheme.colorScheme.primary,
+		)
 
-        Spacer(modifier = Modifier.size(6.dp))
+		Spacer(modifier = Modifier.size(6.dp))
 
-        ItemRows(course)
-    }
+		ItemRows(course)
+	}
 }
 
 @Composable
 private fun ItemRows(course: CourseWithItems) {
-    course.items.forEach { item ->
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 3.dp),
-            verticalAlignment = Alignment.Top,
-        ) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 7.dp)
-                    .size(5.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.outline),
-            )
+	course.items.forEach { item ->
+		Row(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(vertical = 3.dp),
+			verticalAlignment = Alignment.Top,
+		) {
+			Box(
+				modifier = Modifier
+					.padding(top = 7.dp)
+					.size(5.dp)
+					.clip(CircleShape)
+					.background(MaterialTheme.colorScheme.outline),
+			)
 
-            Spacer(modifier = Modifier.width(9.dp))
+			Spacer(modifier = Modifier.width(9.dp))
 
-            Text(
-                text = buildString {
-                    append(item.name)
+			Text(
+				text = buildString {
+					append(item.name)
 
-                    if (item.quantities.isNotEmpty()) {
-                        append("  ")
-                        append(item.quantities)
-                    }
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
-            )
-        }
-    }
+					if (item.displayQuantity.isNotEmpty()) {
+						append("  ")
+						append(item.displayQuantity)
+					}
+				},
+				style = MaterialTheme.typography.bodyMedium,
+				color = MaterialTheme.colorScheme.onSurface,
+				modifier = Modifier.weight(1f),
+			)
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun CourseSectionPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            CourseSection(
-                course = CourseWithItems(
-                    course = Course(id = 1, mealId = 1, name = "Main Course"),
-                    items = listOf(
-                        FoodItem(id = 1, courseId = 1, name = "Pasta", quantities = "100g"),
-                        FoodItem(id = 2, courseId = 1, name = "Tomato Sauce", quantities = "50ml"),
-                    )
-                )
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			CourseSection(
+				course = CourseWithItems(
+					course = Course(id = 1, mealId = 1, name = "Main Course"),
+					items = listOf(
+						FoodItem(id = 1, courseId = 1, name = "Pasta", amount = "100", unit = QuantityUnit.GRAMS),
+						FoodItem(
+							id = 2,
+							courseId = 1,
+							name = "Tomato Sauce",
+							amount = "50",
+							unit = QuantityUnit.MILLILITERS),
+					)
+				)
+			)
+		}
+	}
 }

@@ -10,11 +10,11 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class HydrationReceiverTest {
 
-    @Test
-    fun testHydrationReceiver() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val receiver = HydrationReceiver()
-        assertNotNull(receiver)
-        assertNotNull(context)
-    }
+	@Test
+	fun testHydrationReceiver() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val receiver = HydrationReceiver()
+		assertNotNull(receiver)
+		assertNotNull(context)
+	}
 }

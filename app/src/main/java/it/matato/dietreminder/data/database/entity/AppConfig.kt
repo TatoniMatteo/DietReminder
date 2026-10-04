@@ -5,10 +5,10 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "app_config")
 data class AppConfig(
-    @PrimaryKey
-    val key: String,
+	@PrimaryKey
+	val key: String,
 
-    val value: String
+	val value: String
 ) {
-    constructor(key: ConfigKey, value: String) : this(key = key.name, value = value)
+	constructor(key: ConfigKey, value: String) : this(key = key.name, value = value)
 }

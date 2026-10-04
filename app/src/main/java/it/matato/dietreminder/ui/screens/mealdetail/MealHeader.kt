@@ -28,100 +28,100 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun MealHeader(
-    isNew: Boolean,
-    type: MealType,
-    timeMinutes: Int,
-    onBack: () -> Unit,
-    onSave: () -> Unit,
-    onDelete: () -> Unit,
+	isNew: Boolean,
+	type: MealType,
+	timeMinutes: Int,
+	onBack: () -> Unit,
+	onSave: () -> Unit,
+	onDelete: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(onClick = onBack) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                contentDescription = stringResource(R.string.back),
-            )
-        }
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		verticalAlignment = Alignment.CenterVertically,
+	) {
+		IconButton(onClick = onBack) {
+			Icon(
+				imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+				contentDescription = stringResource(R.string.back),
+			)
+		}
 
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 4.dp),
-        ) {
-            Text(
-                text = stringResource(
-                    if (isNew) R.string.new_meal else R.string.edit_meal,
-                ),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-            )
+		Column(
+			modifier = Modifier
+				.weight(1f)
+				.padding(start = 4.dp),
+		) {
+			Text(
+				text = stringResource(
+					if (isNew) R.string.new_meal else R.string.edit_meal,
+				),
+				style = MaterialTheme.typography.headlineSmall,
+				fontWeight = FontWeight.Bold,
+			)
 
-            Text(
-                text = "${stringResource(type.resId)} · ${formatTime(timeMinutes)}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+			Text(
+				text = "${stringResource(type.resId)} · ${formatTime(timeMinutes)}",
+				style = MaterialTheme.typography.bodyMedium,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
+			)
+		}
 
-        if (!isNew) {
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Rounded.Delete,
-                    contentDescription = stringResource(R.string.delete),
-                    tint = MaterialTheme.colorScheme.error,
-                )
-            }
-        }
+		if (!isNew) {
+			IconButton(onClick = onDelete) {
+				Icon(
+					imageVector = Icons.Rounded.Delete,
+					contentDescription = stringResource(R.string.delete),
+					tint = MaterialTheme.colorScheme.error,
+				)
+			}
+		}
 
-        Button(onClick = onSave) {
-            Icon(
-                imageVector = Icons.Rounded.Save,
-                contentDescription = null,
-            )
+		Button(onClick = onSave) {
+			Icon(
+				imageVector = Icons.Rounded.Save,
+				contentDescription = null,
+			)
 
-            Spacer(modifier = Modifier.width(6.dp))
+			Spacer(modifier = Modifier.width(6.dp))
 
-            Text(stringResource(R.string.save))
-        }
-    }
+			Text(stringResource(R.string.save))
+		}
+	}
 }
 
 private fun formatTime(timeMinutes: Int): String {
-    return "%02d:%02d".format(
-        timeMinutes / 60,
-        timeMinutes % 60,
-    )
+	return "%02d:%02d".format(
+		timeMinutes / 60,
+		timeMinutes % 60,
+	)
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun MealHeaderNewPreview() {
-    DietTheme {
-        MealHeader(
-            isNew = true,
-            type = MealType.BREAKFAST,
-            timeMinutes = 480,
-            onBack = {},
-            onSave = {},
-            onDelete = {},
-        )
-    }
+	DietTheme {
+		MealHeader(
+			isNew = true,
+			type = MealType.BREAKFAST,
+			timeMinutes = 480,
+			onBack = {},
+			onSave = {},
+			onDelete = {},
+		)
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun MealHeaderEditPreview() {
-    DietTheme {
-        MealHeader(
-            isNew = false,
-            type = MealType.LUNCH,
-            timeMinutes = 780,
-            onBack = {},
-            onSave = {},
-            onDelete = {},
-        )
-    }
+	DietTheme {
+		MealHeader(
+			isNew = false,
+			type = MealType.LUNCH,
+			timeMinutes = 780,
+			onBack = {},
+			onSave = {},
+			onDelete = {},
+		)
+	}
 }

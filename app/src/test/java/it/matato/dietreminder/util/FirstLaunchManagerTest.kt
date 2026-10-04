@@ -14,14 +14,14 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class FirstLaunchManagerTest {
 
-    @Test
-    fun isFirstLaunch_and_markCompleted() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
+	@Test
+	fun isFirstLaunch_and_markCompleted() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
 
-        assertTrue(FirstLaunchManager.isFirstLaunch(context))
+		assertTrue(FirstLaunchManager.isFirstLaunch(context))
 
-        FirstLaunchManager.markCompleted(context)
+		FirstLaunchManager.markCompleted(context)
 
-        assertFalse(FirstLaunchManager.isFirstLaunch(context))
-    }
+		assertFalse(FirstLaunchManager.isFirstLaunch(context))
+	}
 }

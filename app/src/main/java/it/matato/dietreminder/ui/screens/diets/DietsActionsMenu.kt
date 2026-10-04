@@ -22,92 +22,92 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun DietsActionsMenu(
-    expanded: Boolean,
-    isActive: Boolean,
-    onDismiss: () -> Unit,
-    onActivate: () -> Unit,
-    onConfigure: () -> Unit,
-    onDuplicate: () -> Unit,
-    onDelete: () -> Unit,
+	expanded: Boolean,
+	isActive: Boolean,
+	onDismiss: () -> Unit,
+	onActivate: () -> Unit,
+	onConfigure: () -> Unit,
+	onDuplicate: () -> Unit,
+	onDelete: () -> Unit,
 ) {
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismiss,
-    ) {
-        if (!isActive) {
-            DropdownMenuItem(
-                text = {
-                    Text(stringResource(R.string.activate))
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Rounded.Check,
-                        contentDescription = null,
-                    )
-                },
-                onClick = onActivate,
-            )
-        }
+	DropdownMenu(
+		expanded = expanded,
+		onDismissRequest = onDismiss,
+	) {
+		if (!isActive) {
+			DropdownMenuItem(
+				text = {
+					Text(stringResource(R.string.activate))
+				},
+				leadingIcon = {
+					Icon(
+						imageVector = Icons.Rounded.Check,
+						contentDescription = null,
+					)
+				},
+				onClick = onActivate,
+			)
+		}
 
-        DropdownMenuItem(
-            text = {
-                Text(stringResource(R.string.configure))
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Rounded.Tune,
-                    contentDescription = null,
-                )
-            },
-            onClick = onConfigure,
-        )
+		DropdownMenuItem(
+			text = {
+				Text(stringResource(R.string.configure))
+			},
+			leadingIcon = {
+				Icon(
+					imageVector = Icons.Rounded.Tune,
+					contentDescription = null,
+				)
+			},
+			onClick = onConfigure,
+		)
 
-        DropdownMenuItem(
-            text = {
-                Text(stringResource(R.string.duplicate))
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Rounded.ContentCopy,
-                    contentDescription = null,
-                )
-            },
-            onClick = onDuplicate,
-        )
+		DropdownMenuItem(
+			text = {
+				Text(stringResource(R.string.duplicate))
+			},
+			leadingIcon = {
+				Icon(
+					imageVector = Icons.Rounded.ContentCopy,
+					contentDescription = null,
+				)
+			},
+			onClick = onDuplicate,
+		)
 
-        DropdownMenuItem(
-            text = {
-                Text(
-                    text = stringResource(R.string.delete),
-                    color = MaterialTheme.colorScheme.error,
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Rounded.Delete,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                )
-            },
-            onClick = onDelete,
-        )
-    }
+		DropdownMenuItem(
+			text = {
+				Text(
+					text = stringResource(R.string.delete),
+					color = MaterialTheme.colorScheme.error,
+				)
+			},
+			leadingIcon = {
+				Icon(
+					imageVector = Icons.Rounded.Delete,
+					contentDescription = null,
+					tint = MaterialTheme.colorScheme.error,
+				)
+			},
+			onClick = onDelete,
+		)
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DietsActionsMenuPreview() {
-    DietTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            DietsActionsMenu(
-                expanded = true,
-                isActive = false,
-                onDismiss = {},
-                onActivate = {},
-                onConfigure = {},
-                onDuplicate = {},
-                onDelete = {},
-            )
-        }
-    }
+	DietTheme {
+		Box(modifier = Modifier.padding(16.dp)) {
+			DietsActionsMenu(
+				expanded = true,
+				isActive = false,
+				onDismiss = {},
+				onActivate = {},
+				onConfigure = {},
+				onDuplicate = {},
+				onDelete = {},
+			)
+		}
+	}
 }

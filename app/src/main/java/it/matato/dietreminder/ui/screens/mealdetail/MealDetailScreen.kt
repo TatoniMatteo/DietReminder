@@ -28,6 +28,7 @@ import it.matato.dietreminder.data.database.entity.FoodItem
 import it.matato.dietreminder.data.database.entity.Meal
 import it.matato.dietreminder.data.database.relation.CourseWithItems
 import it.matato.dietreminder.data.model.MealType
+import it.matato.dietreminder.data.model.QuantityUnit
 import it.matato.dietreminder.ui.dialog.TimePickerDialog
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
@@ -35,331 +36,337 @@ import java.time.DayOfWeek
 
 @Composable
 fun MealDetailScreen(
-    vm: DietViewModel,
-    mealId: Long,
-    dietId: Long,
-    dayOfWeek: DayOfWeek,
-    onBack: () -> Unit,
+	vm: DietViewModel,
+	mealId: Long,
+	dietId: Long,
+	dayOfWeek: DayOfWeek,
+	onBack: () -> Unit,
 ) {
-    val diets by vm.diets.collectAsState()
-    val mealRemindersEnabled by vm.mealRemindersEnabled.collectAsState()
-    val suggestions by vm.existingFoodNames.collectAsState()
+	val diets by vm.diets.collectAsState()
+	val mealRemindersEnabled by vm.mealRemindersEnabled.collectAsState()
+	val suggestions by vm.existingFoodNames.collectAsState()
 
-    var meal by remember { mutableStateOf<Meal?>(null) }
-    var courses by remember { mutableStateOf<List<CourseWithItems>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
+	var meal by remember { mutableStateOf<Meal?>(null) }
+	var courses by remember { mutableStateOf<List<CourseWithItems>>(emptyList()) }
+	var isLoading by remember { mutableStateOf(true) }
 
-    var description by remember { mutableStateOf("") }
-    var timeMinutes by remember { mutableIntStateOf(0) }
-    var type by remember { mutableStateOf(MealType.LUNCH) }
-    var customLabel by remember { mutableStateOf("") }
-    var isNotificationEnabled by remember { mutableStateOf(true) }
+	var description by remember { mutableStateOf("") }
+	var timeMinutes by remember { mutableIntStateOf(0) }
+	var type by remember { mutableStateOf(MealType.LUNCH) }
+	var customLabel by remember { mutableStateOf("") }
+	var isNotificationEnabled by remember { mutableStateOf(true) }
 
-    var showTimePicker by rememberSaveable { mutableStateOf(false) }
+	var showTimePicker by rememberSaveable { mutableStateOf(false) }
 
-    val diet = remember(diets, dietId) {
-        diets.find { it.id == dietId }
-    }
+	val diet = remember(diets, dietId) {
+		diets.find { it.id == dietId }
+	}
 
-    LaunchedEffect(mealId, dietId, dayOfWeek) {
-        val mealWithDetails = vm.getMeal(mealId)
+	LaunchedEffect(mealId, dietId, dayOfWeek) {
+		val mealWithDetails = vm.getMeal(mealId)
 
-        if (mealWithDetails != null) {
-            meal = mealWithDetails.meal
-            courses = mealWithDetails.courses
-            description = mealWithDetails.meal.description
-            timeMinutes = mealWithDetails.meal.timeMinutes
-            type = mealWithDetails.meal.type
-            customLabel = mealWithDetails.meal.customTypeLabel.orEmpty()
-            isNotificationEnabled = mealWithDetails.meal.isNotificationEnabled
-        } else {
-            val defaultTime = vm.getDefaultTime(MealType.LUNCH)
+		if (mealWithDetails != null) {
+			meal = mealWithDetails.meal
+			courses = mealWithDetails.courses
+			description = mealWithDetails.meal.description
+			timeMinutes = mealWithDetails.meal.timeMinutes
+			type = mealWithDetails.meal.type
+			customLabel = mealWithDetails.meal.customTypeLabel.orEmpty()
+			isNotificationEnabled = mealWithDetails.meal.isNotificationEnabled
+		} else {
+			val defaultTime = vm.getDefaultTime(MealType.LUNCH)
 
-            meal = Meal(
-                dietId = dietId,
-                dayOfWeek = dayOfWeek,
-                type = MealType.LUNCH,
-                timeMinutes = defaultTime,
-                isNotificationEnabled = true,
-            )
+			meal = Meal(
+				dietId = dietId,
+				dayOfWeek = dayOfWeek,
+				type = MealType.LUNCH,
+				timeMinutes = defaultTime,
+				isNotificationEnabled = true,
+			)
 
-            courses = emptyList()
-            description = ""
-            type = MealType.LUNCH
-            customLabel = ""
-            timeMinutes = defaultTime
-            isNotificationEnabled = true
-        }
+			courses = emptyList()
+			description = ""
+			type = MealType.LUNCH
+			customLabel = ""
+			timeMinutes = defaultTime
+			isNotificationEnabled = true
+		}
 
-        isLoading = false
-    }
+		isLoading = false
+	}
 
-    fun saveMeal() {
-        val currentMeal = meal ?: return
+	fun saveMeal() {
+		val currentMeal = meal ?: return
 
-        val updatedMeal = currentMeal.copy(
-            description = description.trim(),
-            timeMinutes = timeMinutes,
-            type = type,
-            customTypeLabel = if (type == MealType.OTHER) {
-                customLabel.trim().ifBlank { null }
-            } else {
-                null
-            },
-            isNotificationEnabled = isNotificationEnabled,
-        )
+		val updatedMeal = currentMeal.copy(
+			description = description.trim(),
+			timeMinutes = timeMinutes,
+			type = type,
+			customTypeLabel = if (type == MealType.OTHER) {
+				customLabel.trim().ifBlank { null }
+			} else {
+				null
+			},
+			isNotificationEnabled = isNotificationEnabled,
+		)
 
-        vm.saveMeal(updatedMeal, courses)
-        onBack()
-    }
+		vm.saveMeal(updatedMeal, courses)
+		onBack()
+	}
 
-    fun deleteMeal() {
-        if (mealId == 0L) {
-            return
-        }
+	fun deleteMeal() {
+		if (mealId == 0L) {
+			return
+		}
 
-        vm.deleteMeal(mealId)
-        onBack()
-    }
+		vm.deleteMeal(mealId)
+		onBack()
+	}
 
-    fun addCourse() {
-        val currentMeal = meal ?: return
+	fun addCourse() {
+		val currentMeal = meal ?: return
 
-        courses = courses + CourseWithItems(
-            course = Course(
-                mealId = currentMeal.id,
-                order = courses.size,
-            ),
-            items = emptyList(),
-        )
-    }
+		courses = courses + CourseWithItems(
+			course = Course(
+				mealId = currentMeal.id,
+				order = courses.size,
+			),
+			items = emptyList(),
+		)
+	}
 
-    val isDayNotificationEnabled = diet?.isDayNotificationEnabled(dayOfWeek) != false
-    val isNotificationSwitchEnabled = mealRemindersEnabled && isDayNotificationEnabled
+	val isDayNotificationEnabled = diet?.isDayNotificationEnabled(dayOfWeek) != false
+	val isNotificationSwitchEnabled = mealRemindersEnabled && isDayNotificationEnabled
 
-    MealDetailContent(
-        isLoading = isLoading,
-        isNew = mealId == 0L,
-        type = type,
-        timeMinutes = timeMinutes,
-        customLabel = customLabel,
-        description = description,
-        isNotificationEnabled = isNotificationEnabled,
-        isNotificationSwitchEnabled = isNotificationSwitchEnabled,
-        courses = courses,
-        suggestions = suggestions,
-        onBack = onBack,
-        onSave = ::saveMeal,
-        onDelete = ::deleteMeal,
-        onTimeClick = { showTimePicker = true },
-        onTypeChange = { newType ->
-            type = newType
-            timeMinutes = vm.getDefaultTime(newType)
-        },
-        onCustomLabelChange = { customLabel = it },
-        onDescriptionChange = { description = it },
-        onNotificationEnabledChange = { isNotificationEnabled = it },
-        onAddCourse = ::addCourse,
-        onUpdateCourse = { index, updated ->
-            courses = courses.toMutableList().apply {
-                set(index, updated)
-            }
-        },
-        onDeleteCourse = { index ->
-            courses = courses.toMutableList().apply {
-                removeAt(index)
-            }
-        },
-    )
+	MealDetailContent(
+		isLoading = isLoading,
+		isNew = mealId == 0L,
+		type = type,
+		timeMinutes = timeMinutes,
+		customLabel = customLabel,
+		description = description,
+		isNotificationEnabled = isNotificationEnabled,
+		isNotificationSwitchEnabled = isNotificationSwitchEnabled,
+		courses = courses,
+		suggestions = suggestions,
+		onBack = onBack,
+		onSave = ::saveMeal,
+		onDelete = ::deleteMeal,
+		onTimeClick = { showTimePicker = true },
+		onTypeChange = { newType ->
+			type = newType
+			timeMinutes = vm.getDefaultTime(newType)
+		},
+		onCustomLabelChange = { customLabel = it },
+		onDescriptionChange = { description = it },
+		onNotificationEnabledChange = { isNotificationEnabled = it },
+		onAddCourse = ::addCourse,
+		onUpdateCourse = { index, updated ->
+			courses = courses.toMutableList().apply {
+				set(index, updated)
+			}
+		},
+		onDeleteCourse = { index ->
+			courses = courses.toMutableList().apply {
+				removeAt(index)
+			}
+		},
+	)
 
-    if (showTimePicker) {
-        TimePickerDialog(
-            title = stringResource(R.string.meal_time),
-            initialTimeMinutes = timeMinutes,
-            onDismiss = {
-                showTimePicker = false
-            },
-            onTimeSelected = { selectedTime ->
-                timeMinutes = selectedTime
-                showTimePicker = false
-            },
-        )
-    }
+	if (showTimePicker) {
+		TimePickerDialog(
+			title = stringResource(R.string.meal_time),
+			initialTimeMinutes = timeMinutes,
+			onDismiss = {
+				showTimePicker = false
+			},
+			onTimeSelected = { selectedTime ->
+				timeMinutes = selectedTime
+				showTimePicker = false
+			},
+		)
+	}
 }
 
 @Composable
 fun MealDetailContent(
-    isLoading: Boolean,
-    isNew: Boolean,
-    type: MealType,
-    timeMinutes: Int,
-    customLabel: String,
-    description: String,
-    isNotificationEnabled: Boolean,
-    isNotificationSwitchEnabled: Boolean,
-    courses: List<CourseWithItems>,
-    suggestions: List<String> = emptyList(),
-    onBack: () -> Unit,
-    onSave: () -> Unit,
-    onDelete: () -> Unit,
-    onTimeClick: () -> Unit,
-    onTypeChange: (MealType) -> Unit,
-    onCustomLabelChange: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit,
-    onNotificationEnabledChange: (Boolean) -> Unit,
-    onAddCourse: () -> Unit,
-    onUpdateCourse: (Int, CourseWithItems) -> Unit,
-    onDeleteCourse: (Int) -> Unit,
+	isLoading: Boolean,
+	isNew: Boolean,
+	type: MealType,
+	timeMinutes: Int,
+	customLabel: String,
+	description: String,
+	isNotificationEnabled: Boolean,
+	isNotificationSwitchEnabled: Boolean,
+	courses: List<CourseWithItems>,
+	suggestions: List<String> = emptyList(),
+	onBack: () -> Unit,
+	onSave: () -> Unit,
+	onDelete: () -> Unit,
+	onTimeClick: () -> Unit,
+	onTypeChange: (MealType) -> Unit,
+	onCustomLabelChange: (String) -> Unit,
+	onDescriptionChange: (String) -> Unit,
+	onNotificationEnabledChange: (Boolean) -> Unit,
+	onAddCourse: () -> Unit,
+	onUpdateCourse: (Int, CourseWithItems) -> Unit,
+	onDeleteCourse: (Int) -> Unit,
 ) {
-    Scaffold { padding ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                contentPadding = PaddingValues(
-                    start = 20.dp,
-                    end = 20.dp,
-                    top = 20.dp,
-                    bottom = 104.dp,
-                ),
-            ) {
-                item {
-                    MealHeader(
-                        isNew = isNew,
-                        type = type,
-                        timeMinutes = timeMinutes,
-                        onBack = onBack,
-                        onSave = onSave,
-                        onDelete = onDelete,
-                    )
-                }
+	Scaffold { padding ->
+		if (isLoading) {
+			Box(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(padding),
+				contentAlignment = Alignment.Center,
+			) {
+				CircularProgressIndicator()
+			}
+		} else {
+			LazyColumn(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(padding),
+				verticalArrangement = Arrangement.spacedBy(24.dp),
+				contentPadding = PaddingValues(
+					start = 20.dp,
+					end = 20.dp,
+					top = 20.dp,
+					bottom = 104.dp,
+				),
+			) {
+				item {
+					MealHeader(
+						isNew = isNew,
+						type = type,
+						timeMinutes = timeMinutes,
+						onBack = onBack,
+						onSave = onSave,
+						onDelete = onDelete,
+					)
+				}
 
-                item {
-                    MealInformationSection(
-                        timeMinutes = timeMinutes,
-                        onTimeClick = onTimeClick,
-                        type = type,
-                        onTypeChange = onTypeChange,
-                        isNotificationEnabled = isNotificationEnabled,
-                        onNotificationEnabledChange = onNotificationEnabledChange,
-                        isNotificationSwitchEnabled = isNotificationSwitchEnabled,
-                    )
-                }
+				item {
+					MealInformationSection(
+						timeMinutes = timeMinutes,
+						onTimeClick = onTimeClick,
+						type = type,
+						onTypeChange = onTypeChange,
+						isNotificationEnabled = isNotificationEnabled,
+						onNotificationEnabledChange = onNotificationEnabledChange,
+						isNotificationSwitchEnabled = isNotificationSwitchEnabled,
+					)
+				}
 
-                if (type == MealType.OTHER) {
-                    item {
-                        CustomLabelField(
-                            value = customLabel,
-                            onValueChange = onCustomLabelChange,
-                        )
-                    }
-                }
+				if (type == MealType.OTHER) {
+					item {
+						CustomLabelField(
+							value = customLabel,
+							onValueChange = onCustomLabelChange,
+						)
+					}
+				}
 
-                item {
-                    MealNotesSection(
-                        description = description,
-                        onDescriptionChange = onDescriptionChange,
-                    )
-                }
+				item {
+					MealNotesSection(
+						description = description,
+						onDescriptionChange = onDescriptionChange,
+					)
+				}
 
-                item {
-                    CoursesHeader(count = courses.size)
-                }
+				item {
+					CoursesHeader(count = courses.size)
+				}
 
-                if (courses.isEmpty()) {
-                    item {
-                        EmptyCourses(
-                            onAddCourse = onAddCourse,
-                        )
-                    }
-                } else {
-                    item {
-                        CoursesList(
-                            courses = courses,
-                            suggestions = suggestions,
-                            onUpdate = onUpdateCourse,
-                            onDelete = onDeleteCourse,
-                            onAddCourse = onAddCourse,
-                        )
-                    }
-                }
-            }
-        }
-    }
+				if (courses.isEmpty()) {
+					item {
+						EmptyCourses(
+							onAddCourse = onAddCourse,
+						)
+					}
+				} else {
+					item {
+						CoursesList(
+							courses = courses,
+							suggestions = suggestions,
+							onUpdate = onUpdateCourse,
+							onDelete = onDeleteCourse,
+							onAddCourse = onAddCourse,
+						)
+					}
+				}
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun MealDetailContentPreview() {
-    DietTheme {
-        MealDetailContent(
-            isLoading = false,
-            isNew = false,
-            type = MealType.LUNCH,
-            timeMinutes = 780,
-            customLabel = "",
-            description = "Test notes",
-            isNotificationEnabled = true,
-            isNotificationSwitchEnabled = true,
-            courses = listOf(
-                CourseWithItems(
-                    course = Course(id = 1, mealId = 1, name = "Pasta", order = 0),
-                    items = listOf(
-                        FoodItem(id = 1, courseId = 1, name = "Spaghetti", quantities = "100g", order = 0)
-                    )
-                )
-            ),
-            onBack = {},
-            onSave = {},
-            onDelete = {},
-            onTimeClick = {},
-            onTypeChange = {},
-            onCustomLabelChange = {},
-            onDescriptionChange = {},
-            onNotificationEnabledChange = {},
-            onAddCourse = {},
-            onUpdateCourse = { _, _ -> },
-            onDeleteCourse = {},
-        )
-    }
+	DietTheme {
+		MealDetailContent(
+			isLoading = false,
+			isNew = false,
+			type = MealType.LUNCH,
+			timeMinutes = 780,
+			customLabel = "",
+			description = "Test notes",
+			isNotificationEnabled = true,
+			isNotificationSwitchEnabled = true,
+			courses = listOf(
+				CourseWithItems(
+					course = Course(id = 1, mealId = 1, name = "Pasta", order = 0),
+					items = listOf(
+						FoodItem(
+							id = 1,
+							courseId = 1,
+							name = "Spaghetti",
+							amount = "100",
+							unit = QuantityUnit.GRAMS,
+							order = 0)
+					)
+				)
+			),
+			onBack = {},
+			onSave = {},
+			onDelete = {},
+			onTimeClick = {},
+			onTypeChange = {},
+			onCustomLabelChange = {},
+			onDescriptionChange = {},
+			onNotificationEnabledChange = {},
+			onAddCourse = {},
+			onUpdateCourse = { _, _ -> },
+			onDeleteCourse = {},
+		)
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun MealDetailContentLoadingPreview() {
-    DietTheme {
-        MealDetailContent(
-            isLoading = true,
-            isNew = true,
-            type = MealType.BREAKFAST,
-            timeMinutes = 480,
-            customLabel = "",
-            description = "",
-            isNotificationEnabled = true,
-            isNotificationSwitchEnabled = true,
-            courses = emptyList(),
-            onBack = {},
-            onSave = {},
-            onDelete = {},
-            onTimeClick = {},
-            onTypeChange = {},
-            onCustomLabelChange = {},
-            onDescriptionChange = {},
-            onNotificationEnabledChange = {},
-            onAddCourse = {},
-            onUpdateCourse = { _, _ -> },
-            onDeleteCourse = {},
-        )
-    }
+	DietTheme {
+		MealDetailContent(
+			isLoading = true,
+			isNew = true,
+			type = MealType.BREAKFAST,
+			timeMinutes = 480,
+			customLabel = "",
+			description = "",
+			isNotificationEnabled = true,
+			isNotificationSwitchEnabled = true,
+			courses = emptyList(),
+			onBack = {},
+			onSave = {},
+			onDelete = {},
+			onTimeClick = {},
+			onTypeChange = {},
+			onCustomLabelChange = {},
+			onDescriptionChange = {},
+			onNotificationEnabledChange = {},
+			onAddCourse = {},
+			onUpdateCourse = { _, _ -> },
+			onDeleteCourse = {},
+		)
+	}
 }

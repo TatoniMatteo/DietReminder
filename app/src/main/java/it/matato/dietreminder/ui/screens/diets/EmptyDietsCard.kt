@@ -27,51 +27,51 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun EmptyDietsCard() {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(28.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Restaurant,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(28.dp),
-                )
-            }
+	ElevatedCard(
+		modifier = Modifier.fillMaxWidth(),
+		shape = MaterialTheme.shapes.large,
+	) {
+		Column(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(28.dp),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.spacedBy(12.dp),
+		) {
+			Box(
+				modifier = Modifier
+					.size(56.dp)
+					.clip(CircleShape)
+					.background(MaterialTheme.colorScheme.primaryContainer),
+				contentAlignment = Alignment.Center,
+			) {
+				Icon(
+					imageVector = Icons.Rounded.Restaurant,
+					contentDescription = null,
+					tint = MaterialTheme.colorScheme.onPrimaryContainer,
+					modifier = Modifier.size(28.dp),
+				)
+			}
 
-            Text(
-                text = stringResource(R.string.diets),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-            )
+			Text(
+				text = stringResource(R.string.diets),
+				style = MaterialTheme.typography.titleLarge,
+				fontWeight = FontWeight.Bold,
+			)
 
-            Text(
-                text = stringResource(R.string.new_diet),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
+			Text(
+				text = stringResource(R.string.new_diet),
+				style = MaterialTheme.typography.bodyMedium,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
+			)
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun EmptyDietsCardPreview() {
-    DietTheme {
-        EmptyDietsCard()
-    }
+	DietTheme {
+		EmptyDietsCard()
+	}
 }
