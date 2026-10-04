@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <plurals name="courses_count">
+        <item quantity="one">%1$d course</item>
+        <item quantity="other">%1$d courses</item>
+    </plurals>
+    <plurals name="meals_count">
+        <item quantity="one">%1$d meal</item>
+        <item quantity="other">%1$d meals</item>
+    </plurals>
+    <plurals name="developer_clicks_remaining">
+        <item quantity="one">You are missing %1$d click</item>
+        <item quantity="other">You are missing %1$d clicks</item>
+    </plurals>
+    <plurals name="items_purchased_count">
+        <item quantity="one">%1$d of %2$d item purchased</item>
+        <item quantity="other">%1$d of %2$d items purchased</item>
+    </plurals>
+    <plurals name="import_selected_count">
+        <item quantity="one">Import %1$d food</item>
+        <item quantity="other">Import %1$d foods</item>
+    </plurals>
     <string name="app_name">Diet Reminder</string>
 
     <string name="week">Week</string>
@@ -31,8 +51,6 @@
     <string name="new_diet">New diet</string>
     <string name="diet_name">Diet name</string>
     <string name="window_minutes">Visibility window (minutes)</string>
-    <string name="courses_count">%1$d courses</string>
-    <string name="meals_count">%1$d meals</string>
     <string name="add_meal">Add a meal</string>
 
     <string name="import_diet">Import diet</string>
@@ -42,15 +60,8 @@
     <string name="export_name">Export %1$s</string>
     <string name="json_exported">Diet exported successfully</string>
     <string name="export_failed">Export failed</string>
-    <string name="import_failed">Import failed</string>
     <string name="backup_data">Data and backup</string>
-    <string name="import_success">Diet imported successfully</string>
-    <string name="import_invalid_json">The file is invalid</string>
-    <string name="import_overwrite_title">Diet already exists</string>
-    <string name="import_overwrite_message">A diet with the same unique ID already exists. Do you want to overwrite it or cancel the import?</string>
-    <string name="overwrite">Overwrite</string>
 
-    <string name="greeting">Hello!</string>
     <string name="hydration_title">Hydration</string>
 
     <string name="appearance_personalization">Appearance and personalization</string>
@@ -68,11 +79,9 @@
 
     <string name="planning">Planning</string>
     <string name="default_time">Default time</string>
-    <string name="set_default_time">Set default time</string>
     <string name="new_window">New window</string>
     <string name="start">Start</string>
     <string name="end">End</string>
-    <string name="from_to">From %1$02d:%2$02d to %3$02d:%4$02d</string>
 
     <string name="notifications_alarms">Notifications and alarms</string>
     <string name="meal_reminders">Meal reminders</string>
@@ -112,7 +121,6 @@
     <string name="reset_database_confirmation">Do you really want to delete all database data? This action cannot be undone.</string>
     <string name="reset_database_description">This action permanently deletes all application data and cannot be undone.</string>
 
-    <string name="developer_clicks_remaining">You are missing %1$d clicks</string>
     <string name="developer_mode_activated">Developer options activated!</string>
     <string name="developer_settings">Developer settings</string>
     <string name="developer_settings_description">Advanced tools and logs</string>
@@ -137,8 +145,6 @@
     <string name="it_is_moment_of">It\'s time for %1$s</string>
     <string name="hydration_notification_title">Hydration</string>
     <string name="hydration_notification_message">Remember to drink a glass of water!</string>
-    <string name="action_drank">Drank ✅</string>
-    <string name="action_later">Later ⏰</string>
 
     <string name="meal_breakfast_short">Break.</string>
     <string name="meal_morning_snack_short">Snack</string>
@@ -161,16 +167,13 @@
     <string name="notification_enabled">Notification active</string>
     <string name="notification_disabled">Notification disabled</string>
 
-    <string name="ingredients">Ingredients</string>
     <string name="ingredients_title">Ingredients list</string>
     <string name="no_ingredients_in_diet">No ingredients present in this diet</string>
 
-    <string name="shopping_list">Shopping list</string>
     <string name="shopping_lists">Shopping lists</string>
     <string name="nav_shopping_lists">Shopping</string>
     <string name="new_shopping_list">New shopping list</string>
     <string name="default_shopping_list_name">Shopping list %1$s</string>
-    <string name="items_purchased_count">%1$d of %2$d items purchased</string>
     <string name="to_buy">To buy</string>
     <string name="purchased">Purchased</string>
     <string name="add_item">Add item</string>
@@ -272,7 +275,6 @@
     <string name="unit_custom">Other</string>
 
     <string name="import_diet_foods_title">Import from diet</string>
-    <string name="import_selected_count">Import %1$d foods</string>
     <string name="import_info_title">Fresh vs Weekly management</string>
     <string name="import_info_desc">Standard foods are combined into a single total quantity for the entire week. Fresh foods are kept separate for each day of consumption.</string>
     <string name="item_type_label">Type:</string>
@@ -295,4 +297,19 @@
     <string name="import_error_invalid_amount">Invalid numeric amount \'%1$s\' for food item \'%2$s\'.</string>
     <string name="import_error_unit_requires_amount">Unit \'%1$s\' requires a numeric amount for food item \'%2$s\'.</string>
     <string name="import_error_malformed_json">The JSON file is malformed or contains syntax errors.</string>
+
+    <string name="update_recent_title">New Update Available</string>
+    <string name="update_recent_message">A new version of Diet Reminder is available. Please update to enjoy the latest features and fixes.</string>
+    <string name="update_deprecated_title">Update Recommended</string>
+    <string name="update_deprecated_message">Your app version is deprecated and uses server APIs that will soon be removed. Please update as soon as possible.</string>
+    <string name="update_obsolete_title">Version Obsolete</string>
+    <string name="update_obsolete_message">This version of the application is no longer supported by the server. You must update the app to continue.</string>
+    <string name="update_now">Update Now</string>
+    <string name="update_later">Later</string>
+    <string name="offline_title">No Connection</string>
+    <string name="offline_message">Unable to verify application version policy because you are offline. Please check your internet connection and try again.</string>
+    <string name="retry">Retry</string>
+    <string name="continue_offline">Continue offline</string>
+    <string name="offline_mode_banner">Offline mode: some actions are unavailable.</string>
+    <string name="offline_write_blocked">This action is unavailable offline. Reconnect to make changes.</string>
 </resources>

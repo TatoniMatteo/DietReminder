@@ -3,34 +3,43 @@ package it.matato.dietreminder.viewmodel
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
-import it.matato.dietreminder.DietApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
 import it.matato.dietreminder.data.database.entity.ConfigKey
 import it.matato.dietreminder.data.database.entity.Meal
 import it.matato.dietreminder.data.database.entity.ShoppingListItem
 import it.matato.dietreminder.data.database.relation.CourseWithItems
 import it.matato.dietreminder.data.database.relation.MealWithDetails
 import it.matato.dietreminder.data.export.DietExport
+import it.matato.dietreminder.data.model.AppVersionState
 import it.matato.dietreminder.data.model.HydrationRange
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.model.QuantityUnit
-import it.matato.dietreminder.data.repository.DietImportItemConfig
-import it.matato.dietreminder.data.repository.DietRepository
-import it.matato.dietreminder.data.repository.ShoppingListInitialItem
+import it.matato.dietreminder.data.repository.contracts.ConfigRepository
+import it.matato.dietreminder.data.repository.contracts.DietImportItemConfig
+import it.matato.dietreminder.data.repository.contracts.DietRepository
+import it.matato.dietreminder.data.repository.contracts.ShoppingListInitialItem
+import it.matato.dietreminder.data.repository.contracts.ShoppingListRepository
+import it.matato.dietreminder.data.repository.contracts.VersionPolicyRepository
+import it.matato.dietreminder.data.repository.delegating.OfflineWriteException
+import it.matato.dietreminder.data.repository.github.GitHubVersionPolicyRepository
 import it.matato.dietreminder.domain.IngredientSummary
 import it.matato.dietreminder.domain.NextMeal
 import it.matato.dietreminder.domain.nextMeal
 import it.matato.dietreminder.domain.toIngredientSummaries
 import it.matato.dietreminder.util.AppLog
+import it.matato.dietreminder.util.UpdateManager
+import it.matato.dietreminder.util.UpdateManagerStatus
 import it.matato.dietreminder.util.alarm.AlarmScheduler
 import it.matato.dietreminder.util.alarm.AlarmSyncHelper
 import it.matato.dietreminder.widget.DietReminder
 import java.time.DayOfWeek
 import java.time.LocalDateTime
+import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -44,37 +53,59 @@ sealed interface ImportCheckResult {
 	data class Invalid(val message: String) : ImportCheckResult
 }
 
+@HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
-class DietViewModel(
+class DietViewModel @Inject constructor(
 	private val application: Application,
-	private val repository: DietRepository
+	private val dietRepository: DietRepository,
+	private val shoppingListRepository: ShoppingListRepository,
+	private val configRepository: ConfigRepository,
+	versionPolicyRepository: VersionPolicyRepository,
 ) : ViewModel() {
 
-	companion object {
-		val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-			@Suppress("UNCHECKED_CAST")
-			override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-				val app = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
-				val repository = if (app is DietApplication) {
-					app.repository
-				} else {
-					// Fallback per l'ambiente di test (es. TestDietApplication)
-					val repoField = app?.javaClass?.getMethod("getRepository")?.invoke(app) as? DietRepository
-						?: (app?.javaClass?.getField("repository")?.get(app) as DietRepository)
-					repoField
-				}
-				return DietViewModel(app, repository) as T
-			}
+	constructor(
+		application: Application,
+		repository: DietRepository,
+		versionPolicyRepository: VersionPolicyRepository =
+			(repository as? VersionPolicyRepository) ?: GitHubVersionPolicyRepository(application),
+	) : this(
+		application = application,
+		dietRepository = repository,
+		shoppingListRepository = requireNotNull(repository as? ShoppingListRepository) {
+			"Repository must also provide shopping-list operations."
+		},
+		configRepository = requireNotNull(repository as? ConfigRepository) {
+			"Repository must also provide configuration operations."
+		},
+		versionPolicyRepository = versionPolicyRepository,
+	)
+
+	private val updateManager = UpdateManager(versionPolicyRepository)
+	val versionStatus = updateManager.versionStatus
+
+	init {
+		viewModelScope.launch {
+			updateManager.checkUpdate()
 		}
 	}
 
-	val diets = repository.all.stateIn(
+	fun checkUpdate() {
+		viewModelScope.launch {
+			updateManager.checkUpdate()
+		}
+	}
+
+	fun forceUpdateState(state: AppVersionState?) {
+		updateManager.forceState(state)
+	}
+
+	val diets = dietRepository.all.stateIn(
 		viewModelScope,
 		SharingStarted.WhileSubscribed(5000),
 		emptyList(),
 	)
 
-	val active = repository.active.stateIn(
+	val active = dietRepository.active.stateIn(
 		viewModelScope,
 		SharingStarted.WhileSubscribed(5000),
 		null,
@@ -82,7 +113,7 @@ class DietViewModel(
 
 	val meals = active
 		.flatMapLatest { diet ->
-			diet?.let { repository.observeMeals(it.id) } ?: flowOf(emptyList())
+			diet?.let { dietRepository.observeMeals(it.id) } ?: flowOf(emptyList())
 		}
 		.stateIn(
 			viewModelScope,
@@ -104,19 +135,19 @@ class DietViewModel(
 			emptyList(),
 		)
 
-	val defaultTimes = repository.defaultTimes.stateIn(
+	val defaultTimes = configRepository.defaultTimes.stateIn(
 		viewModelScope,
 		SharingStarted.WhileSubscribed(5000),
 		emptyList(),
 	)
 
-	val shoppingLists = repository.allShoppingLists.stateIn(
+	val shoppingLists = shoppingListRepository.allShoppingLists.stateIn(
 		viewModelScope,
 		SharingStarted.WhileSubscribed(5000),
 		emptyList(),
 	)
 
-	val theme = repository.observeConfig(ConfigKey.THEME)
+	val theme = configRepository.observeConfig(ConfigKey.THEME)
 		.map { it?.value ?: "system" }
 		.stateIn(
 			viewModelScope,
@@ -124,7 +155,7 @@ class DietViewModel(
 			"system",
 		)
 
-	val useDynamicColors = repository.observeConfig(ConfigKey.USE_DYNAMIC_COLORS)
+	val useDynamicColors = configRepository.observeConfig(ConfigKey.USE_DYNAMIC_COLORS)
 		.map { it?.value != "false" }
 		.stateIn(
 			viewModelScope,
@@ -132,7 +163,7 @@ class DietViewModel(
 			true,
 		)
 
-	val seedColor = repository.observeConfig(ConfigKey.SEED_COLOR)
+	val seedColor = configRepository.observeConfig(ConfigKey.SEED_COLOR)
 		.map { it?.value ?: "0xFF6750A4" }
 		.stateIn(
 			viewModelScope,
@@ -140,7 +171,7 @@ class DietViewModel(
 			"0xFF6750A4",
 		)
 
-	val language = repository.observeConfig(ConfigKey.LANGUAGE)
+	val language = configRepository.observeConfig(ConfigKey.LANGUAGE)
 		.map { it?.value ?: "it" }
 		.stateIn(
 			viewModelScope,
@@ -148,7 +179,7 @@ class DietViewModel(
 			"it",
 		)
 
-	val hydrationRanges = repository.observeConfig(ConfigKey.HYDRATION_RANGES)
+	val hydrationRanges = configRepository.observeConfig(ConfigKey.HYDRATION_RANGES)
 		.map { config ->
 			config?.value?.let { value ->
 				try {
@@ -164,7 +195,7 @@ class DietViewModel(
 			defaultHydrationRanges(),
 		)
 
-	val hydrationEnabled = repository.observeConfig(ConfigKey.HYDRATION_ENABLED)
+	val hydrationEnabled = configRepository.observeConfig(ConfigKey.HYDRATION_ENABLED)
 		.map { it?.value == "true" }
 		.stateIn(
 			viewModelScope,
@@ -172,7 +203,7 @@ class DietViewModel(
 			true,
 		)
 
-	val hydrationInterval = repository.observeConfig(ConfigKey.HYDRATION_INTERVAL)
+	val hydrationInterval = configRepository.observeConfig(ConfigKey.HYDRATION_INTERVAL)
 		.map { it?.value?.toIntOrNull() ?: 120 }
 		.stateIn(
 			viewModelScope,
@@ -180,15 +211,12 @@ class DietViewModel(
 			120,
 		)
 
-	val hydrationDays = repository.observeConfig(ConfigKey.HYDRATION_DAYS)
+	val hydrationDays = configRepository.observeConfig(ConfigKey.HYDRATION_DAYS)
 		.map { config ->
 			config?.value
 				?.split(",")
-				?.mapNotNull { value ->
-					runCatching { DayOfWeek.valueOf(value) }.getOrNull()
-				}
-				?.toSet()
-				?: DayOfWeek.entries.toSet()
+				?.mapNotNull { runCatching { DayOfWeek.valueOf(it.trim()) }.getOrNull() }
+				?.toSet() ?: DayOfWeek.entries.toSet()
 		}
 		.stateIn(
 			viewModelScope,
@@ -196,7 +224,7 @@ class DietViewModel(
 			DayOfWeek.entries.toSet(),
 		)
 
-	val mealRemindersEnabled = repository.observeConfig(ConfigKey.MEAL_REMINDERS_ENABLED)
+	val mealRemindersEnabled = configRepository.observeConfig(ConfigKey.MEAL_REMINDERS_ENABLED)
 		.map { it?.value != "false" }
 		.stateIn(
 			viewModelScope,
@@ -204,7 +232,7 @@ class DietViewModel(
 			true,
 		)
 
-	val isDeveloperMode = repository.observeConfig(ConfigKey.DEVELOPER_MODE)
+	val isDeveloperMode = configRepository.observeConfig(ConfigKey.DEVELOPER_MODE)
 		.map { it?.value == "true" }
 		.stateIn(
 			viewModelScope,
@@ -219,34 +247,59 @@ class DietViewModel(
 	)
 
 	val lastImportError = mutableStateOf<String?>(null)
+	private val _writeBlockedEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+	val writeBlockedEvents = _writeBlockedEvents.asSharedFlow()
 
-	fun setTheme(value: String) {
+	private fun launchWrite(action: suspend () -> Unit) {
 		viewModelScope.launch {
-			repository.saveConfig(ConfigKey.THEME, value)
+			if (UpdateManagerStatus.writesBlocked) {
+				AppLog.w("Write blocked because the app is in offline read-only mode")
+				_writeBlockedEvents.emit(Unit)
+				return@launch
+			}
+
+			try {
+				action()
+			} catch (_: OfflineWriteException) {
+				AppLog.w("Write blocked because the app switched to offline read-only mode")
+				_writeBlockedEvents.emit(Unit)
+			}
+		}
+	}
+
+	private fun launchLocalWrite(action: suspend () -> Unit) {
+		viewModelScope.launch {
+			action()
+		}
+	}
+
+	fun setTheme(theme: String) {
+		launchLocalWrite {
+			configRepository.saveConfig(ConfigKey.THEME, theme)
 		}
 	}
 
 	fun setUseDynamicColors(enabled: Boolean) {
-		viewModelScope.launch {
-			repository.saveConfig(ConfigKey.USE_DYNAMIC_COLORS, enabled.toString())
+		launchLocalWrite {
+			configRepository.saveConfig(ConfigKey.USE_DYNAMIC_COLORS, enabled.toString())
 		}
 	}
 
-	fun setSeedColor(value: String) {
-		viewModelScope.launch {
-			repository.saveConfig(ConfigKey.SEED_COLOR, value)
+	fun setSeedColor(color: String) {
+		launchLocalWrite {
+			configRepository.saveConfig(ConfigKey.SEED_COLOR, color)
 		}
 	}
 
-	fun setLanguage(value: String) {
-		viewModelScope.launch {
-			repository.saveConfig(ConfigKey.LANGUAGE, value)
+	fun setLanguage(language: String) {
+		launchLocalWrite {
+			configRepository.saveConfig(ConfigKey.LANGUAGE, language)
 		}
 	}
 
 	fun setHydrationRanges(ranges: List<HydrationRange>) {
-		viewModelScope.launch {
-			repository.saveConfig(
+		launchLocalWrite {
+			configRepository.saveConfig(
 				ConfigKey.HYDRATION_RANGES,
 				Json.encodeToString(ranges),
 			)
@@ -254,26 +307,26 @@ class DietViewModel(
 	}
 
 	fun setHydrationEnabled(enabled: Boolean) {
-		viewModelScope.launch {
-			repository.saveConfig(
+		launchLocalWrite {
+			configRepository.saveConfig(
 				ConfigKey.HYDRATION_ENABLED,
 				enabled.toString(),
 			)
 		}
 	}
 
-	fun setHydrationInterval(minutes: Int) {
-		viewModelScope.launch {
-			repository.saveConfig(
+	fun setHydrationInterval(interval: Int) {
+		launchLocalWrite {
+			configRepository.saveConfig(
 				ConfigKey.HYDRATION_INTERVAL,
-				minutes.toString(),
+				interval.toString(),
 			)
 		}
 	}
 
 	fun setHydrationDays(days: Set<DayOfWeek>) {
-		viewModelScope.launch {
-			repository.saveConfig(
+		launchLocalWrite {
+			configRepository.saveConfig(
 				ConfigKey.HYDRATION_DAYS,
 				days.joinToString(",") { it.name },
 			)
@@ -281,31 +334,31 @@ class DietViewModel(
 	}
 
 	fun setMealRemindersEnabled(enabled: Boolean) {
-		viewModelScope.launch {
-			repository.saveConfig(
+		launchLocalWrite {
+			configRepository.saveConfig(
 				ConfigKey.MEAL_REMINDERS_ENABLED,
 				enabled.toString(),
 			)
-			AlarmSyncHelper.syncAlarms(application)
 		}
 	}
 
 	fun setDietDayNotificationEnabled(dietId: Long, day: DayOfWeek, enabled: Boolean) {
-		viewModelScope.launch {
-			val diet = diets.value.find { it.id == dietId } ?: return@launch
+		launchWrite {
+			val diet = diets.value.find { it.id == dietId } ?: return@launchWrite
 			val updated = diet.withDayNotificationToggled(day, enabled)
-			repository.updateDiet(updated)
+			dietRepository.updateDiet(updated)
 			DietReminder.updateAll(application)
 			AlarmSyncHelper.syncAlarms(application)
 		}
 	}
 
 	fun setDeveloperMode(enabled: Boolean) {
-		viewModelScope.launch {
-			repository.saveConfig(
+		launchLocalWrite {
+			configRepository.saveConfig(
 				ConfigKey.DEVELOPER_MODE,
 				enabled.toString(),
 			)
+			AlarmSyncHelper.syncAlarms(application)
 		}
 	}
 
@@ -327,10 +380,10 @@ class DietViewModel(
 			?: getDefaultFallback(type)
 	}
 
-	suspend fun getDietMeals(id: Long) = repository.getMeals(id)
+	suspend fun getDietMeals(id: Long) = dietRepository.getMeals(id)
 
 	suspend fun getDietIngredients(id: Long): List<IngredientSummary> {
-		return repository.getMeals(id).toIngredientSummaries()
+		return dietRepository.getMeals(id).toIngredientSummaries()
 	}
 
 	suspend fun getMeal(id: Long): MealWithDetails? {
@@ -338,7 +391,7 @@ class DietViewModel(
 			return null
 		}
 
-		return repository
+		return dietRepository
 			.getMeals(active.value?.id ?: 0L)
 			.find { it.meal.id == id }
 	}
@@ -363,68 +416,68 @@ class DietViewModel(
 	}
 
 	fun saveDefaultTime(type: MealType, timeMinutes: Int) {
-		viewModelScope.launch {
-			repository.saveDefaultTime(type, timeMinutes)
+		launchLocalWrite {
+			configRepository.saveDefaultTime(type, timeMinutes)
 		}
 	}
 
 	fun resetDatabase() {
-		viewModelScope.launch {
-			repository.resetDatabase()
+		launchWrite {
+			configRepository.resetDatabase()
 		}
 	}
 
 	fun create(name: String, window: Int) {
-		viewModelScope.launch {
-			repository.create(name, window)
+		launchWrite {
+			dietRepository.create(name, window)
 		}
 	}
 
 	fun activate(id: Long) {
-		viewModelScope.launch {
-			repository.activate(id)
+		launchWrite {
+			dietRepository.activate(id)
 			DietReminder.updateAll(application)
 		}
 	}
 
 	fun deleteDiet(id: Long) {
-		viewModelScope.launch {
-			repository.delete(id)
+		launchWrite {
+			dietRepository.delete(id)
 			DietReminder.updateAll(application)
 		}
 	}
 
 	fun duplicate(id: Long) {
-		viewModelScope.launch {
-			repository.duplicate(id)
+		launchWrite {
+			dietRepository.duplicate(id)
 		}
 	}
 
 	fun saveMeal(meal: Meal, courses: List<CourseWithItems>) {
-		viewModelScope.launch {
-			repository.saveMeal(meal, courses)
+		launchWrite {
+			dietRepository.saveMeal(meal, courses)
 			DietReminder.updateAll(application)
 		}
 	}
 
 	fun deleteMeal(id: Long) {
-		viewModelScope.launch {
-			repository.deleteMeal(id)
+		launchWrite {
+			dietRepository.deleteMeal(id)
 			DietReminder.updateAll(application)
 		}
 	}
 
-	fun parseDietJson(json: String): DietExport = repository.parseDietJson(json)
+	fun parseDietJson(json: String): DietExport = dietRepository.parseDietJson(json)
 
-	suspend fun dietExists(uuid: String): Boolean = repository.dietExists(uuid)
+	suspend fun dietExists(uuid: String): Boolean = dietRepository.dietExists(uuid)
 
 	suspend fun checkImportConflict(json: String): ImportCheckResult {
 		return try {
 			lastImportError.value = null
 
-			val data = repository.parseDietJson(json)
+			val data = dietRepository.parseDietJson(json)
 
-			val existing = data.uuid?.let { repository.dietExists(it) }
+			val existing = data.uuid?.let { dietRepository.dietExists(it) }
 
 			if (existing == true) {
 				ImportCheckResult.Conflict
@@ -447,8 +500,19 @@ class DietViewModel(
 	): Result<Unit> {
 		return try {
 			lastImportError.value = null
-			repository.importJson(json, overwrite)
+			if (UpdateManagerStatus.writesBlocked) {
+				val exception = OfflineWriteException()
+				lastImportError.value = exception.message
+				AppLog.w("Diet import blocked because the app is in offline read-only mode")
+				_writeBlockedEvents.emit(Unit)
+				return Result.failure(exception)
+			}
+			dietRepository.importJson(json, overwrite)
 			Result.success(Unit)
+		} catch (exception: OfflineWriteException) {
+			lastImportError.value = exception.message
+			_writeBlockedEvents.emit(Unit)
+			Result.failure(exception)
 		} catch (exception: Exception) {
 			AppLog.e("Import failed", exception)
 
@@ -460,10 +524,10 @@ class DietViewModel(
 	}
 
 	suspend fun exportDiet(id: Long): String {
-		return repository.exportJson(id)
+		return dietRepository.exportJson(id)
 	}
 
-	fun observeShoppingList(id: Long) = repository.observeShoppingList(id)
+	fun observeShoppingList(id: Long) = shoppingListRepository.observeShoppingList(id)
 
 	fun createShoppingList(
 		name: String,
@@ -471,21 +535,21 @@ class DietViewModel(
 		initialItems: List<ShoppingListInitialItem> = emptyList(),
 		onCreated: ((Long) -> Unit)? = null,
 	) {
-		viewModelScope.launch {
-			val id = repository.createShoppingList(name, dietId, initialItems)
+		launchWrite {
+			val id = shoppingListRepository.createShoppingList(name, dietId, initialItems)
 			onCreated?.invoke(id)
 		}
 	}
 
 	fun updateShoppingListName(id: Long, name: String) {
-		viewModelScope.launch {
-			repository.updateShoppingListName(id, name)
+		launchWrite {
+			shoppingListRepository.updateShoppingListName(id, name)
 		}
 	}
 
 	fun deleteShoppingList(id: Long) {
-		viewModelScope.launch {
-			repository.deleteShoppingList(id)
+		launchWrite {
+			shoppingListRepository.deleteShoppingList(id)
 		}
 	}
 
@@ -496,32 +560,32 @@ class DietViewModel(
 		unit: QuantityUnit = QuantityUnit.GRAMS,
 		isCustom: Boolean = true,
 	) {
-		viewModelScope.launch {
-			repository.addShoppingListItem(listId, name, amount, unit, isCustom)
+		launchWrite {
+			shoppingListRepository.addShoppingListItem(listId, name, amount, unit, isCustom)
 		}
 	}
 
 	fun updateShoppingListItem(item: ShoppingListItem) {
-		viewModelScope.launch {
-			repository.updateShoppingListItem(item)
+		launchWrite {
+			shoppingListRepository.updateShoppingListItem(item)
 		}
 	}
 
 	fun toggleShoppingListItem(item: ShoppingListItem) {
-		viewModelScope.launch {
-			repository.toggleShoppingListItemBought(item.id, !item.isBought)
+		launchWrite {
+			shoppingListRepository.toggleShoppingListItemBought(item.id, !item.isBought)
 		}
 	}
 
 	fun toggleShoppingListItemDay(dayId: Long, isBought: Boolean) {
-		viewModelScope.launch {
-			repository.toggleShoppingListItemDayBought(dayId, isBought)
+		launchWrite {
+			shoppingListRepository.toggleShoppingListItemDayBought(dayId, isBought)
 		}
 	}
 
 	fun deleteShoppingListItem(itemId: Long) {
-		viewModelScope.launch {
-			repository.deleteShoppingListItem(itemId)
+		launchWrite {
+			shoppingListRepository.deleteShoppingListItem(itemId)
 		}
 	}
 
@@ -531,8 +595,8 @@ class DietViewModel(
 		configs: List<DietImportItemConfig>,
 		onCompleted: (() -> Unit)? = null,
 	) {
-		viewModelScope.launch {
-			repository.addDietIngredientsToShoppingList(listId, dietId, configs)
+		launchWrite {
+			shoppingListRepository.addDietIngredientsToShoppingList(listId, dietId, configs)
 			onCompleted?.invoke()
 		}
 	}

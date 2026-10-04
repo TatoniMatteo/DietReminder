@@ -25,12 +25,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun DietsHeader(
 	count: Int,
 	onImportClick: () -> Unit,
+	isOffline: Boolean = LocalOfflineMode.current,
 ) {
 	Row(
 		modifier = Modifier.fillMaxWidth(),
@@ -67,7 +69,7 @@ fun DietsHeader(
 			}
 		}
 
-		IconButton(onClick = onImportClick) {
+		IconButton(onClick = onImportClick, enabled = !isOffline) {
 			Icon(
 				imageVector = Icons.Rounded.FileUpload,
 				contentDescription = stringResource(R.string.import_diet),

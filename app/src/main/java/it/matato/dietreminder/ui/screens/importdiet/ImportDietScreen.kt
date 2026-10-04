@@ -55,6 +55,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.data.export.DietExport
 import it.matato.dietreminder.data.export.getLocalizedImportError
 import it.matato.dietreminder.ui.theme.DietTheme
@@ -155,6 +156,7 @@ fun ImportDietContent(
 	onDismissError: () -> Unit,
 	onBack: () -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -243,7 +245,7 @@ fun ImportDietContent(
 								.padding(24.dp),
 							contentAlignment = Alignment.Center,
 						) {
-							Button(onClick = onPickFileClick) {
+							Button(onClick = onPickFileClick, enabled = !isOffline) {
 								Icon(
 									imageVector = Icons.Rounded.FileOpen,
 									contentDescription = null,
@@ -382,6 +384,7 @@ private fun DietPreviewCard(
 
 			Button(
 				onClick = onConfirmImport,
+				enabled = !LocalOfflineMode.current,
 				modifier = Modifier.fillMaxWidth(),
 			) {
 				Icon(Icons.Rounded.CheckCircle, contentDescription = null)

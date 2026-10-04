@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.model.QuantityUnit
 import it.matato.dietreminder.data.model.localizedSymbol
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +37,7 @@ fun QuantityInputRow(
 	onAmountChange: (String) -> Unit,
 	onUnitChange: (QuantityUnit) -> Unit,
 	modifier: Modifier = Modifier,
+	enabled: Boolean = !LocalOfflineMode.current,
 ) {
 	var expanded by remember { mutableStateOf(false) }
 
@@ -54,7 +56,7 @@ fun QuantityInputRow(
 					}
 				}
 			},
-			enabled = !selectedUnit.isNoAmountNeeded,
+			enabled = enabled && !selectedUnit.isNoAmountNeeded,
 			modifier = Modifier.weight(1f),
 			label = { Text(stringResource(R.string.quantity)) },
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -64,7 +66,7 @@ fun QuantityInputRow(
 
 		ExposedDropdownMenuBox(
 			expanded = expanded,
-			onExpandedChange = { expanded = it },
+			onExpandedChange = { if (enabled) expanded = it },
 			modifier = Modifier.weight(1f),
 		) {
 			OutlinedTextField(
@@ -74,10 +76,11 @@ fun QuantityInputRow(
 				})",
 				onValueChange = {},
 				readOnly = true,
+				enabled = enabled,
 				trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
 				modifier = Modifier
 					.fillMaxWidth()
-					.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true),
+					.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = enabled),
 				label = { Text(stringResource(R.string.unit_label)) },
 				shape = MaterialTheme.shapes.medium,
 				singleLine = true,
@@ -100,6 +103,7 @@ fun QuantityInputRow(
 							onUnitChange(unit)
 							expanded = false
 						},
+						enabled = enabled,
 					)
 				}
 			}

@@ -5,7 +5,9 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import it.matato.dietreminder.TestDietApplication
 import it.matato.dietreminder.data.model.ScheduledAlarm
+import it.matato.dietreminder.util.UpdateManagerStatus
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -22,9 +24,17 @@ class AlarmTrackerTest {
 	@Before
 	fun setUp() {
 		context = ApplicationProvider.getApplicationContext()
+		UpdateManagerStatus.isOffline = false
+		UpdateManagerStatus.isChecking = false
 		runBlocking {
 			AlarmTracker.clearAll(context)
 		}
+	}
+
+	@After
+	fun tearDown() {
+		UpdateManagerStatus.isOffline = false
+		UpdateManagerStatus.isChecking = false
 	}
 
 	@Test
@@ -50,5 +60,17 @@ class AlarmTrackerTest {
 
 		val alarms = AlarmTracker.getAlarms(context)
 		assertTrue(alarms.isEmpty())
+	}
+
+	@Test
+	fun registerAlarm_worksInOfflineMode() = runBlocking {
+		UpdateManagerStatus.isOffline = true
+		val alarm = ScheduledAlarm(id = 103, type = "MEAL", timeMillis = 300000L, label = "Cena")
+
+		AlarmTracker.registerAlarm(context, alarm)
+		Thread.sleep(100)
+
+		val alarms = AlarmTracker.getAlarms(context)
+		assertEquals(listOf(alarm), alarms)
 	}
 }

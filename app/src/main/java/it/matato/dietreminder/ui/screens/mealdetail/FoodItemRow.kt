@@ -29,6 +29,7 @@ import it.matato.dietreminder.R
 import it.matato.dietreminder.data.database.entity.FoodItem
 import it.matato.dietreminder.data.model.QuantityUnit
 import it.matato.dietreminder.ui.components.QuantityInputRow
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,6 +40,7 @@ fun FoodItemRow(
 	onUpdate: (FoodItem) -> Unit,
 	onDelete: () -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	var expanded by remember { mutableStateOf(false) }
 
 	val filteredSuggestions = remember(item.name, suggestions) {
@@ -90,6 +92,7 @@ fun FoodItemRow(
 				},
 				shape = MaterialTheme.shapes.medium,
 				singleLine = true,
+				enabled = !isOffline,
 			)
 
 			if (filteredSuggestions.isNotEmpty()) {
@@ -104,6 +107,7 @@ fun FoodItemRow(
 								onUpdate(item.copy(name = suggestion))
 								expanded = false
 							},
+							enabled = !isOffline,
 						)
 					}
 				}
@@ -137,10 +141,12 @@ fun FoodItemRow(
 					)
 				},
 				modifier = Modifier.weight(1f),
+				enabled = !isOffline,
 			)
 
 			IconButton(
 				onClick = onDelete,
+				enabled = !isOffline,
 			) {
 				Icon(
 					imageVector = Icons.Rounded.RemoveCircleOutline,

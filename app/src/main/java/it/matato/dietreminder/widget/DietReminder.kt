@@ -69,8 +69,8 @@ class DietReminder : GlanceAppWidget() {
 		id: GlanceId
 	) {
 		val app = context.applicationContext as DietApplication
-		val diet = app.repository.active.first()
-		val meals = diet?.let { app.repository.getMeals(it.id) }.orEmpty()
+		val diet = app.dietRepository.active.first()
+		val meals = diet?.let { app.dietRepository.getMeals(it.id) }.orEmpty()
 		val next = diet?.let {
 			nextMeal(
 				meals = meals,

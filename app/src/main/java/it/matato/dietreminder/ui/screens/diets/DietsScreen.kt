@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -23,6 +22,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.database.entity.Diet
+import it.matato.dietreminder.ui.LocalOfflineMode
+import it.matato.dietreminder.ui.OfflineAwareFloatingActionButton
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
 
@@ -66,9 +67,10 @@ fun DietsContent(
 	onDelete: (Diet) -> Unit,
 	onConfigure: (Diet) -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	Scaffold(
 		floatingActionButton = {
-			FloatingActionButton(
+			OfflineAwareFloatingActionButton(
 				onClick = onCreateClick,
 				containerColor = MaterialTheme.colorScheme.primary,
 				contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -91,6 +93,7 @@ fun DietsContent(
 				DietsHeader(
 					count = diets.size,
 					onImportClick = onImportClick,
+					isOffline = isOffline,
 				)
 			}
 

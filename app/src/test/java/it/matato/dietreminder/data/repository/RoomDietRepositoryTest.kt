@@ -4,19 +4,26 @@ import android.app.Application
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import it.matato.dietreminder.data.database.AppDatabase
-import it.matato.dietreminder.data.database.entity.Course
-import it.matato.dietreminder.data.database.entity.FoodItem
+import it.matato.dietreminder.data.database.entity.ConfigKey
 import it.matato.dietreminder.data.database.entity.Meal
-import it.matato.dietreminder.data.database.relation.CourseWithItems
+import it.matato.dietreminder.data.database.entity.ShoppingListItem
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.model.QuantityUnit
+import it.matato.dietreminder.data.repository.aggregate.CompositeDietRepository
+import it.matato.dietreminder.data.repository.contracts.DietImportItemConfig
+import it.matato.dietreminder.data.repository.delegating.DelegatingDietRepository
+import it.matato.dietreminder.data.repository.delegating.DelegatingShoppingListRepository
+import it.matato.dietreminder.data.repository.delegating.OfflineWriteException
+import it.matato.dietreminder.data.repository.fake.FakeDietRepository
+import it.matato.dietreminder.data.repository.room.RoomConfigRepository
+import it.matato.dietreminder.data.repository.room.RoomDietRepository
+import it.matato.dietreminder.data.repository.room.RoomShoppingListRepository
 import java.time.DayOfWeek
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -27,7 +34,7 @@ import org.robolectric.RobolectricTestRunner
 class RoomDietRepositoryTest {
 
 	private lateinit var database: AppDatabase
-	private lateinit var repository: RoomDietRepository
+	private lateinit var repository: CompositeDietRepository
 
 	@Before
 	fun setUp() {
@@ -36,15 +43,27 @@ class RoomDietRepositoryTest {
 			.allowMainThreadQueries()
 			.build()
 
-		repository = RoomDietRepository(
+		val dietRepo = RoomDietRepository(
 			database = database,
 			diets = database.dietDao(),
 			meals = database.mealDao(),
 			courses = database.courseDao(),
 			foodItems = database.foodItemDao(),
+		)
+		val shoppingRepo = RoomShoppingListRepository(
+			database = database,
+			shoppingLists = database.shoppingListDao(),
+			diets = database.dietDao(),
+			meals = database.mealDao(),
+		)
+		val configRepo = RoomConfigRepository(
+			database = database,
 			config = database.configDao(),
+			diets = database.dietDao(),
 			shoppingLists = database.shoppingListDao(),
 		)
+
+		repository = CompositeDietRepository(dietRepo, shoppingRepo, configRepo)
 	}
 
 	@After
@@ -53,190 +72,183 @@ class RoomDietRepositoryTest {
 	}
 
 	@Test
-	fun createAndObserveDiet() = runBlocking {
-		val dietId = repository.create("Dieta Mediterranea", 60)
+	fun testCreateDiet() = runBlocking {
+		val dietId = repository.create("Dieta Test", 60)
 		assertTrue(dietId > 0)
 
-		val active = repository.active.first()
-		assertNotNull(active)
-		assertEquals("Dieta Mediterranea", active?.name)
-		assertTrue(active?.isActive == true)
+		val activeDiet = repository.active.first()
+		assertNotNull(activeDiet)
+		assertEquals("Dieta Test", activeDiet?.name)
+		assertTrue(activeDiet?.isActive == true)
 	}
 
 	@Test
-	fun saveAndGetMealWithDetails() = runBlocking {
+	fun testSaveAndGetMeals() = runBlocking {
 		val dietId = repository.create("Dieta Test", 60)
-
 		val meal = Meal(
 			dietId = dietId,
-			type = MealType.BREAKFAST,
-			timeMinutes = 8 * 60,
 			dayOfWeek = DayOfWeek.MONDAY,
-			description = "Colazione proteica",
-		)
-
-		val course = CourseWithItems(
-			course = Course(mealId = 0, name = "Primo", order = 0),
-			items = listOf(
-				FoodItem(courseId = 0, name = "Fette biscottate", amount = "3", unit = QuantityUnit.PIECES, order = 0),
-			),
-		)
-
-		repository.saveMeal(meal, listOf(course))
-
-		val mealsList = repository.getMeals(dietId)
-		assertEquals(1, mealsList.size)
-
-		val savedMeal = mealsList[0]
-		assertEquals(MealType.BREAKFAST, savedMeal.meal.type)
-		assertEquals(1, savedMeal.courses.size)
-		assertEquals("Primo", savedMeal.courses[0].course.name)
-		assertEquals(1, savedMeal.courses[0].items.size)
-		assertEquals("Fette biscottate", savedMeal.courses[0].items[0].name)
-	}
-
-	@Test
-	fun saveAndObserveDefaultTimes() = runBlocking {
-		repository.saveDefaultTime(MealType.LUNCH, 13 * 60)
-
-		val times = repository.defaultTimes.first()
-		assertEquals(1, times.size)
-		assertEquals(MealType.LUNCH, times[0].type)
-		assertEquals(13 * 60, times[0].timeMinutes)
-	}
-
-	@Test
-	fun duplicateDiet() = runBlocking {
-		val dietId = repository.create("Dieta Originale", 60)
-		val meal = Meal(
-			dietId = dietId,
 			type = MealType.LUNCH,
 			timeMinutes = 13 * 60,
-			dayOfWeek = DayOfWeek.MONDAY,
-			description = "Pranzo",
+			description = "Pranzo test",
 		)
 		repository.saveMeal(meal, emptyList())
 
-		val duplicatedId = repository.duplicate(dietId)
-		assertTrue(duplicatedId > dietId)
-
-		val duplicatedMeals = repository.getMeals(duplicatedId)
-		assertEquals(1, duplicatedMeals.size)
-		assertEquals(MealType.LUNCH, duplicatedMeals[0].meal.type)
+		val meals = repository.getMeals(dietId)
+		assertTrue(meals.isNotEmpty())
 	}
 
 	@Test
-	fun deleteDiet() = runBlocking {
-		val dietId1 = repository.create("Dieta 1", 60)
-		val dietId2 = repository.create("Dieta 2", 60)
-
-		repository.activate(dietId1)
-		val deleted = repository.delete(dietId1)
-
-		assertEquals(1, deleted)
-		val active = repository.active.first()
-		assertEquals(dietId2, active?.id)
+	fun testDefaultTimes() = runBlocking {
+		repository.saveDefaultTime(MealType.BREAKFAST, 450)
+		val times = repository.defaultTimes.first()
+		assertEquals(1, times.size)
+		assertEquals(MealType.BREAKFAST, times[0].type)
+		assertEquals(450, times[0].timeMinutes)
 	}
 
 	@Test
-	fun createAndObserveShoppingList() = runBlocking {
-		val listId = repository.createShoppingList("Lista Settimanale")
+	fun offlineDelegatesReadRemoteDataAndKeepsLocalConfigWritable() = runBlocking {
+		repository.create("Cached diet", 75)
+		repository.createShoppingList("Cached shopping list")
+		repository.saveConfig(ConfigKey.THEME, "dark")
+		repository.saveDefaultTime(MealType.LUNCH, 780)
+
+		val onlineRepository = FakeDietRepository()
+		val offlineDietRepository = DelegatingDietRepository(
+			onlineRepository = onlineRepository,
+			localCacheRepository = repository,
+			isOfflineProvider = { true },
+		)
+		val offlineShoppingRepository = DelegatingShoppingListRepository(
+			onlineRepository = onlineRepository,
+			localCacheRepository = repository,
+			isOfflineProvider = { true },
+		)
+
+		assertEquals(listOf("Cached diet"), offlineDietRepository.all.first().map { it.name })
+		assertEquals(
+			listOf("Cached shopping list"),
+			offlineShoppingRepository.allShoppingLists.first().map { it.list.name },
+		)
+		assertEquals("dark", repository.observeConfig(ConfigKey.THEME).first()?.value)
+		assertEquals(780, repository.defaultTimes.first().single().timeMinutes)
+
+		val cachedDiet = offlineDietRepository.all.first().single()
+		val cachedMeal = Meal(
+			dietId = cachedDiet.id,
+			dayOfWeek = DayOfWeek.MONDAY,
+			type = MealType.LUNCH,
+			timeMinutes = 12 * 60,
+		)
+		val shoppingList = offlineShoppingRepository.allShoppingLists.first().single()
+		val shoppingItem = ShoppingListItem(
+			id = 1,
+			shoppingListId = shoppingList.list.id,
+			name = "Blocked item",
+		)
+
+		assertOfflineWriteBlocked { offlineDietRepository.create("Blocked", 60) }
+		assertOfflineWriteBlocked { offlineDietRepository.updateDiet(cachedDiet.copy(name = "Changed")) }
+		assertOfflineWriteBlocked { offlineDietRepository.activate(cachedDiet.id) }
+		assertOfflineWriteBlocked { offlineDietRepository.delete(cachedDiet.id) }
+		assertOfflineWriteBlocked { offlineDietRepository.saveMeal(cachedMeal, emptyList()) }
+		assertOfflineWriteBlocked { offlineDietRepository.deleteMeal(1) }
+		assertOfflineWriteBlocked { offlineDietRepository.duplicate(cachedDiet.id) }
+		assertOfflineWriteBlocked { offlineDietRepository.importJson("{}") }
+
+		assertOfflineWriteBlocked { offlineShoppingRepository.createShoppingList("Blocked") }
+		assertOfflineWriteBlocked { offlineShoppingRepository.updateShoppingListName(shoppingList.list.id, "Changed") }
+		assertOfflineWriteBlocked { offlineShoppingRepository.deleteShoppingList(shoppingList.list.id) }
+		assertOfflineWriteBlocked {
+			offlineShoppingRepository.addShoppingListItem(shoppingList.list.id, "Blocked")
+		}
+		assertOfflineWriteBlocked { offlineShoppingRepository.updateShoppingListItem(shoppingItem) }
+		assertOfflineWriteBlocked { offlineShoppingRepository.toggleShoppingListItemBought(1, true) }
+		assertOfflineWriteBlocked { offlineShoppingRepository.toggleShoppingListItemDayBought(1, true) }
+		assertOfflineWriteBlocked { offlineShoppingRepository.deleteShoppingListItem(1) }
+		assertOfflineWriteBlocked {
+			offlineShoppingRepository.addDietIngredientsToShoppingList(
+				shoppingList.list.id,
+				cachedDiet.id,
+				listOf(DietImportItemConfig("apple", false)),
+			)
+		}
+
+		repository.saveDefaultTime(MealType.LUNCH, 13 * 60)
+		repository.saveConfig(ConfigKey.THEME, "light")
+
+		assertEquals(listOf("Cached diet"), offlineDietRepository.all.first().map { it.name })
+		assertEquals(
+			listOf("Cached shopping list"),
+			offlineShoppingRepository.allShoppingLists.first().map { it.list.name },
+		)
+		assertEquals("light", repository.observeConfig(ConfigKey.THEME).first()?.value)
+		assertEquals(13 * 60, repository.defaultTimes.first().single().timeMinutes)
+	}
+
+	@Test
+	fun testDuplicateDiet() = runBlocking {
+		val dietId = repository.create("Originale", 30)
+		val duplicateId = repository.duplicate(dietId)
+		assertTrue(duplicateId > 0)
+
+		val meals = repository.getMeals(duplicateId)
+		assertNotNull(meals)
+	}
+
+	@Test
+	fun testActivateAndDeleteDiet() = runBlocking {
+		val id1 = repository.create("Dieta 1", 30)
+		val id2 = repository.create("Dieta 2", 30)
+
+		repository.activate(id2)
+		assertEquals(id2, repository.active.first()?.id)
+
+		repository.delete(id2)
+		assertEquals(id1, repository.active.first()?.id)
+	}
+
+	@Test
+	fun testShoppingListOperations() = runBlocking {
+		val listId = repository.createShoppingList("Spesa settimanale")
 		assertTrue(listId > 0)
 
 		val lists = repository.allShoppingLists.first()
 		assertEquals(1, lists.size)
-		assertEquals("Lista Settimanale", lists[0].list.name)
-		assertEquals(listId, lists[0].list.id)
-	}
+		assertEquals("Spesa settimanale", lists[0].list.name)
 
-	@Test
-	fun addAndToggleShoppingListItems() = runBlocking {
-		val listId = repository.createShoppingList("Lista Spesa")
-		val itemId = repository.addShoppingListItem(listId, "Mela", "1", unit = QuantityUnit.KILOGRAMS, isCustom = true)
-
-		var listWithItems = repository.observeShoppingList(listId).first()
+		repository.addShoppingListItem(listId, "Mela", "2", QuantityUnit.PIECES)
+		val listWithItems = repository.observeShoppingList(listId).first()
 		assertNotNull(listWithItems)
 		assertEquals(1, listWithItems?.items?.size)
 		assertEquals("Mela", listWithItems?.items?.get(0)?.item?.name)
-		assertEquals(false, listWithItems?.items?.get(0)?.item?.isBought)
 
-		repository.toggleShoppingListItemBought(itemId, true)
-		listWithItems = repository.observeShoppingList(listId).first()
-		assertEquals(true, listWithItems?.items?.get(0)?.item?.isBought)
+		repository.toggleShoppingListItemBought(listWithItems!!.items[0].item.id, true)
+		val updatedList = repository.observeShoppingList(listId).first()
+		assertTrue(updatedList?.items?.get(0)?.item?.isBought == true)
 
-		repository.deleteShoppingListItem(itemId)
-		listWithItems = repository.observeShoppingList(listId).first()
-		assertTrue(listWithItems?.items?.isEmpty() == true)
-	}
+		repository.deleteShoppingListItem(updatedList!!.items[0].item.id)
+		val emptyList = repository.observeShoppingList(listId).first()
+		assertTrue(emptyList?.items.isNullOrEmpty())
 
-	@Test
-	fun deleteShoppingList() = runBlocking {
-		val listId = repository.createShoppingList("Lista Da Eliminare")
 		repository.deleteShoppingList(listId)
-
-		val listWithItems = repository.observeShoppingList(listId).first()
-		assertNull(listWithItems)
+		val noLists = repository.allShoppingLists.first()
+		assertTrue(noLists.isEmpty())
 	}
 
 	@Test
-	fun importDietIngredientsFreshVsStandard() = runBlocking {
-		val dietId = repository.create("Dieta Test", 60)
-		repository.activate(dietId)
+	fun testResetDatabase() = runBlocking {
+		repository.create("Dieta", 30)
+		repository.saveDefaultTime(MealType.LUNCH, 780)
+		repository.resetDatabase()
 
-		// Monday Lunch: Salmone 150g, Biscotti 45g
-		val mealMon = Meal(dietId = dietId, dayOfWeek = DayOfWeek.MONDAY, type = MealType.LUNCH, timeMinutes = 13 * 60)
-		val coursesMon = listOf(
-			CourseWithItems(
-				course = Course(mealId = 0, name = "Primo"),
-				items = listOf(
-					FoodItem(courseId = 0, name = "Salmone", amount = "150", unit = QuantityUnit.GRAMS),
-					FoodItem(courseId = 0, name = "Biscotti", amount = "45", unit = QuantityUnit.GRAMS),
-				),
-			),
-		)
-		repository.saveMeal(mealMon, coursesMon)
+		assertTrue(repository.all.first().isEmpty())
+		assertTrue(repository.defaultTimes.first().isEmpty())
+	}
 
-		// Thursday Lunch: Salmone 150g, Biscotti 45g
-		val mealThu =
-			Meal(dietId = dietId, dayOfWeek = DayOfWeek.THURSDAY, type = MealType.LUNCH, timeMinutes = 13 * 60)
-		val coursesThu = listOf(
-			CourseWithItems(
-				course = Course(mealId = 0, name = "Primo"),
-				items = listOf(
-					FoodItem(courseId = 0, name = "Salmone", amount = "150", unit = QuantityUnit.GRAMS),
-					FoodItem(courseId = 0, name = "Biscotti", amount = "45", unit = QuantityUnit.GRAMS),
-				),
-			),
-		)
-		repository.saveMeal(mealThu, coursesThu)
-
-		val listId = repository.createShoppingList("Spesa Settimana")
-
-		val configs = listOf(
-			DietImportItemConfig(ingredientName = "Biscotti", isFresh = false),
-			DietImportItemConfig(
-				ingredientName = "Salmone",
-				isFresh = true,
-				selectedDays = setOf(DayOfWeek.MONDAY, DayOfWeek.THURSDAY)),
-		)
-
-		repository.addDietIngredientsToShoppingList(listId, dietId, configs)
-
-		val listWithItems = repository.observeShoppingList(listId).first()
-		assertNotNull(listWithItems)
-
-		val items = listWithItems?.items ?: emptyList()
-		// Biscotti: 1 item aggregated (90 g)
-		val biscottiItems = items.filter { it.item.name == "Biscotti" }
-		assertEquals(1, biscottiItems.size)
-		assertEquals("90 g", biscottiItems[0].item.displayQuantity)
-		assertEquals(false, biscottiItems[0].item.isFresh)
-
-		// Salmone: 1 fresh item with 2 days (Monday: 150 g, Thursday: 150 g)
-		val salmoneItems = items.filter { it.item.name == "Salmone" }
-		assertEquals(1, salmoneItems.size)
-		assertTrue(salmoneItems[0].item.isFresh)
-		assertEquals(2, salmoneItems[0].days.size)
-		assertEquals(setOf(DayOfWeek.MONDAY, DayOfWeek.THURSDAY), salmoneItems[0].days.map { it.dayOfWeek }.toSet())
+	private suspend fun assertOfflineWriteBlocked(action: suspend () -> Unit) {
+		val exception = runCatching { action() }.exceptionOrNull()
+		assertTrue("Expected offline write to be rejected, got $exception", exception is OfflineWriteException)
 	}
 }

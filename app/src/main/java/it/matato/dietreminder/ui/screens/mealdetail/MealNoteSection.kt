@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.components.SectionTitle
 import it.matato.dietreminder.ui.theme.DietTheme
 
@@ -20,6 +21,7 @@ fun MealNotesSection(
 	description: String,
 	onDescriptionChange: (String) -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	Column(
 		verticalArrangement = Arrangement.spacedBy(8.dp),
 	) {
@@ -34,6 +36,7 @@ fun MealNotesSection(
 			modifier = Modifier.fillMaxWidth(),
 			shape = androidx.compose.material3.MaterialTheme.shapes.large,
 			minLines = 3,
+			enabled = !isOffline,
 		)
 	}
 }
@@ -43,6 +46,7 @@ fun CustomLabelField(
 	value: String,
 	onValueChange: (String) -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	OutlinedTextField(
 		value = value,
 		onValueChange = onValueChange,
@@ -52,6 +56,7 @@ fun CustomLabelField(
 		modifier = Modifier.fillMaxWidth(),
 		shape = androidx.compose.material3.MaterialTheme.shapes.medium,
 		singleLine = true,
+		enabled = !isOffline,
 	)
 }
 

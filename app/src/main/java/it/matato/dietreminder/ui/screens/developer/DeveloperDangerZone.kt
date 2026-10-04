@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.ui.dialog.DeveloperDangerDialog
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
@@ -34,6 +35,7 @@ fun DeveloperDangerZone(
 	onResetDatabase: () -> Unit,
 	onDisableDeveloperMode: () -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	val error = MaterialTheme.colorScheme.error
 	val errorContainer = MaterialTheme.colorScheme.errorContainer
 
@@ -63,6 +65,7 @@ fun DeveloperDangerZone(
 					icon = Icons.Rounded.DeveloperMode,
 					title = stringResource(R.string.disable_developer_mode),
 					description = stringResource(R.string.disable_developer_mode_description),
+					enabled = true,
 					onClick = {
 						dialog = DangerDialogState(
 							title = R.string.disable_developer_mode,
@@ -76,6 +79,7 @@ fun DeveloperDangerZone(
 					icon = Icons.Rounded.DeleteForever,
 					title = stringResource(R.string.reset_database),
 					description = stringResource(R.string.reset_database_description),
+					enabled = !isOffline,
 					onClick = {
 						dialog = DangerDialogState(
 							title = R.string.reset_database,
@@ -127,12 +131,13 @@ private fun DangerAction(
 	icon: ImageVector,
 	title: String,
 	description: String,
+	enabled: Boolean,
 	onClick: () -> Unit,
 ) {
 	Row(
 		modifier = Modifier
 			.fillMaxWidth()
-			.clickable(onClick = onClick)
+			.clickable(enabled = enabled, onClick = onClick)
 			.padding(vertical = 4.dp),
 		horizontalArrangement = Arrangement.spacedBy(16.dp),
 	) {

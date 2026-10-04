@@ -34,6 +34,7 @@ import it.matato.dietreminder.data.database.relation.CourseWithItems
 import it.matato.dietreminder.data.model.QuantityUnit
 import it.matato.dietreminder.ui.components.IconContainer
 import it.matato.dietreminder.ui.components.SectionTitle
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
@@ -75,6 +76,7 @@ fun CoursesList(
 	onDelete: (Int) -> Unit,
 	onAddCourse: () -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	OutlinedCard(
 		modifier = Modifier.fillMaxWidth(),
 		shape = MaterialTheme.shapes.large,
@@ -101,6 +103,7 @@ fun CoursesList(
 
 			TextButton(
 				onClick = onAddCourse,
+				enabled = !isOffline,
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(
@@ -123,10 +126,11 @@ fun CoursesList(
 fun EmptyCourses(
 	onAddCourse: () -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	OutlinedCard(
 		modifier = Modifier
 			.fillMaxWidth()
-			.clickable(onClick = onAddCourse),
+			.clickable(enabled = !isOffline, onClick = onAddCourse),
 		shape = MaterialTheme.shapes.large,
 	) {
 		Column(

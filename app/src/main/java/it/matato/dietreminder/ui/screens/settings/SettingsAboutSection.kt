@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import it.matato.dietreminder.BuildConfig
 import it.matato.dietreminder.R
 import it.matato.dietreminder.ui.theme.DietTheme
 
@@ -23,7 +24,7 @@ fun SettingsAboutSection(
 	) {
 		SettingsListItem(
 			title = stringResource(R.string.version),
-			subtitle = "1.0.0 (Build 20261027)",
+			subtitle = "${BuildConfig.VERSION_NAME} (Build ${BuildConfig.VERSION_CODE})",
 			leadingIcon = Icons.Rounded.Update,
 			onClick = onVersionClick,
 		)

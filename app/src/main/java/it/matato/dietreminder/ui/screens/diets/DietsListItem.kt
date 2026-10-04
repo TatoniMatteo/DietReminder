@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.database.entity.Diet
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
@@ -38,6 +39,7 @@ fun DietsListItem(
 	onDuplicate: () -> Unit,
 	onDelete: () -> Unit,
 	onConfigure: () -> Unit,
+	isOffline: Boolean = LocalOfflineMode.current,
 ) {
 	var menuExpanded by rememberSaveable(diet.id) {
 		mutableStateOf(false)
@@ -133,6 +135,7 @@ fun DietsListItem(
 							menuExpanded = false
 							onDelete()
 						},
+						isOffline = isOffline,
 					)
 				}
 			},

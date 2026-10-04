@@ -1,4 +1,4 @@
-package it.matato.dietreminder.data.repository
+package it.matato.dietreminder.data.repository.fake
 
 import it.matato.dietreminder.data.database.entity.AppConfig
 import it.matato.dietreminder.data.database.entity.ConfigKey
@@ -21,6 +21,13 @@ import it.matato.dietreminder.data.export.FoodItemExport
 import it.matato.dietreminder.data.export.MealExport
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.model.QuantityUnit
+import it.matato.dietreminder.data.model.VersionPolicy
+import it.matato.dietreminder.data.repository.contracts.ConfigRepository
+import it.matato.dietreminder.data.repository.contracts.DietImportItemConfig
+import it.matato.dietreminder.data.repository.contracts.DietRepository
+import it.matato.dietreminder.data.repository.contracts.ShoppingListInitialItem
+import it.matato.dietreminder.data.repository.contracts.ShoppingListRepository
+import it.matato.dietreminder.data.repository.contracts.VersionPolicyRepository
 import it.matato.dietreminder.domain.QuantityAggregator
 import it.matato.dietreminder.domain.toIngredientSummaries
 import kotlinx.coroutines.flow.Flow
@@ -29,7 +36,9 @@ import kotlinx.coroutines.flow.map
 
 class FakeDietRepository(
 	private val jsonCodec: DietJsonCodec = DietJsonCodec(),
-) : DietRepository {
+) : DietRepository, ShoppingListRepository, ConfigRepository, VersionPolicyRepository {
+
+	override suspend fun fetchPolicy(): Pair<VersionPolicy, Boolean> = VersionPolicy() to false
 
 	private val _diets = MutableStateFlow<List<Diet>>(emptyList())
 	override val all: Flow<List<Diet>> = _diets
@@ -280,7 +289,7 @@ class FakeDietRepository(
 	override suspend fun create(name: String, window: Int): Long {
 		val id = currentDietId++
 		val newDiet = Diet(id = id, name = name, nextMealWindowMinutes = window, isActive = _diets.value.isEmpty())
-		_diets.value = _diets.value + newDiet
+		_diets.value += newDiet
 		return id
 	}
 

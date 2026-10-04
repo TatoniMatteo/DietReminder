@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.database.entity.Diet
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
@@ -33,6 +34,7 @@ fun DietsSection(
 	onDelete: (Diet) -> Unit,
 	onConfigure: (Diet) -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	Column(
 		verticalArrangement = Arrangement.spacedBy(8.dp),
 	) {
@@ -76,6 +78,7 @@ fun DietsSection(
 						onDuplicate = { onDuplicate(diet) },
 						onDelete = { onDelete(diet) },
 						onConfigure = { onConfigure(diet) },
+						isOffline = isOffline,
 					)
 
 					if (index < diets.lastIndex) {

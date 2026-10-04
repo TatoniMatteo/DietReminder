@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.ui.components.IconContainer
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
@@ -46,6 +48,7 @@ fun MealInformationSection(
 	onNotificationEnabledChange: (Boolean) -> Unit,
 	isNotificationSwitchEnabled: Boolean = true,
 ) {
+	val isOffline = LocalOfflineMode.current
 	var typeMenuExpanded by remember { mutableStateOf(false) }
 
 	OutlinedCard(
@@ -65,7 +68,7 @@ fun MealInformationSection(
 					IconContainer(icon = Icons.Rounded.Schedule)
 				},
 				trailingContent = {
-					OutlinedButton(onClick = onTimeClick) {
+					OutlinedButton(onClick = onTimeClick, enabled = !isOffline) {
 						Icon(
 							imageVector = Icons.Rounded.Schedule,
 							contentDescription = null,
@@ -85,7 +88,7 @@ fun MealInformationSection(
 			// Row 2: Meal Type
 			Box {
 				ListItem(
-					modifier = Modifier.clickable {
+					modifier = Modifier.clickable(enabled = !isOffline) {
 						typeMenuExpanded = true
 					},
 					headlineContent = {
@@ -120,6 +123,7 @@ fun MealInformationSection(
 								onTypeChange(mealType)
 								typeMenuExpanded = false
 							},
+							enabled = !isOffline,
 						)
 					}
 				}
@@ -156,7 +160,8 @@ fun MealInformationSection(
 					Switch(
 						checked = isNotificationEnabled,
 						onCheckedChange = onNotificationEnabledChange,
-						enabled = isNotificationSwitchEnabled,
+						enabled = isNotificationSwitchEnabled && !isOffline,
+						modifier = Modifier.testTag("meal-notifications-switch"),
 					)
 				}
 			)

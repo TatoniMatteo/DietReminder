@@ -27,7 +27,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -47,12 +46,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.database.relation.ShoppingListWithItems
+import it.matato.dietreminder.ui.LocalOfflineMode
+import it.matato.dietreminder.ui.OfflineAwareFloatingActionButton
 import it.matato.dietreminder.ui.components.IconContainer
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
@@ -124,6 +126,7 @@ fun ShoppingListsContent(
 	onDeleteList: (Long) -> Unit,
 	onRenameList: (Long, String) -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -154,7 +157,11 @@ fun ShoppingListsContent(
 			)
 		},
 		floatingActionButton = {
-			FloatingActionButton(onClick = onCreateClick) {
+			OfflineAwareFloatingActionButton(
+				onClick = onCreateClick,
+				containerColor = MaterialTheme.colorScheme.primary,
+				contentColor = MaterialTheme.colorScheme.onPrimary,
+			) {
 				Icon(
 					imageVector = Icons.Rounded.Add,
 					contentDescription = stringResource(R.string.new_shopping_list),
@@ -255,7 +262,7 @@ private fun ShoppingListCard(
 				}
 
 				Box {
-					IconButton(onClick = { showMenu = true }) {
+					IconButton(onClick = { showMenu = true }, enabled = !LocalOfflineMode.current) {
 						Icon(
 							imageVector = Icons.Rounded.MoreVert,
 							contentDescription = null,
@@ -272,6 +279,7 @@ private fun ShoppingListCard(
 								showMenu = false
 								showRenameDialog = true
 							},
+							enabled = !LocalOfflineMode.current,
 							leadingIcon = {
 								Icon(Icons.Rounded.Edit, contentDescription = null)
 							},
@@ -282,6 +290,7 @@ private fun ShoppingListCard(
 								showMenu = false
 								showDeleteConfirmDialog = true
 							},
+							enabled = !LocalOfflineMode.current,
 							leadingIcon = {
 								Icon(
 									Icons.Rounded.Delete,
@@ -302,8 +311,9 @@ private fun ShoppingListCard(
 				verticalAlignment = Alignment.CenterVertically,
 			) {
 				Text(
-					text = stringResource(
-						R.string.items_purchased_count,
+					text = pluralStringResource(
+						R.plurals.items_purchased_count,
+						boughtItems,
 						boughtItems,
 						totalItems,
 					),
@@ -412,7 +422,7 @@ private fun NewShoppingListDialog(
 						onConfirm(name.trim(), importFromDiet)
 					}
 				},
-				enabled = name.isNotBlank(),
+				enabled = name.isNotBlank() && !LocalOfflineMode.current,
 			) {
 				Text(stringResource(R.string.create))
 			}
@@ -452,7 +462,7 @@ private fun RenameShoppingListDialog(
 						onConfirm(name.trim())
 					}
 				},
-				enabled = name.isNotBlank(),
+				enabled = name.isNotBlank() && !LocalOfflineMode.current,
 			) {
 				Text(stringResource(R.string.save))
 			}

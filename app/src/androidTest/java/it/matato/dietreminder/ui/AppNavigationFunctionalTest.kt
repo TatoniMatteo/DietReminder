@@ -5,7 +5,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import it.matato.dietreminder.data.repository.FakeDietRepository
+import it.matato.dietreminder.data.repository.fake.FakeDietRepository
 import it.matato.dietreminder.ui.navigation.AppNavigation
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
@@ -35,6 +35,7 @@ class AppNavigationFunctionalTest {
 				AppContent(
 					currentRoute = "WeekRoute",
 					showBottomBar = true,
+					isOffline = false,
 					onNavigateToRoot = { destination ->
 						navController.navigate(destination.route())
 					},

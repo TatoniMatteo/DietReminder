@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <plurals name="courses_count">
+        <item quantity="one">%1$d portata</item>
+        <item quantity="other">%1$d portate</item>
+        <item quantity="many">%1$d portate</item>
+    </plurals>
+    <plurals name="meals_count">
+        <item quantity="one">%1$d pasto</item>
+        <item quantity="other">%1$d pasti</item>
+        <item quantity="many">%1$d pasti</item>
+    </plurals>
+    <plurals name="developer_clicks_remaining">
+        <item quantity="one">Ti manca %1$d clic</item>
+        <item quantity="other">Ti mancano %1$d clic</item>
+        <item quantity="many">Ti mancano %1$d clic</item>
+    </plurals>
+    <plurals name="items_purchased_count">
+        <item quantity="one">%1$d di %2$d elemento acquistato</item>
+        <item quantity="other">%1$d di %2$d elementi acquistati</item>
+        <item quantity="many">%1$d di %2$d elementi acquistati</item>
+    </plurals>
+    <plurals name="import_selected_count">
+        <item quantity="one">Importa %1$d alimento</item>
+        <item quantity="other">Importa %1$d alimenti</item>
+        <item quantity="many">Importa %1$d alimenti</item>
+    </plurals>
     <string name="app_name">Memo Pasti</string>
 
     <string name="week">Settimana</string>
@@ -31,8 +56,6 @@
     <string name="new_diet">Nuova dieta</string>
     <string name="diet_name">Nome dieta</string>
     <string name="window_minutes">Finestra di visualizzazione (minuti)</string>
-    <string name="courses_count">%1$d portate</string>
-    <string name="meals_count">%1$d pasti</string>
     <string name="add_meal">Aggiungi un pasto</string>
 
     <string name="import_diet">Importa dieta</string>
@@ -42,15 +65,8 @@
     <string name="export_name">Esporta %1$s</string>
     <string name="json_exported">Dieta esportata con successo</string>
     <string name="export_failed">Esportazione non riuscita</string>
-    <string name="import_failed">Importazione non riuscita</string>
     <string name="backup_data">Dati e backup</string>
-    <string name="import_success">Dieta importata con successo</string>
-    <string name="import_invalid_json">Il file non è valido</string>
-    <string name="import_overwrite_title">Dieta già esistente</string>
-    <string name="import_overwrite_message">Una dieta con lo stesso ID univoco esiste già. Vuoi sovrascriverla o annullare l\'importazione?</string>
-    <string name="overwrite">Sovrascrivi</string>
 
-    <string name="greeting">Ciao!</string>
     <string name="hydration_title">Idratazione</string>
 
     <string name="appearance_personalization">Aspetto e personalizzazione</string>
@@ -68,11 +84,9 @@
 
     <string name="planning">Pianificazione</string>
     <string name="default_time">Orario predefinito</string>
-    <string name="set_default_time">Imposta orario predefinito</string>
     <string name="new_window">Nuova fascia</string>
     <string name="start">Inizio</string>
     <string name="end">Fine</string>
-    <string name="from_to">Dalle %1$02d:%2$02d alle %3$02d:%4$02d</string>
 
     <string name="notifications_alarms">Notifiche e allarmi</string>
     <string name="meal_reminders">Promemoria pasti</string>
@@ -112,7 +126,6 @@
     <string name="reset_database_confirmation">Vuoi davvero cancellare tutti i dati del database? Questa operazione non può essere annullata.</string>
     <string name="reset_database_description">Questa operazione elimina definitivamente tutti i dati dell\'applicazione e non può essere annullata.</string>
 
-    <string name="developer_clicks_remaining">Ti mancano %1$d clic</string>
     <string name="developer_mode_activated">Opzioni sviluppatore attivate!</string>
     <string name="developer_settings">Impostazioni sviluppatore</string>
     <string name="developer_settings_description">Strumenti avanzati e log</string>
@@ -137,8 +150,6 @@
     <string name="it_is_moment_of">È il momento di %1$s</string>
     <string name="hydration_notification_title">Idratazione</string>
     <string name="hydration_notification_message">Ricordati di bere un bicchiere d\'acqua!</string>
-    <string name="action_drank">Bevuto ✅</string>
-    <string name="action_later">Più tardi ⏰</string>
 
     <string name="meal_breakfast_short">Colaz.</string>
     <string name="meal_morning_snack_short">Spunt.</string>
@@ -161,16 +172,13 @@
     <string name="notification_enabled">Notifica attiva</string>
     <string name="notification_disabled">Notifica disattivata</string>
 
-    <string name="ingredients">Ingredienti</string>
     <string name="ingredients_title">Lista ingredienti</string>
     <string name="no_ingredients_in_diet">Nessun ingrediente presente in questa dieta</string>
 
-    <string name="shopping_list">Lista della spesa</string>
     <string name="shopping_lists">Liste della spesa</string>
     <string name="nav_shopping_lists">Spesa</string>
     <string name="new_shopping_list">Nuova lista della spesa</string>
     <string name="default_shopping_list_name">Lista della spesa %1$s</string>
-    <string name="items_purchased_count">%1$d di %2$d elementi acquistati</string>
     <string name="to_buy">Da acquistare</string>
     <string name="purchased">Acquistati</string>
     <string name="add_item">Aggiungi elemento</string>
@@ -272,7 +280,6 @@
     <string name="unit_custom">Altro</string>
 
     <string name="import_diet_foods_title">Importa dalla dieta</string>
-    <string name="import_selected_count">Importa %1$d alimenti</string>
     <string name="import_info_title">Gestione Freschi vs Settimana</string>
     <string name="import_info_desc">Gli alimenti standard vengono accorpati calcolando la quantità totale per l\'intera settimana. Gli alimenti freschi vengono mantenuti divisi giorno per giorno.</string>
     <string name="item_type_label">Tipo:</string>
@@ -295,4 +302,19 @@
     <string name="import_error_invalid_amount">Quantità numerica \'%1$s\' non valida per l\'alimento \'%2$s\'.</string>
     <string name="import_error_unit_requires_amount">L\'unità di misura \'%1$s\' richiede un valore numerico per l\'alimento \'%2$s\'.</string>
     <string name="import_error_malformed_json">Il file JSON è malformato o contiene errori di sintassi.</string>
+
+    <string name="update_recent_title">Nuovo Aggiornamento Disponibile</string>
+    <string name="update_recent_message">È disponibile una nuova versione dell\'applicazione. Aggiorna per accedere alle ultime novità.</string>
+    <string name="update_deprecated_title">Aggiornamento Consigliato</string>
+    <string name="update_deprecated_message">La versione corrente è deprecata e utilizza API sul server che verranno presto rimosse. Si consiglia di aggiornare al più presto.</string>
+    <string name="update_obsolete_title">Versione Obsoleta</string>
+    <string name="update_obsolete_message">Questa versione dell\'applicazione non è più supportata dal server. È necessario aggiornare l\'app per continuare.</string>
+    <string name="update_now">Aggiorna Subito</string>
+    <string name="update_later">Più tardi</string>
+    <string name="offline_title">Connessione Assente</string>
+    <string name="offline_message">Impossibile verificare la versione dell\'applicazione in quanto sei offline. Controlla la connessione internet e riprova.</string>
+    <string name="retry">Riprova</string>
+    <string name="continue_offline">Continua offline</string>
+    <string name="offline_mode_banner">Modalità offline: alcune operazioni sono disattivate.</string>
+    <string name="offline_write_blocked">Questa operazione non è disponibile offline. Riconnettiti per apportare modifiche.</string>
 </resources>

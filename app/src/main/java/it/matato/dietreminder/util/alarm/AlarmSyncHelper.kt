@@ -56,13 +56,13 @@ object AlarmSyncHelper {
 		AppLog.i("AlarmSyncHelper: Sync starting...")
 
 		val app = context as DietApplication
-		val repository = app.repository
+		val configRepo = app.configRepository
 
 		val mealRemindersEnabled =
-			repository.observeConfig(ConfigKey.MEAL_REMINDERS_ENABLED).first()?.value != "false"
+			configRepo.observeConfig(ConfigKey.MEAL_REMINDERS_ENABLED).first()?.value != "false"
 
 		val hydrationEnabled =
-			repository.observeConfig(ConfigKey.HYDRATION_ENABLED).first()?.value == "true"
+			configRepo.observeConfig(ConfigKey.HYDRATION_ENABLED).first()?.value == "true"
 
 		AppLog.d(
 			"Current configuration: mealReminders=$mealRemindersEnabled, " +
@@ -88,7 +88,7 @@ object AlarmSyncHelper {
 		context: Context,
 		app: DietApplication
 	) {
-		val activeDiet = app.repository.active.first()
+		val activeDiet = app.dietRepository.active.first()
 
 		if (activeDiet == null) {
 			AppLog.w("No active diet found, meal reminders will not be scheduled")
@@ -97,7 +97,7 @@ object AlarmSyncHelper {
 
 		AppLog.d("Syncing meals for active diet: ${activeDiet.name}")
 
-		val allMeals = app.repository.getMeals(activeDiet.id)
+		val allMeals = app.dietRepository.getMeals(activeDiet.id)
 
 		MealType.entries.forEach { type ->
 			val matchingMeals = allMeals.filter { it.meal.type == type }
@@ -178,7 +178,7 @@ object AlarmSyncHelper {
 	}
 
 	private suspend fun loadHydrationRanges(app: DietApplication): List<HydrationRange> {
-		val json = app.repository.observeConfig(ConfigKey.HYDRATION_RANGES).first()?.value
+		val json = app.configRepository.observeConfig(ConfigKey.HYDRATION_RANGES).first()?.value
 
 		if (json.isNullOrBlank()) {
 			return defaultHydrationRanges
@@ -193,7 +193,7 @@ object AlarmSyncHelper {
 	}
 
 	private suspend fun loadHydrationDays(app: DietApplication): Set<DayOfWeek> {
-		val value = app.repository.observeConfig(ConfigKey.HYDRATION_DAYS).first()?.value
+		val value = app.configRepository.observeConfig(ConfigKey.HYDRATION_DAYS).first()?.value
 
 		if (value.isNullOrBlank()) {
 			return DayOfWeek.entries.toSet()
@@ -215,7 +215,7 @@ object AlarmSyncHelper {
 	}
 
 	private suspend fun loadHydrationInterval(app: DietApplication): Int {
-		return app.repository.observeConfig(ConfigKey.HYDRATION_INTERVAL).first()?.value?.toIntOrNull()
+		return app.configRepository.observeConfig(ConfigKey.HYDRATION_INTERVAL).first()?.value?.toIntOrNull()
 			?: DEFAULT_HYDRATION_INTERVAL_MINUTES
 	}
 

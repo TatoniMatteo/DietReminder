@@ -36,7 +36,6 @@ import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -58,12 +57,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
+import it.matato.dietreminder.ui.LocalOfflineMode
+import it.matato.dietreminder.ui.OfflineAwareFloatingActionButton
 import it.matato.dietreminder.data.database.entity.Meal
 import it.matato.dietreminder.data.database.relation.MealWithDetails
 import it.matato.dietreminder.data.model.MealType
@@ -143,9 +146,10 @@ fun DietConfigContent(
 	onAddMeal: () -> Unit,
 	onEditMeal: (Long) -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	Scaffold(
 		floatingActionButton = {
-			FloatingActionButton(
+			OfflineAwareFloatingActionButton(
 				onClick = onAddMeal,
 				containerColor = MaterialTheme.colorScheme.primary,
 				contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -257,7 +261,8 @@ private fun DayNotificationHeaderCard(
 				Switch(
 					checked = isEnabled,
 					onCheckedChange = onToggle,
-					enabled = isSwitchEnabled,
+					enabled = isSwitchEnabled && !LocalOfflineMode.current,
+					modifier = Modifier.testTag("diet-day-notifications-switch"),
 				)
 			}
 		)
@@ -552,8 +557,9 @@ private fun MealTimelineItem(
 						Spacer(modifier = Modifier.height(8.dp))
 
 						Text(
-							text = stringResource(
-								R.string.courses_count,
+							text = pluralStringResource(
+								R.plurals.courses_count,
+								mealDetails.courses.size,
 								mealDetails.courses.size,
 							),
 							style = MaterialTheme.typography.labelMedium,

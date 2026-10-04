@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,6 +73,7 @@ fun NewDietDialogContent(
 	onDismiss: () -> Unit,
 	onCreate: () -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	ElevatedCard(
 		shape = MaterialTheme.shapes.extraLarge,
 		colors = CardDefaults.elevatedCardColors(
@@ -112,6 +114,7 @@ fun NewDietDialogContent(
 			OutlinedTextField(
 				value = name,
 				onValueChange = onNameChange,
+				enabled = !isOffline,
 				label = {
 					Text(stringResource(R.string.diet_name))
 				},
@@ -145,6 +148,7 @@ fun NewDietDialogContent(
 					value = window,
 					onValueChange = onWindowChange,
 					valueRange = 0f .. 120f,
+					enabled = !isOffline,
 				)
 			}
 
@@ -160,7 +164,7 @@ fun NewDietDialogContent(
 
 				Button(
 					onClick = onCreate,
-					enabled = name.isNotBlank(),
+					enabled = name.isNotBlank() && !isOffline,
 				) {
 					Text(stringResource(R.string.create))
 				}

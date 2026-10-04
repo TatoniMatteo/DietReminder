@@ -181,7 +181,7 @@ fun AppNavigation(
 						MealDetailRoute(
 							mealId = 0L,
 							dietId = dietId,
-							dayOfWeek = dayOfWeek,
+							dayOfWeek = dayOfWeek.name,
 						),
 					)
 				},
@@ -190,7 +190,7 @@ fun AppNavigation(
 						MealDetailRoute(
 							mealId = mealId,
 							dietId = route.dietId,
-							dayOfWeek = dayOfWeek,
+							dayOfWeek = dayOfWeek.name,
 						),
 					)
 				},
@@ -204,7 +204,7 @@ fun AppNavigation(
 				vm = vm,
 				mealId = route.mealId,
 				dietId = route.dietId,
-				dayOfWeek = route.dayOfWeek,
+				dayOfWeek = java.time.DayOfWeek.valueOf(route.dayOfWeek),
 				onBack = {
 					navigator.navigateUp()
 				},
