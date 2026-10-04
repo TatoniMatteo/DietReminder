@@ -18,90 +18,90 @@ import kotlinx.serialization.json.Json
 
 object AlarmTracker {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val mutex = Mutex()
+	private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+	private val mutex = Mutex()
 
-    fun registerAlarm(context: Context, alarm: ScheduledAlarm) {
-        scope.launch {
-            mutex.withLock {
-                val current = getAlarmsInternal(context)
-                val updated = (current.filter { it.id != alarm.id } + alarm).sortedBy { it.timeMillis }
+	fun registerAlarm(context: Context, alarm: ScheduledAlarm) {
+		scope.launch {
+			mutex.withLock {
+				val current = getAlarmsInternal(context)
+				val updated = (current.filter { it.id != alarm.id } + alarm).sortedBy { it.timeMillis }
 
-                saveAlarms(context, updated)
+				saveAlarms(context, updated)
 
-                AppLog.t("Alarm registered: ID=${alarm.id}, Type=${alarm.type}")
-            }
-        }
-    }
+				AppLog.t("Alarm registered: ID=${alarm.id}, Type=${alarm.type}")
+			}
+		}
+	}
 
-    fun unregisterAlarm(
-        context: Context,
-        id: Int,
-    ) {
-        scope.launch {
-            mutex.withLock {
-                val current = getAlarmsInternal(context)
-                val updated = current.filter { it.id != id }
+	fun unregisterAlarm(
+		context: Context,
+		id: Int,
+	) {
+		scope.launch {
+			mutex.withLock {
+				val current = getAlarmsInternal(context)
+				val updated = current.filter { it.id != id }
 
-                saveAlarms(context, updated)
+				saveAlarms(context, updated)
 
-                AppLog.t("Alarm unregistered: ID=$id")
-            }
-        }
-    }
+				AppLog.t("Alarm unregistered: ID=$id")
+			}
+		}
+	}
 
-    fun clearAll(context: Context) {
-        scope.launch {
-            mutex.withLock {
-                saveAlarms(context, emptyList())
-                AppLog.d("Alarm registry cleared")
-            }
-        }
-    }
+	fun clearAll(context: Context) {
+		scope.launch {
+			mutex.withLock {
+				saveAlarms(context, emptyList())
+				AppLog.d("Alarm registry cleared")
+			}
+		}
+	}
 
-    fun observeAlarms(context: Context): Flow<List<ScheduledAlarm>> {
-        val repo = (context.applicationContext as DietApplication).repository
+	fun observeAlarms(context: Context): Flow<List<ScheduledAlarm>> {
+		val repo = (context.applicationContext as DietApplication).repository
 
-        return repo.observeConfig(ConfigKey.SCHEDULED_ALARMS_REGISTRY).map { config ->
-                decodeAlarms(config?.value)
-            }
-    }
+		return repo.observeConfig(ConfigKey.SCHEDULED_ALARMS_REGISTRY).map { config ->
+			decodeAlarms(config?.value)
+		}
+	}
 
-    suspend fun getAlarms(context: Context): List<ScheduledAlarm> {
-        return mutex.withLock {
-            getAlarmsInternal(context)
-        }
-    }
+	suspend fun getAlarms(context: Context): List<ScheduledAlarm> {
+		return mutex.withLock {
+			getAlarmsInternal(context)
+		}
+	}
 
-    private suspend fun getAlarmsInternal(context: Context): List<ScheduledAlarm> {
-        val repo = (context.applicationContext as DietApplication).repository
-        val json = repo.observeConfig(ConfigKey.SCHEDULED_ALARMS_REGISTRY).first()?.value
+	private suspend fun getAlarmsInternal(context: Context): List<ScheduledAlarm> {
+		val repo = (context.applicationContext as DietApplication).repository
+		val json = repo.observeConfig(ConfigKey.SCHEDULED_ALARMS_REGISTRY).first()?.value
 
-        return decodeAlarms(json)
-    }
+		return decodeAlarms(json)
+	}
 
-    private fun decodeAlarms(json: String?): List<ScheduledAlarm> {
-        return try {
-            if (json.isNullOrBlank()) {
-                emptyList()
-            } else {
-                Json.decodeFromString<List<ScheduledAlarm>>(json)
-            }
-        } catch (e: Exception) {
-            AppLog.e("Failed to decode alarm registry", e)
-            emptyList()
-        }
-    }
+	private fun decodeAlarms(json: String?): List<ScheduledAlarm> {
+		return try {
+			if (json.isNullOrBlank()) {
+				emptyList()
+			} else {
+				Json.decodeFromString<List<ScheduledAlarm>>(json)
+			}
+		} catch (e: Exception) {
+			AppLog.e("Failed to decode alarm registry", e)
+			emptyList()
+		}
+	}
 
-    private suspend fun saveAlarms(
-        context: Context,
-        alarms: List<ScheduledAlarm>,
-    ) {
-        val repo = (context.applicationContext as DietApplication).repository
+	private suspend fun saveAlarms(
+		context: Context,
+		alarms: List<ScheduledAlarm>,
+	) {
+		val repo = (context.applicationContext as DietApplication).repository
 
-        repo.saveConfig(
-            ConfigKey.SCHEDULED_ALARMS_REGISTRY,
-            Json.encodeToString(alarms),
-        )
-    }
+		repo.saveConfig(
+			ConfigKey.SCHEDULED_ALARMS_REGISTRY,
+			Json.encodeToString(alarms),
+		)
+	}
 }

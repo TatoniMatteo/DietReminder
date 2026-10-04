@@ -26,45 +26,45 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun EmptyDayState() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_no_meal),
-                    contentDescription = null,
-                    modifier = Modifier.size(30.dp),
-                )
-            }
+	Box(
+		modifier = Modifier
+			.fillMaxSize()
+			.padding(horizontal = 32.dp),
+		contentAlignment = Alignment.Center,
+	) {
+		Column(
+			horizontalAlignment = Alignment.CenterHorizontally,
+		) {
+			Box(
+				modifier = Modifier
+					.size(64.dp)
+					.clip(CircleShape)
+					.background(MaterialTheme.colorScheme.surfaceVariant),
+				contentAlignment = Alignment.Center,
+			) {
+				Icon(
+					painter = painterResource(R.drawable.ic_no_meal),
+					contentDescription = null,
+					modifier = Modifier.size(30.dp),
+				)
+			}
 
-            Spacer(modifier = Modifier.height(16.dp))
+			Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = stringResource(R.string.no_meals_for_day),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-    }
+			Text(
+				text = stringResource(R.string.no_meals_for_day),
+				style = MaterialTheme.typography.titleMedium,
+				fontWeight = FontWeight.SemiBold,
+				color = MaterialTheme.colorScheme.onSurface,
+			)
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun EmptyDayStatePreview() {
-    DietTheme {
-        EmptyDayState()
-    }
+	DietTheme {
+		EmptyDayState()
+	}
 }

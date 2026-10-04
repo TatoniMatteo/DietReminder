@@ -22,106 +22,106 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun SettingsAppearanceSection(
-    currentTheme: String,
-    dynamicEnabled: Boolean,
-    seedColorHex: String,
-    currentLanguage: String,
-    onThemeChange: (String) -> Unit,
-    onDynamicColorsChange: (Boolean) -> Unit,
-    onColorClick: () -> Unit,
-    onLanguageClick: () -> Unit,
+	currentTheme: String,
+	dynamicEnabled: Boolean,
+	seedColorHex: String,
+	currentLanguage: String,
+	onThemeChange: (String) -> Unit,
+	onDynamicColorsChange: (Boolean) -> Unit,
+	onColorClick: () -> Unit,
+	onLanguageClick: () -> Unit,
 ) {
-    val seedColor = parseSeedColor(seedColorHex)
+	val seedColor = parseSeedColor(seedColorHex)
 
-    SettingsSection(
-        title = stringResource(R.string.appearance_personalization),
-        icon = Icons.Rounded.Tune,
-    ) {
-        SettingsListItem(
-            title = stringResource(R.string.theme),
-            subtitle = when (currentTheme) {
-                "light" -> stringResource(R.string.theme_light)
-                "dark" -> stringResource(R.string.theme_dark)
-                else -> stringResource(R.string.theme_system)
-            },
-            leadingIcon = Icons.Rounded.Brightness4,
-            onClick = {
-                val nextTheme = when (currentTheme) {
-                    "system" -> "light"
-                    "light" -> "dark"
-                    else -> "system"
-                }
+	SettingsSection(
+		title = stringResource(R.string.appearance_personalization),
+		icon = Icons.Rounded.Tune,
+	) {
+		SettingsListItem(
+			title = stringResource(R.string.theme),
+			subtitle = when (currentTheme) {
+				"light" -> stringResource(R.string.theme_light)
+				"dark" -> stringResource(R.string.theme_dark)
+				else -> stringResource(R.string.theme_system)
+			},
+			leadingIcon = Icons.Rounded.Brightness4,
+			onClick = {
+				val nextTheme = when (currentTheme) {
+					"system" -> "light"
+					"light" -> "dark"
+					else -> "system"
+				}
 
-                onThemeChange(nextTheme)
-            },
-        )
+				onThemeChange(nextTheme)
+			},
+		)
 
-        SettingsDivider()
+		SettingsDivider()
 
-        SettingsListItem(
-            title = stringResource(R.string.dynamic_colors),
-            subtitle = stringResource(R.string.dynamic_colors_desc),
-            leadingIcon = Icons.Rounded.ColorLens,
-            trailingContent = {
-                Switch(
-                    checked = dynamicEnabled,
-                    onCheckedChange = onDynamicColorsChange,
-                )
-            },
-            onClick = {
-                onDynamicColorsChange(!dynamicEnabled)
-            },
-        )
+		SettingsListItem(
+			title = stringResource(R.string.dynamic_colors),
+			subtitle = stringResource(R.string.dynamic_colors_desc),
+			leadingIcon = Icons.Rounded.ColorLens,
+			trailingContent = {
+				Switch(
+					checked = dynamicEnabled,
+					onCheckedChange = onDynamicColorsChange,
+				)
+			},
+			onClick = {
+				onDynamicColorsChange(!dynamicEnabled)
+			},
+		)
 
-        SettingsDivider()
+		SettingsDivider()
 
-        SettingsListItem(
-            title = stringResource(R.string.app_color),
-            subtitle = stringResource(R.string.app_color_desc),
-            leadingIcon = Icons.Rounded.ColorLens,
-            trailingContent = {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .background(
-                            color = seedColor,
-                            shape = CircleShape,
-                        ),
-                )
-            },
-            onClick = onColorClick,
-        )
+		SettingsListItem(
+			title = stringResource(R.string.app_color),
+			subtitle = stringResource(R.string.app_color_desc),
+			leadingIcon = Icons.Rounded.ColorLens,
+			trailingContent = {
+				Box(
+					modifier = Modifier
+						.size(32.dp)
+						.background(
+							color = seedColor,
+							shape = CircleShape,
+						),
+				)
+			},
+			onClick = onColorClick,
+		)
 
-        SettingsDivider()
+		SettingsDivider()
 
-        SettingsListItem(
-            title = stringResource(R.string.language),
-            subtitle = if (currentLanguage == "it") {
-                stringResource(R.string.lang_it)
-            } else {
-                stringResource(R.string.lang_en)
-            },
-            leadingIcon = Icons.Rounded.Language,
-            onClick = onLanguageClick,
-        )
-    }
+		SettingsListItem(
+			title = stringResource(R.string.language),
+			subtitle = if (currentLanguage == "it") {
+				stringResource(R.string.lang_it)
+			} else {
+				stringResource(R.string.lang_en)
+			},
+			leadingIcon = Icons.Rounded.Language,
+			onClick = onLanguageClick,
+		)
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SettingsAppearanceSectionPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            SettingsAppearanceSection(
-                currentTheme = "system",
-                dynamicEnabled = true,
-                seedColorHex = "0xFF6750A4",
-                currentLanguage = "en",
-                onThemeChange = {},
-                onDynamicColorsChange = {},
-                onColorClick = {},
-                onLanguageClick = {},
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			SettingsAppearanceSection(
+				currentTheme = "system",
+				dynamicEnabled = true,
+				seedColorHex = "0xFF6750A4",
+				currentLanguage = "en",
+				onThemeChange = {},
+				onDynamicColorsChange = {},
+				onColorClick = {},
+				onLanguageClick = {},
+			)
+		}
+	}
 }

@@ -13,33 +13,33 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class AppLogTest {
 
-    @Before
-    fun setUp() {
-        AppLog.clear()
-    }
+	@Before
+	fun setUp() {
+		AppLog.clear()
+	}
 
-    @Test
-    fun logMethods_addEntriesToLogStream() {
-        assertTrue(AppLog.entries.value.isEmpty())
+	@Test
+	fun logMethods_addEntriesToLogStream() {
+		assertTrue(AppLog.entries.value.isEmpty())
 
-        AppLog.i("Info message")
-        AppLog.d("Debug message")
-        AppLog.w("Warning message")
-        AppLog.e("Error message", RuntimeException("Test exception"))
-        AppLog.t("Trace message")
+		AppLog.i("Info message")
+		AppLog.d("Debug message")
+		AppLog.w("Warning message")
+		AppLog.e("Error message", RuntimeException("Test exception"))
+		AppLog.t("Trace message")
 
-        val entries = AppLog.entries.value
-        assertEquals(5, entries.size)
-        assertEquals(LogLevel.TRACE, entries[0].level)
-        assertEquals(LogLevel.INFO, entries[4].level)
-    }
+		val entries = AppLog.entries.value
+		assertEquals(5, entries.size)
+		assertEquals(LogLevel.TRACE, entries[0].level)
+		assertEquals(LogLevel.INFO, entries[4].level)
+	}
 
-    @Test
-    fun clear_resetsLogStream() {
-        AppLog.i("Some log")
-        assertEquals(1, AppLog.entries.value.size)
+	@Test
+	fun clear_resetsLogStream() {
+		AppLog.i("Some log")
+		assertEquals(1, AppLog.entries.value.size)
 
-        AppLog.clear()
-        assertTrue(AppLog.entries.value.isEmpty())
-    }
+		AppLog.clear()
+		assertTrue(AppLog.entries.value.isEmpty())
+	}
 }

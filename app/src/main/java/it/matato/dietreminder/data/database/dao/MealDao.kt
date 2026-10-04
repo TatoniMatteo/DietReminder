@@ -12,35 +12,35 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MealDao {
 
-    @Transaction
-    @Query(
-        """
+	@Transaction
+	@Query(
+		"""
         SELECT * FROM meals
         WHERE dietId = :dietId
         ORDER BY dayOfWeek, timeMinutes
     """
-    )
-    fun observeWithDetails(dietId: Long): Flow<List<MealWithDetails>>
+	)
+	fun observeWithDetails(dietId: Long): Flow<List<MealWithDetails>>
 
-    @Transaction
-    @Query(
-        """
+	@Transaction
+	@Query(
+		"""
         SELECT * FROM meals
         WHERE dietId = :dietId
         ORDER BY dayOfWeek, timeMinutes
     """
-    )
-    suspend fun getAllWithDetails(dietId: Long): List<MealWithDetails>
+	)
+	suspend fun getAllWithDetails(dietId: Long): List<MealWithDetails>
 
-    @Query("SELECT * FROM meals WHERE id = :id")
-    suspend fun get(id: Long): Meal?
+	@Query("SELECT * FROM meals WHERE id = :id")
+	suspend fun get(id: Long): Meal?
 
-    @Insert
-    suspend fun insert(meal: Meal): Long
+	@Insert
+	suspend fun insert(meal: Meal): Long
 
-    @Update
-    suspend fun update(meal: Meal): Int
+	@Update
+	suspend fun update(meal: Meal): Int
 
-    @Query("DELETE FROM meals WHERE id = :id")
-    suspend fun delete(id: Long): Int
+	@Query("DELETE FROM meals WHERE id = :id")
+	suspend fun delete(id: Long): Int
 }

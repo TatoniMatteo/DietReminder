@@ -30,79 +30,79 @@ import it.matato.dietreminder.ui.theme.DietTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialog(
-    title: String,
-    initialTimeMinutes: Int,
-    onDismiss: () -> Unit,
-    onTimeSelected: (Int) -> Unit,
+	title: String,
+	initialTimeMinutes: Int,
+	onDismiss: () -> Unit,
+	onTimeSelected: (Int) -> Unit,
 ) {
-    val timeState = rememberTimePickerState(
-        initialHour = initialTimeMinutes / 60,
-        initialMinute = initialTimeMinutes % 60,
-        is24Hour = true,
-    )
+	val timeState = rememberTimePickerState(
+		initialHour = initialTimeMinutes / 60,
+		initialMinute = initialTimeMinutes % 60,
+		is24Hour = true,
+	)
 
-    BasicAlertDialog(
-        onDismissRequest = onDismiss,
-    ) {
-        ElevatedCard(
-            shape = MaterialTheme.shapes.extraLarge,
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                )
+	BasicAlertDialog(
+		onDismissRequest = onDismiss,
+	) {
+		ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge,
+		) {
+			Column(
+				modifier = Modifier.padding(16.dp),
+				verticalArrangement = Arrangement.spacedBy(12.dp),
+				horizontalAlignment = Alignment.CenterHorizontally,
+			) {
+				Text(
+					text = title,
+					style = MaterialTheme.typography.titleMedium,
+					fontWeight = FontWeight.Bold,
+				)
 
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    TimePicker(
-                        state = timeState,
-                        modifier = Modifier.scale(0.75f),
-                    )
-                }
+				Box(
+					modifier = Modifier.fillMaxWidth(),
+					contentAlignment = Alignment.Center,
+				) {
+					TimePicker(
+						state = timeState,
+						modifier = Modifier.scale(0.75f),
+					)
+				}
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(
-                        onClick = onDismiss,
-                    ) {
-                        Text(stringResource(R.string.cancel))
-                    }
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					horizontalArrangement = Arrangement.End,
+				) {
+					TextButton(
+						onClick = onDismiss,
+					) {
+						Text(stringResource(R.string.cancel))
+					}
 
-                    Button(
-                        modifier = Modifier.testTag("saveButton"),
-                        onClick = {
-                            onTimeSelected(
-                                timeState.hour * 60 + timeState.minute,
-                            )
-                        },
-                    ) {
-                        Text(stringResource(R.string.save))
-                    }
-                }
-            }
-        }
-    }
+					Button(
+						modifier = Modifier.testTag("saveButton"),
+						onClick = {
+							onTimeSelected(
+								timeState.hour * 60 + timeState.minute,
+							)
+						},
+					) {
+						Text(stringResource(R.string.save))
+					}
+				}
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun TimePickerDialogPreview() {
-    DietTheme {
-        TimePickerDialog(
-            title = "Select Time",
-            initialTimeMinutes = 720,
-            onDismiss = {},
-            onTimeSelected = {},
-        )
-    }
+	DietTheme {
+		TimePickerDialog(
+			title = "Select Time",
+			initialTimeMinutes = 720,
+			onDismiss = {},
+			onTimeSelected = {},
+		)
+	}
 }

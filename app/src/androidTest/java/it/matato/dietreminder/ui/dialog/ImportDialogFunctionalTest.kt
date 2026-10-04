@@ -12,22 +12,22 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ImportDialogFunctionalTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testImportDialog_DisplaysTitle() {
-        composeTestRule.setContent {
-            DietTheme {
-                ImportDialog(
-                    onDismiss = {},
-                    onImportText = {},
-                    onPickFile = {}
-                )
-            }
-        }
+	@Test
+	fun testImportDialog_DisplaysTitle() {
+		composeTestRule.setContent {
+			DietTheme {
+				ImportDialog(
+					onDismiss = {},
+					onImportText = {},
+					onPickFile = {}
+				)
+			}
+		}
 
-        composeTestRule.onNode(hasText("Importa dieta") or hasText("Import diet"), useUnmergedTree = true)
-            .assertIsDisplayed()
-    }
+		composeTestRule.onNode(hasText("Importa dieta") or hasText("Import diet"), useUnmergedTree = true)
+			.assertIsDisplayed()
+	}
 }

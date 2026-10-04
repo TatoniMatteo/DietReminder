@@ -12,18 +12,18 @@ import kotlinx.coroutines.launch
 
 class AlarmSyncReceiver : BroadcastReceiver() {
 
-    override fun onReceive(context: Context, intent: Intent) {
-        val pendingResult = goAsync()
+	override fun onReceive(context: Context, intent: Intent) {
+		val pendingResult = goAsync()
 
-        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-            try {
-                AppLog.i("AlarmSyncReceiver triggered")
-                AlarmSyncHelper.doSync(context)
-            } catch (e: Exception) {
-                AppLog.e("AlarmSyncReceiver: Error synchronizing alarms", e)
-            } finally {
-                pendingResult.finish()
-            }
-        }
-    }
+		CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+			try {
+				AppLog.i("AlarmSyncReceiver triggered")
+				AlarmSyncHelper.doSync(context)
+			} catch (e: Exception) {
+				AppLog.e("AlarmSyncReceiver: Error synchronizing alarms", e)
+			} finally {
+				pendingResult.finish()
+			}
+		}
+	}
 }

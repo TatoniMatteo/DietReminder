@@ -7,10 +7,10 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class DietEntityTest {
-    @Test
-    fun testDietCreation() {
-        val diet = Diet(id = 1L, name = "Test", nextMealWindowMinutes = 60, isActive = true)
-        assertEquals("Test", diet.name)
-        assertEquals(60, diet.nextMealWindowMinutes)
-    }
+	@Test
+	fun testDietCreation() {
+		val diet = Diet(id = 1L, name = "Test", nextMealWindowMinutes = 60, isActive = true)
+		assertEquals("Test", diet.name)
+		assertEquals(60, diet.nextMealWindowMinutes)
+	}
 }

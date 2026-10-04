@@ -38,150 +38,150 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun MealInformationSection(
-    timeMinutes: Int,
-    onTimeClick: () -> Unit,
-    type: MealType,
-    onTypeChange: (MealType) -> Unit,
-    isNotificationEnabled: Boolean,
-    onNotificationEnabledChange: (Boolean) -> Unit,
-    isNotificationSwitchEnabled: Boolean = true,
+	timeMinutes: Int,
+	onTimeClick: () -> Unit,
+	type: MealType,
+	onTypeChange: (MealType) -> Unit,
+	isNotificationEnabled: Boolean,
+	onNotificationEnabledChange: (Boolean) -> Unit,
+	isNotificationSwitchEnabled: Boolean = true,
 ) {
-    var typeMenuExpanded by remember { mutableStateOf(false) }
+	var typeMenuExpanded by remember { mutableStateOf(false) }
 
-    OutlinedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-    ) {
-        Column {
-            // Row 1: Time
-            ListItem(
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.meal_time),
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                },
-                leadingContent = {
-                    IconContainer(icon = Icons.Rounded.Schedule)
-                },
-                trailingContent = {
-                    OutlinedButton(onClick = onTimeClick) {
-                        Icon(
-                            imageVector = Icons.Rounded.Schedule,
-                            contentDescription = null,
-                        )
+	OutlinedCard(
+		modifier = Modifier.fillMaxWidth(),
+		shape = MaterialTheme.shapes.large,
+	) {
+		Column {
+			// Row 1: Time
+			ListItem(
+				headlineContent = {
+					Text(
+						text = stringResource(R.string.meal_time),
+						fontWeight = FontWeight.SemiBold,
+					)
+				},
+				leadingContent = {
+					IconContainer(icon = Icons.Rounded.Schedule)
+				},
+				trailingContent = {
+					OutlinedButton(onClick = onTimeClick) {
+						Icon(
+							imageVector = Icons.Rounded.Schedule,
+							contentDescription = null,
+						)
 
-                        Spacer(modifier = Modifier.width(8.dp))
+						Spacer(modifier = Modifier.width(8.dp))
 
-                        Text(formatTime(timeMinutes))
-                    }
-                },
-            )
+						Text(formatTime(timeMinutes))
+					}
+				},
+			)
 
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth(),
-            )
+			HorizontalDivider(
+				modifier = Modifier.fillMaxWidth(),
+			)
 
-            // Row 2: Meal Type
-            Box {
-                ListItem(
-                    modifier = Modifier.clickable {
-                        typeMenuExpanded = true
-                    },
-                    headlineContent = {
-                        Text(
-                            text = stringResource(R.string.meal_type),
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(type.resId),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    },
-                    leadingContent = {
-                        IconContainer(icon = Icons.Rounded.Restaurant)
-                    },
-                )
+			// Row 2: Meal Type
+			Box {
+				ListItem(
+					modifier = Modifier.clickable {
+						typeMenuExpanded = true
+					},
+					headlineContent = {
+						Text(
+							text = stringResource(R.string.meal_type),
+							fontWeight = FontWeight.SemiBold,
+						)
+					},
+					supportingContent = {
+						Text(
+							text = stringResource(type.resId),
+							color = MaterialTheme.colorScheme.onSurfaceVariant,
+						)
+					},
+					leadingContent = {
+						IconContainer(icon = Icons.Rounded.Restaurant)
+					},
+				)
 
-                DropdownMenu(
-                    expanded = typeMenuExpanded,
-                    onDismissRequest = {
-                        typeMenuExpanded = false
-                    },
-                ) {
-                    MealType.entries.forEach { mealType ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(stringResource(mealType.resId))
-                            },
-                            onClick = {
-                                onTypeChange(mealType)
-                                typeMenuExpanded = false
-                            },
-                        )
-                    }
-                }
-            }
+				DropdownMenu(
+					expanded = typeMenuExpanded,
+					onDismissRequest = {
+						typeMenuExpanded = false
+					},
+				) {
+					MealType.entries.forEach { mealType ->
+						DropdownMenuItem(
+							text = {
+								Text(stringResource(mealType.resId))
+							},
+							onClick = {
+								onTypeChange(mealType)
+								typeMenuExpanded = false
+							},
+						)
+					}
+				}
+			}
 
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth(),
-            )
+			HorizontalDivider(
+				modifier = Modifier.fillMaxWidth(),
+			)
 
-            // Row 3: Meal Notifications
-            ListItem(
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.meal_notifications),
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                },
-                supportingContent = {
-                    Text(
-                        text = if (isNotificationEnabled) {
-                            stringResource(R.string.notification_enabled)
-                        } else {
-                            stringResource(R.string.notification_disabled)
-                        },
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
-                leadingContent = {
-                    IconContainer(
-                        icon = if (isNotificationEnabled) Icons.Rounded.Notifications else Icons.Rounded.NotificationsOff
-                    )
-                },
-                trailingContent = {
-                    Switch(
-                        checked = isNotificationEnabled,
-                        onCheckedChange = onNotificationEnabledChange,
-                        enabled = isNotificationSwitchEnabled,
-                    )
-                }
-            )
-        }
-    }
+			// Row 3: Meal Notifications
+			ListItem(
+				headlineContent = {
+					Text(
+						text = stringResource(R.string.meal_notifications),
+						fontWeight = FontWeight.SemiBold,
+					)
+				},
+				supportingContent = {
+					Text(
+						text = if (isNotificationEnabled) {
+							stringResource(R.string.notification_enabled)
+						} else {
+							stringResource(R.string.notification_disabled)
+						},
+						color = MaterialTheme.colorScheme.onSurfaceVariant,
+					)
+				},
+				leadingContent = {
+					IconContainer(
+						icon = if (isNotificationEnabled) Icons.Rounded.Notifications else Icons.Rounded.NotificationsOff
+					)
+				},
+				trailingContent = {
+					Switch(
+						checked = isNotificationEnabled,
+						onCheckedChange = onNotificationEnabledChange,
+						enabled = isNotificationSwitchEnabled,
+					)
+				}
+			)
+		}
+	}
 }
 
 private fun formatTime(timeMinutes: Int): String {
-    return "%02d:%02d".format(
-        timeMinutes / 60,
-        timeMinutes % 60,
-    )
+	return "%02d:%02d".format(
+		timeMinutes / 60,
+		timeMinutes % 60,
+	)
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun MealInformationSectionPreview() {
-    DietTheme {
-        MealInformationSection(
-            timeMinutes = 780,
-            onTimeClick = {},
-            type = MealType.LUNCH,
-            onTypeChange = {},
-            isNotificationEnabled = true,
-            onNotificationEnabledChange = {},
-        )
-    }
+	DietTheme {
+		MealInformationSection(
+			timeMinutes = 780,
+			onTimeClick = {},
+			type = MealType.LUNCH,
+			onTypeChange = {},
+			isNotificationEnabled = true,
+			onNotificationEnabledChange = {},
+		)
+	}
 }

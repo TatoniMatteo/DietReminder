@@ -27,83 +27,83 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun DietsSection(
-    diets: List<Diet>,
-    onActivate: (Diet) -> Unit,
-    onDuplicate: (Diet) -> Unit,
-    onDelete: (Diet) -> Unit,
-    onConfigure: (Diet) -> Unit,
+	diets: List<Diet>,
+	onActivate: (Diet) -> Unit,
+	onDuplicate: (Diet) -> Unit,
+	onDelete: (Diet) -> Unit,
+	onConfigure: (Diet) -> Unit,
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Restaurant,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp),
-            )
+	Column(
+		verticalArrangement = Arrangement.spacedBy(8.dp),
+	) {
+		Row(
+			modifier = Modifier.padding(horizontal = 4.dp),
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.spacedBy(8.dp),
+		) {
+			Icon(
+				imageVector = Icons.Rounded.Restaurant,
+				contentDescription = null,
+				tint = MaterialTheme.colorScheme.primary,
+				modifier = Modifier.size(20.dp),
+			)
 
-            Text(
-                text = stringResource(R.string.diets),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-            )
-        }
+			Text(
+				text = stringResource(R.string.diets),
+				style = MaterialTheme.typography.titleMedium,
+				color = MaterialTheme.colorScheme.primary,
+				fontWeight = FontWeight.Bold,
+			)
+		}
 
-        if (diets.isEmpty()) {
-            EmptyDietsCard()
-            return
-        }
+		if (diets.isEmpty()) {
+			EmptyDietsCard()
+			return
+		}
 
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
-            colors = CardDefaults.outlinedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
-        ) {
-            Column {
-                diets.forEachIndexed { index, diet ->
-                    DietsListItem(
-                        diet = diet,
-                        onActivate = { onActivate(diet) },
-                        onDuplicate = { onDuplicate(diet) },
-                        onDelete = { onDelete(diet) },
-                        onConfigure = { onConfigure(diet) },
-                    )
+		OutlinedCard(
+			modifier = Modifier.fillMaxWidth(),
+			shape = MaterialTheme.shapes.large,
+			colors = CardDefaults.outlinedCardColors(
+				containerColor = MaterialTheme.colorScheme.surface,
+			),
+		) {
+			Column {
+				diets.forEachIndexed { index, diet ->
+					DietsListItem(
+						diet = diet,
+						onActivate = { onActivate(diet) },
+						onDuplicate = { onDuplicate(diet) },
+						onDelete = { onDelete(diet) },
+						onConfigure = { onConfigure(diet) },
+					)
 
-                    if (index < diets.lastIndex) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                        )
-                    }
-                }
-            }
-        }
-    }
+					if (index < diets.lastIndex) {
+						HorizontalDivider(
+							modifier = Modifier.padding(horizontal = 16.dp),
+						)
+					}
+				}
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DietsSectionPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            DietsSection(
-                diets = listOf(
-                    Diet(id = 1, name = "Weight Loss", nextMealWindowMinutes = 90, isActive = true),
-                    Diet(id = 2, name = "Muscle Gain", nextMealWindowMinutes = 60, isActive = false),
-                ),
-                onActivate = {},
-                onDuplicate = {},
-                onDelete = {},
-                onConfigure = {},
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			DietsSection(
+				diets = listOf(
+					Diet(id = 1, name = "Weight Loss", nextMealWindowMinutes = 90, isActive = true),
+					Diet(id = 2, name = "Muscle Gain", nextMealWindowMinutes = 60, isActive = false),
+				),
+				onActivate = {},
+				onDuplicate = {},
+				onDelete = {},
+				onConfigure = {},
+			)
+		}
+	}
 }

@@ -8,11 +8,11 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class NotificationChannelConfigInstrumentedTest {
-    @Test
-    fun testNotificationChannelConfig() {
-        val config = NotificationChannelConfig(id = "test_channel", version = 2)
-        assertNotNull(config)
-        assertEquals("test_channel", config.id)
-        assertEquals(2, config.version)
-    }
+	@Test
+	fun testNotificationChannelConfig() {
+		val config = NotificationChannelConfig(id = "test_channel", version = 2)
+		assertNotNull(config)
+		assertEquals("test_channel", config.id)
+		assertEquals(2, config.version)
+	}
 }

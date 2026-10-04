@@ -16,57 +16,57 @@ import kotlinx.coroutines.launch
 
 class HydrationReceiver : BroadcastReceiver() {
 
-    override fun onReceive(context: Context, intent: Intent) {
-        val pendingResult = goAsync()
+	override fun onReceive(context: Context, intent: Intent) {
+		val pendingResult = goAsync()
 
-        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-            try {
-                process(context)
-            } catch (e: Exception) {
-                AppLog.e("HydrationReceiver: Error processing alarm", e)
-            } finally {
-                pendingResult.finish()
-            }
-        }
-    }
+		CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+			try {
+				process(context)
+			} catch (e: Exception) {
+				AppLog.e("HydrationReceiver: Error processing alarm", e)
+			} finally {
+				pendingResult.finish()
+			}
+		}
+	}
 
-    private suspend fun process(context: Context) {
-        AppLog.i("HydrationReceiver triggered")
+	private suspend fun process(context: Context) {
+		AppLog.i("HydrationReceiver triggered")
 
-        val notificationIntent = Intent(
-            Intent.ACTION_VIEW,
-            "dietreminder://hydration".toUri(),
-        ).apply {
-            setPackage(context.packageName)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+		val notificationIntent = Intent(
+			Intent.ACTION_VIEW,
+			"dietreminder://hydration".toUri(),
+		).apply {
+			setPackage(context.packageName)
+			addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+		}
 
-        val notificationId = HYDRATION_NOTIFICATION_ID
+		val notificationId = HYDRATION_NOTIFICATION_ID
 
-        val contentIntent = NotificationHelper.createActivityPendingIntent(
-            context = context,
-            requestCode = notificationId,
-            intent = notificationIntent,
-        )
+		val contentIntent = NotificationHelper.createActivityPendingIntent(
+			context = context,
+			requestCode = notificationId,
+			intent = notificationIntent,
+		)
 
-        NotificationHelper(context).show(
-            notificationId = notificationId,
-            title = context.getString(R.string.hydration_notification_title),
-            message = context.getString(R.string.hydration_notification_message),
-            contentIntent = contentIntent,
-            channel = NotificationChannelConfig(
-                id = "hydration_alarm",
-                sound = NotificationChannelConfig.customSound(
-                    context,
-                    R.raw.hydration_alarm,
-                ),
-            ),
-        )
+		NotificationHelper(context).show(
+			notificationId = notificationId,
+			title = context.getString(R.string.hydration_notification_title),
+			message = context.getString(R.string.hydration_notification_message),
+			contentIntent = contentIntent,
+			channel = NotificationChannelConfig(
+				id = "hydration_alarm",
+				sound = NotificationChannelConfig.customSound(
+					context,
+					R.raw.hydration_alarm,
+				),
+			),
+		)
 
-        AlarmSyncHelper.doSync(context)
-    }
+		AlarmSyncHelper.doSync(context)
+	}
 
-    private companion object {
-        const val HYDRATION_NOTIFICATION_ID = 999
-    }
+	private companion object {
+		const val HYDRATION_NOTIFICATION_ID = 999
+	}
 }

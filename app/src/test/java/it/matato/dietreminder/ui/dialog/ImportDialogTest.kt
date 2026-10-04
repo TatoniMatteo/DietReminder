@@ -15,22 +15,22 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class ImportDialogTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testImportDialog_DisplaysTitleAndTabs() {
-        composeTestRule.setContent {
-            DietTheme {
-                ImportDialog(
-                    onDismiss = {},
-                    onImportText = {},
-                    onPickFile = {}
-                )
-            }
-        }
+	@Test
+	fun testImportDialog_DisplaysTitleAndTabs() {
+		composeTestRule.setContent {
+			DietTheme {
+				ImportDialog(
+					onDismiss = {},
+					onImportText = {},
+					onPickFile = {}
+				)
+			}
+		}
 
-        composeTestRule.onNode(hasText("Importa dieta") or hasText("Import diet"), useUnmergedTree = true)
-            .assertIsDisplayed()
-    }
+		composeTestRule.onNode(hasText("Importa dieta") or hasText("Import diet"), useUnmergedTree = true)
+			.assertIsDisplayed()
+	}
 }

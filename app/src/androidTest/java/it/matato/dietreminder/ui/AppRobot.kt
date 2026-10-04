@@ -9,43 +9,43 @@ import it.matato.dietreminder.ui.screens.ingredients.IngredientsScreenRobot
 import it.matato.dietreminder.ui.screens.ingredients.ingredientsRobot
 
 fun appRobot(
-    composeTestRule: SemanticsNodeInteractionsProvider,
-    block: AppRobot.() -> Unit
+	composeTestRule: SemanticsNodeInteractionsProvider,
+	block: AppRobot.() -> Unit
 ) = AppRobot(composeTestRule).apply(block)
 
 class AppRobot(private val composeTestRule: SemanticsNodeInteractionsProvider) {
 
-    fun navigateToWeek() {
-        composeTestRule.onNode(hasText("Settimana") or hasText("Week"))
-            .performClick()
-    }
+	fun navigateToWeek() {
+		composeTestRule.onNode(hasText("Settimana") or hasText("Week"))
+			.performClick()
+	}
 
-    fun navigateToDiets() {
-        composeTestRule.onNode(hasText("Diete") or hasText("Diets"))
-            .performClick()
-    }
+	fun navigateToDiets() {
+		composeTestRule.onNode(hasText("Diete") or hasText("Diets"))
+			.performClick()
+	}
 
-    fun navigateToIngredients() {
-        composeTestRule.onNode(hasText("Ingredienti") or hasText("Ingredients"))
-            .performClick()
-    }
+	fun navigateToShoppingList() {
+		composeTestRule.onNode(hasText("Spesa") or hasText("Shopping"))
+			.performClick()
+	}
 
-    fun navigateToHydration() {
-        composeTestRule.onNode(hasText("Idratazione") or hasText("Hydration"))
-            .performClick()
-    }
+	fun navigateToHydration() {
+		composeTestRule.onNode(hasText("Idratazione") or hasText("Hydration"))
+			.performClick()
+	}
 
-    fun navigateToSettings() {
-        composeTestRule.onNode(hasText("Impostazioni") or hasText("Settings"))
-            .performClick()
-    }
+	fun navigateToSettings() {
+		composeTestRule.onNode(hasText("Impostazioni") or hasText("Settings"))
+			.performClick()
+	}
 
-    // Helper per saltare al robot specifico della schermata
-    fun onDietsScreen(block: DietsScreenRobot.() -> Unit) {
-        dietsRobot(composeTestRule, block)
-    }
+	// Helper per saltare al robot specifico della schermata
+	fun onDietsScreen(block: DietsScreenRobot.() -> Unit) {
+		dietsRobot(composeTestRule, block)
+	}
 
-    fun onIngredientsScreen(block: IngredientsScreenRobot.() -> Unit) {
-        ingredientsRobot(composeTestRule, block)
-    }
+	fun onIngredientsScreen(block: IngredientsScreenRobot.() -> Unit) {
+		ingredientsRobot(composeTestRule, block)
+	}
 }

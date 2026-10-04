@@ -20,23 +20,25 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class DeveloperScreenTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testDeveloperScreen_DisplaysDeveloperTitle() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val fakeRepository = FakeDietRepository()
-        val viewModel = DietViewModel(context, fakeRepository)
+	@Test
+	fun testDeveloperScreen_DisplaysDeveloperTitle() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val fakeRepository = FakeDietRepository()
+		val viewModel = DietViewModel(context, fakeRepository)
 
-        composeTestRule.setContent {
-            DietTheme {
-                DeveloperScreen(vm = viewModel, onBack = {})
-            }
-        }
+		composeTestRule.setContent {
+			DietTheme {
+				DeveloperScreen(vm = viewModel, onBack = {})
+			}
+		}
 
-        composeTestRule.onAllNodes(hasText("Developer settings") or hasText("Impostazioni sviluppatore"), useUnmergedTree = true)
-            .onFirst()
-            .assertIsDisplayed()
-    }
+		composeTestRule.onAllNodes(
+			hasText("Developer settings") or hasText("Impostazioni sviluppatore"),
+			useUnmergedTree = true)
+			.onFirst()
+			.assertIsDisplayed()
+	}
 }

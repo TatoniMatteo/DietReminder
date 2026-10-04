@@ -10,11 +10,11 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class AlarmSyncReceiverTest {
 
-    @Test
-    fun testAlarmSyncReceiver() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val receiver = AlarmSyncReceiver()
-        assertNotNull(receiver)
-        assertNotNull(context)
-    }
+	@Test
+	fun testAlarmSyncReceiver() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val receiver = AlarmSyncReceiver()
+		assertNotNull(receiver)
+		assertNotNull(context)
+	}
 }

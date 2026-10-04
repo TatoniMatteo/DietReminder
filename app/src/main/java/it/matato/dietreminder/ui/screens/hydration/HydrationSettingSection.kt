@@ -24,59 +24,59 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun HydrationSettingsSection(
-    enabled: Boolean,
-    onEnabledChange: (Boolean) -> Unit,
+	enabled: Boolean,
+	onEnabledChange: (Boolean) -> Unit,
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        SectionTitle(
-            title = stringResource(R.string.hydration_reminders),
-            icon = Icons.Rounded.WaterDrop,
-        )
+	Column(
+		verticalArrangement = Arrangement.spacedBy(8.dp),
+	) {
+		SectionTitle(
+			title = stringResource(R.string.hydration_reminders),
+			icon = Icons.Rounded.WaterDrop,
+		)
 
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
-        ) {
-            ListItem(
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.hydration_reminders),
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                },
-                supportingContent = {
-                    Text(
-                        text = stringResource(R.string.hydration_reminders_desc),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
-                leadingContent = {
-                    IconContainer(
-                        icon = Icons.Rounded.WaterDrop,
-                    )
-                },
-                trailingContent = {
-                    Switch(
-                        checked = enabled,
-                        onCheckedChange = onEnabledChange,
-                    )
-                },
-            )
-        }
-    }
+		OutlinedCard(
+			modifier = Modifier.fillMaxWidth(),
+			shape = MaterialTheme.shapes.large,
+		) {
+			ListItem(
+				headlineContent = {
+					Text(
+						text = stringResource(R.string.hydration_reminders),
+						fontWeight = FontWeight.SemiBold,
+					)
+				},
+				supportingContent = {
+					Text(
+						text = stringResource(R.string.hydration_reminders_desc),
+						color = MaterialTheme.colorScheme.onSurfaceVariant,
+					)
+				},
+				leadingContent = {
+					IconContainer(
+						icon = Icons.Rounded.WaterDrop,
+					)
+				},
+				trailingContent = {
+					Switch(
+						checked = enabled,
+						onCheckedChange = onEnabledChange,
+					)
+				},
+			)
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun HydrationSettingsSectionPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            HydrationSettingsSection(
-                enabled = true,
-                onEnabledChange = {},
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			HydrationSettingsSection(
+				enabled = true,
+				onEnabledChange = {},
+			)
+		}
+	}
 }

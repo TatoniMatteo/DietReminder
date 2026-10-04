@@ -17,57 +17,57 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun SettingsBackupSection(
-    diets: List<Diet>,
-    onImport: () -> Unit,
-    onExport: (Long, String) -> Unit,
+	diets: List<Diet>,
+	onImport: () -> Unit,
+	onExport: (Long, String) -> Unit,
 ) {
-    SettingsSection(
-        title = stringResource(R.string.backup_data),
-        icon = Icons.Rounded.Backup,
-    ) {
-        SettingsListItem(
-            title = stringResource(R.string.import_diet),
-            subtitle = stringResource(R.string.import_desc),
-            leadingIcon = Icons.Rounded.FileUpload,
-            onClick = onImport,
-        )
+	SettingsSection(
+		title = stringResource(R.string.backup_data),
+		icon = Icons.Rounded.Backup,
+	) {
+		SettingsListItem(
+			title = stringResource(R.string.import_diet),
+			subtitle = stringResource(R.string.import_desc),
+			leadingIcon = Icons.Rounded.FileUpload,
+			onClick = onImport,
+		)
 
-        if (diets.isNotEmpty()) {
-            SettingsDivider()
+		if (diets.isNotEmpty()) {
+			SettingsDivider()
 
-            diets.forEachIndexed { index, diet ->
-                if (index > 0) {
-                    SettingsDivider()
-                }
+			diets.forEachIndexed { index, diet ->
+				if (index > 0) {
+					SettingsDivider()
+				}
 
-                SettingsListItem(
-                    title = stringResource(
-                        R.string.export_name,
-                        diet.name,
-                    ),
-                    leadingIcon = Icons.Rounded.FileDownload,
-                    onClick = {
-                        val fileName = "${diet.name.lowercase().replace(" ", "_")}.dr"
-                        onExport(diet.id, fileName)
-                    },
-                )
-            }
-        }
-    }
+				SettingsListItem(
+					title = stringResource(
+						R.string.export_name,
+						diet.name,
+					),
+					leadingIcon = Icons.Rounded.FileDownload,
+					onClick = {
+						val fileName = "${diet.name.lowercase().replace(" ", "_")}.dr"
+						onExport(diet.id, fileName)
+					},
+				)
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SettingsBackupSectionPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            SettingsBackupSection(
-                diets = listOf(
-                    Diet(id = 1, name = "Summer Diet", nextMealWindowMinutes = 90, isActive = true),
-                ),
-                onImport = {},
-                onExport = { _, _ -> },
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			SettingsBackupSection(
+				diets = listOf(
+					Diet(id = 1, name = "Summer Diet", nextMealWindowMinutes = 90, isActive = true),
+				),
+				onImport = {},
+				onExport = { _, _ -> },
+			)
+		}
+	}
 }

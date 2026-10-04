@@ -15,39 +15,40 @@ import java.util.concurrent.TimeUnit
 
 open class DietApplication : Application() {
 
-    val database by lazy {
-        AppDatabase.create(this)
-    }
+	val database by lazy {
+		AppDatabase.create(this)
+	}
 
-    open val repository: DietRepository by lazy {
-        RoomDietRepository(
-            database = database,
-            diets = database.dietDao(),
-            meals = database.mealDao(),
-            courses = database.courseDao(),
-            foodItems = database.foodItemDao(),
-            config = database.configDao(),
-        )
-    }
+	open val repository: DietRepository by lazy {
+		RoomDietRepository(
+			database = database,
+			diets = database.dietDao(),
+			meals = database.mealDao(),
+			courses = database.courseDao(),
+			foodItems = database.foodItemDao(),
+			config = database.configDao(),
+			shoppingLists = database.shoppingListDao(),
+		)
+	}
 
-    override fun onCreate() {
-        super.onCreate()
-        initServices()
-    }
+	override fun onCreate() {
+		super.onCreate()
+		initServices()
+	}
 
-    open fun initServices() {
-        AppLog.i("=== Application Initializing ===")
+	open fun initServices() {
+		AppLog.i("=== Application Initializing ===")
 
-        // Sync alarms at startup
-        AlarmSyncHelper.syncAlarms(this)
-        AlarmDataObserver.start(this)
+		// Sync alarms at startup
+		AlarmSyncHelper.syncAlarms(this)
+		AlarmDataObserver.start(this)
 
-        AppLog.d("Setting up Periodic Workers")
+		AppLog.d("Setting up Periodic Workers")
 
-        val widgetRequest = PeriodicWorkRequestBuilder<WidgetRefreshWorker>(15, TimeUnit.MINUTES).build()
-        WorkManager.getInstance(this)
-            .enqueueUniquePeriodicWork(WidgetRefreshWorker.WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, widgetRequest)
+		val widgetRequest = PeriodicWorkRequestBuilder<WidgetRefreshWorker>(15, TimeUnit.MINUTES).build()
+		WorkManager.getInstance(this)
+			.enqueueUniquePeriodicWork(WidgetRefreshWorker.WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, widgetRequest)
 
-        AppLog.i("=== Application Ready ===")
-    }
+		AppLog.i("=== Application Ready ===")
+	}
 }

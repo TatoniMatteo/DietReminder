@@ -15,39 +15,39 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun SettingsNotificationsSection(
-    enabled: Boolean,
-    onEnabledChange: (Boolean) -> Unit,
+	enabled: Boolean,
+	onEnabledChange: (Boolean) -> Unit,
 ) {
-    SettingsSection(
-        title = stringResource(R.string.notifications_alarms),
-        icon = Icons.Rounded.Notifications,
-    ) {
-        SettingsListItem(
-            title = stringResource(R.string.meal_reminders),
-            subtitle = stringResource(R.string.meal_reminders_desc),
-            leadingIcon = Icons.Rounded.Notifications,
-            trailingContent = {
-                Switch(
-                    checked = enabled,
-                    onCheckedChange = onEnabledChange,
-                )
-            },
-            onClick = {
-                onEnabledChange(!enabled)
-            },
-        )
-    }
+	SettingsSection(
+		title = stringResource(R.string.notifications_alarms),
+		icon = Icons.Rounded.Notifications,
+	) {
+		SettingsListItem(
+			title = stringResource(R.string.meal_reminders),
+			subtitle = stringResource(R.string.meal_reminders_desc),
+			leadingIcon = Icons.Rounded.Notifications,
+			trailingContent = {
+				Switch(
+					checked = enabled,
+					onCheckedChange = onEnabledChange,
+				)
+			},
+			onClick = {
+				onEnabledChange(!enabled)
+			},
+		)
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SettingsNotificationsSectionPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            SettingsNotificationsSection(
-                enabled = true,
-                onEnabledChange = {},
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			SettingsNotificationsSection(
+				enabled = true,
+				onEnabledChange = {},
+			)
+		}
+	}
 }

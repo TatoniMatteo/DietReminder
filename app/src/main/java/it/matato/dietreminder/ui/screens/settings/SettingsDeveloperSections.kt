@@ -15,29 +15,29 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun SettingsDeveloperSection(
-    onNavigateToDeveloper: () -> Unit,
+	onNavigateToDeveloper: () -> Unit,
 ) {
-    SettingsSection(
-        title = stringResource(R.string.developer_settings),
-        icon = Icons.Rounded.DeveloperMode,
-    ) {
-        SettingsListItem(
-            title = stringResource(R.string.developer_settings),
-            subtitle = stringResource(R.string.developer_settings_description),
-            leadingIcon = Icons.Rounded.SettingsApplications,
-            onClick = onNavigateToDeveloper,
-        )
-    }
+	SettingsSection(
+		title = stringResource(R.string.developer_settings),
+		icon = Icons.Rounded.DeveloperMode,
+	) {
+		SettingsListItem(
+			title = stringResource(R.string.developer_settings),
+			subtitle = stringResource(R.string.developer_settings_description),
+			leadingIcon = Icons.Rounded.SettingsApplications,
+			onClick = onNavigateToDeveloper,
+		)
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SettingsDeveloperSectionPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            SettingsDeveloperSection(
-                onNavigateToDeveloper = {},
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			SettingsDeveloperSection(
+				onNavigateToDeveloper = {},
+			)
+		}
+	}
 }

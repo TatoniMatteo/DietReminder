@@ -14,71 +14,71 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class DietsFunctionalTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    private fun setupViewModel(): DietViewModel {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val fakeRepository = FakeDietRepository()
-        return DietViewModel(context, fakeRepository)
-    }
+	private fun setupViewModel(): DietViewModel {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val fakeRepository = FakeDietRepository()
+		return DietViewModel(context, fakeRepository)
+	}
 
-    @Test
-    fun testUserJourney_CreateNewDiet() {
-        val viewModel = setupViewModel()
+	@Test
+	fun testUserJourney_CreateNewDiet() {
+		val viewModel = setupViewModel()
 
-        composeTestRule.setContent {
-            DietTheme {
-                DietsScreen(vm = viewModel, onConfigDiet = {})
-            }
-        }
+		composeTestRule.setContent {
+			DietTheme {
+				DietsScreen(vm = viewModel, onConfigDiet = {}, onNavigateToImportDiet = {})
+			}
+		}
 
-        dietsRobot(composeTestRule) {
-            verifyDietCountHeader(0)
-            clickAddDiet()
-            typeDietName("Dieta Proteica Sport")
-            clickConfirmCreateDiet()
-            verifyDietExists("Dieta Proteica Sport")
-            verifyDietCountHeader(1)
-        }
-    }
+		dietsRobot(composeTestRule) {
+			verifyDietCountHeader(0)
+			clickAddDiet()
+			typeDietName("Dieta Proteica Sport")
+			clickConfirmCreateDiet()
+			verifyDietExists("Dieta Proteica Sport")
+			verifyDietCountHeader(1)
+		}
+	}
 
-    @Test
-    fun testUserJourney_DuplicateDiet() {
-        val viewModel = setupViewModel()
-        viewModel.create("Dieta Base", 60)
+	@Test
+	fun testUserJourney_DuplicateDiet() {
+		val viewModel = setupViewModel()
+		viewModel.create("Dieta Base", 60)
 
-        composeTestRule.setContent {
-            DietTheme {
-                DietsScreen(vm = viewModel, onConfigDiet = {})
-            }
-        }
+		composeTestRule.setContent {
+			DietTheme {
+				DietsScreen(vm = viewModel, onConfigDiet = {}, onNavigateToImportDiet = {})
+			}
+		}
 
-        dietsRobot(composeTestRule) {
-            verifyDietCountHeader(1)
-            clickMoreOptionsForDiet("Dieta Base")
-            clickMenuOption("Duplicate")
-            verifyDietExists("Dieta Base copia")
-            verifyDietCountHeader(2)
-        }
-    }
+		dietsRobot(composeTestRule) {
+			verifyDietCountHeader(1)
+			clickMoreOptionsForDiet("Dieta Base")
+			clickMenuOption("Duplicate")
+			verifyDietExists("Dieta Base copia")
+			verifyDietCountHeader(2)
+		}
+	}
 
-    @Test
-    fun testUserJourney_DeleteDiet() {
-        val viewModel = setupViewModel()
-        viewModel.create("Dieta Temporanea", 45)
+	@Test
+	fun testUserJourney_DeleteDiet() {
+		val viewModel = setupViewModel()
+		viewModel.create("Dieta Temporanea", 45)
 
-        composeTestRule.setContent {
-            DietTheme {
-                DietsScreen(vm = viewModel, onConfigDiet = {})
-            }
-        }
+		composeTestRule.setContent {
+			DietTheme {
+				DietsScreen(vm = viewModel, onConfigDiet = {}, onNavigateToImportDiet = {})
+			}
+		}
 
-        dietsRobot(composeTestRule) {
-            verifyDietCountHeader(1)
-            clickMoreOptionsForDiet("Dieta Temporanea")
-            clickMenuOption("Delete")
-            verifyDietCountHeader(0)
-        }
-    }
+		dietsRobot(composeTestRule) {
+			verifyDietCountHeader(1)
+			clickMoreOptionsForDiet("Dieta Temporanea")
+			clickMenuOption("Delete")
+			verifyDietCountHeader(0)
+		}
+	}
 }

@@ -12,41 +12,41 @@ import it.matato.dietreminder.util.LogLevel
 
 @Composable
 fun DeveloperLogLine(entry: LogEntry) {
-    val color = when (entry.level) {
-        LogLevel.DEBUG -> MaterialTheme.colorScheme.onSurfaceVariant
-        LogLevel.INFO -> MaterialTheme.colorScheme.primary
-        LogLevel.WARN -> MaterialTheme.colorScheme.tertiary
-        LogLevel.ERROR -> MaterialTheme.colorScheme.error
-        LogLevel.TRACE -> MaterialTheme.colorScheme.outline
-    }
+	val color = when (entry.level) {
+		LogLevel.DEBUG -> MaterialTheme.colorScheme.onSurfaceVariant
+		LogLevel.INFO -> MaterialTheme.colorScheme.primary
+		LogLevel.WARN -> MaterialTheme.colorScheme.tertiary
+		LogLevel.ERROR -> MaterialTheme.colorScheme.error
+		LogLevel.TRACE -> MaterialTheme.colorScheme.outline
+	}
 
-    Text(
-        text = "[${entry.timestamp}] ${entry.level.name.take(1)}: ${entry.message}",
-        style = MaterialTheme.typography.bodySmall,
-        fontFamily = FontFamily.Monospace,
-        color = color,
-    )
+	Text(
+		text = "[${entry.timestamp}] ${entry.level.name.take(1)}: ${entry.message}",
+		style = MaterialTheme.typography.bodySmall,
+		fontFamily = FontFamily.Monospace,
+		color = color,
+	)
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DeveloperLogLinePreview() {
-    DietTheme {
-        Column {
-            DeveloperLogLine(
-                entry = LogEntry(
-                    timestamp = "12:00:00",
-                    level = LogLevel.INFO,
-                    message = "Information message",
-                ),
-            )
-            DeveloperLogLine(
-                entry = LogEntry(
-                    timestamp = "12:00:01",
-                    level = LogLevel.ERROR,
-                    message = "Error message",
-                ),
-            )
-        }
-    }
+	DietTheme {
+		Column {
+			DeveloperLogLine(
+				entry = LogEntry(
+					timestamp = "12:00:00",
+					level = LogLevel.INFO,
+					message = "Information message",
+				),
+			)
+			DeveloperLogLine(
+				entry = LogEntry(
+					timestamp = "12:00:01",
+					level = LogLevel.ERROR,
+					message = "Error message",
+				),
+			)
+		}
+	}
 }

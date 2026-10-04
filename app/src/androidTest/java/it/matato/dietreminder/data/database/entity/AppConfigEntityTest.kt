@@ -7,10 +7,10 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AppConfigEntityTest {
-    @Test
-    fun testAppConfigCreation() {
-        val config = AppConfig(key = ConfigKey.THEME, value = "dark")
-        assertEquals(ConfigKey.THEME.name, config.key)
-        assertEquals("dark", config.value)
-    }
+	@Test
+	fun testAppConfigCreation() {
+		val config = AppConfig(key = ConfigKey.THEME, value = "dark")
+		assertEquals(ConfigKey.THEME.name, config.key)
+		assertEquals("dark", config.value)
+	}
 }

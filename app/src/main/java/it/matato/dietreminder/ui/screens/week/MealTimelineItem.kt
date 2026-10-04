@@ -46,181 +46,181 @@ import java.time.DayOfWeek
 
 @Composable
 fun MealTimelineItem(
-    mealDetails: MealWithDetails,
-    initiallyExpanded: Boolean = false,
+	mealDetails: MealWithDetails,
+	initiallyExpanded: Boolean = false,
 ) {
-    var expanded by rememberSaveable(
-        mealDetails.meal.id,
-        initiallyExpanded,
-    ) {
-        mutableStateOf(initiallyExpanded)
-    }
+	var expanded by rememberSaveable(
+		mealDetails.meal.id,
+		initiallyExpanded,
+	) {
+		mutableStateOf(initiallyExpanded)
+	}
 
-    val mealIcon = when (mealDetails.meal.type) {
-        MealType.BREAKFAST -> R.drawable.ic_breakfast
-        MealType.MORNING_SNACK -> R.drawable.ic_morning_snack
-        MealType.LUNCH -> R.drawable.ic_lunch
-        MealType.AFTERNOON_SNACK -> R.drawable.ic_afternoon_snack
-        MealType.DINNER -> R.drawable.ic_dinner
-        MealType.OTHER -> R.drawable.ic_other_meal
-    }
+	val mealIcon = when (mealDetails.meal.type) {
+		MealType.BREAKFAST -> R.drawable.ic_breakfast
+		MealType.MORNING_SNACK -> R.drawable.ic_morning_snack
+		MealType.LUNCH -> R.drawable.ic_lunch
+		MealType.AFTERNOON_SNACK -> R.drawable.ic_afternoon_snack
+		MealType.DINNER -> R.drawable.ic_dinner
+		MealType.OTHER -> R.drawable.ic_other_meal
+	}
 
-    val mealLabel = mealDetails.meal.customTypeLabel ?: stringResource(mealDetails.meal.type.resId)
+	val mealLabel = mealDetails.meal.customTypeLabel ?: stringResource(mealDetails.meal.type.resId)
 
-    val hour = mealDetails.meal.timeMinutes / 60
-    val minute = mealDetails.meal.timeMinutes % 60
-    val time = "%02d:%02d".format(hour, minute)
+	val hour = mealDetails.meal.timeMinutes / 60
+	val minute = mealDetails.meal.timeMinutes % 60
+	val time = "%02d:%02d".format(hour, minute)
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-    ) {
-        Column(
-            modifier = Modifier.width(58.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = time,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-            )
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		verticalAlignment = Alignment.Top,
+	) {
+		Column(
+			modifier = Modifier.width(58.dp),
+			horizontalAlignment = Alignment.CenterHorizontally,
+		) {
+			Text(
+				text = time,
+				style = MaterialTheme.typography.labelLarge,
+				fontWeight = FontWeight.Bold,
+				color = MaterialTheme.colorScheme.primary,
+			)
 
-            Spacer(modifier = Modifier.size(8.dp))
+			Spacer(modifier = Modifier.size(8.dp))
 
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(mealIcon),
-                    contentDescription = null,
-                    modifier = Modifier.size(19.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
+			Box(
+				modifier = Modifier
+					.size(34.dp)
+					.clip(CircleShape)
+					.background(MaterialTheme.colorScheme.primaryContainer),
+				contentAlignment = Alignment.Center,
+			) {
+				Icon(
+					painter = painterResource(mealIcon),
+					contentDescription = null,
+					modifier = Modifier.size(19.dp),
+					tint = MaterialTheme.colorScheme.onPrimaryContainer
+				)
+			}
+		}
 
-        Spacer(modifier = Modifier.width(12.dp))
+		Spacer(modifier = Modifier.width(12.dp))
 
-        ElevatedCard(
-            modifier = Modifier
-                .weight(1f)
-                .animateContentSize()
-                .clickable {
-                    expanded = !expanded
-                },
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
-            elevation = CardDefaults.elevatedCardElevation(
-                defaultElevation = 2.dp,
-            ),
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Text(
-                            text = mealLabel,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
+		ElevatedCard(
+			modifier = Modifier
+				.weight(1f)
+				.animateContentSize()
+				.clickable {
+					expanded = !expanded
+				},
+			shape = RoundedCornerShape(20.dp),
+			colors = CardDefaults.elevatedCardColors(
+				containerColor = MaterialTheme.colorScheme.surface,
+			),
+			elevation = CardDefaults.elevatedCardElevation(
+				defaultElevation = 2.dp,
+			),
+		) {
+			Column(
+				modifier = Modifier.padding(16.dp),
+			) {
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					verticalAlignment = Alignment.CenterVertically,
+				) {
+					Column(
+						modifier = Modifier.weight(1f),
+					) {
+						Text(
+							text = mealLabel,
+							style = MaterialTheme.typography.titleMedium,
+							fontWeight = FontWeight.Bold,
+							color = MaterialTheme.colorScheme.onSurface,
+						)
 
-                        if (mealDetails.meal.description.isNotBlank()) {
-                            Spacer(modifier = Modifier.size(3.dp))
+						if (mealDetails.meal.description.isNotBlank()) {
+							Spacer(modifier = Modifier.size(3.dp))
 
-                            Text(
-                                text = mealDetails.meal.description,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 2,
-                            )
-                        }
-                    }
+							Text(
+								text = mealDetails.meal.description,
+								style = MaterialTheme.typography.bodySmall,
+								color = MaterialTheme.colorScheme.onSurfaceVariant,
+								maxLines = 2,
+							)
+						}
+					}
 
-                    Spacer(modifier = Modifier.width(8.dp))
+					Spacer(modifier = Modifier.width(8.dp))
 
-                    Surface(
-                        modifier = Modifier.size(34.dp),
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                imageVector = if (expanded) {
-                                    Icons.Rounded.KeyboardArrowUp
-                                } else {
-                                    Icons.Rounded.KeyboardArrowDown
-                                },
-                                contentDescription = if (expanded) {
-                                    stringResource(R.string.collapse)
-                                } else {
-                                    stringResource(R.string.expand)
-                                },
-                                modifier = Modifier.size(22.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                }
+					Surface(
+						modifier = Modifier.size(34.dp),
+						shape = CircleShape,
+						color = MaterialTheme.colorScheme.surfaceVariant,
+					) {
+						Box(
+							contentAlignment = Alignment.Center,
+						) {
+							Icon(
+								imageVector = if (expanded) {
+									Icons.Rounded.KeyboardArrowUp
+								} else {
+									Icons.Rounded.KeyboardArrowDown
+								},
+								contentDescription = if (expanded) {
+									stringResource(R.string.collapse)
+								} else {
+									stringResource(R.string.expand)
+								},
+								modifier = Modifier.size(22.dp),
+								tint = MaterialTheme.colorScheme.onSurfaceVariant,
+							)
+						}
+					}
+				}
 
-                AnimatedVisibility(visible = expanded) {
-                    Column {
-                        Spacer(modifier = Modifier.size(14.dp))
+				AnimatedVisibility(visible = expanded) {
+					Column {
+						Spacer(modifier = Modifier.size(14.dp))
 
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outlineVariant,
-                        )
+						HorizontalDivider(
+							color = MaterialTheme.colorScheme.outlineVariant,
+						)
 
-                        Spacer(modifier = Modifier.size(14.dp))
+						Spacer(modifier = Modifier.size(14.dp))
 
-                        mealDetails.courses.forEachIndexed { index, course ->
-                            CourseSection(course = course)
+						mealDetails.courses.forEachIndexed { index, course ->
+							CourseSection(course = course)
 
-                            if (index < mealDetails.courses.lastIndex) {
-                                Spacer(modifier = Modifier.size(14.dp))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+							if (index < mealDetails.courses.lastIndex) {
+								Spacer(modifier = Modifier.size(14.dp))
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun MealTimelineItemPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            MealTimelineItem(
-                mealDetails = MealWithDetails(
-                    meal = Meal(
-                        id = 1,
-                        dietId = 1,
-                        type = MealType.BREAKFAST,
-                        timeMinutes = 480,
-                        dayOfWeek = DayOfWeek.MONDAY,
-                        description = "Healthy breakfast"
-                    ),
-                    courses = emptyList()
-                ),
-                initiallyExpanded = true
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			MealTimelineItem(
+				mealDetails = MealWithDetails(
+					meal = Meal(
+						id = 1,
+						dietId = 1,
+						type = MealType.BREAKFAST,
+						timeMinutes = 480,
+						dayOfWeek = DayOfWeek.MONDAY,
+						description = "Healthy breakfast"
+					),
+					courses = emptyList()
+				),
+				initiallyExpanded = true
+			)
+		}
+	}
 }

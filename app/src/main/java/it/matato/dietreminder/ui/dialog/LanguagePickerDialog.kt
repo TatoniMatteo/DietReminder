@@ -28,80 +28,80 @@ import it.matato.dietreminder.ui.theme.DietTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguagePickerDialog(
-    onDismiss: () -> Unit,
-    onLanguageSelected: (String) -> Unit,
+	onDismiss: () -> Unit,
+	onLanguageSelected: (String) -> Unit,
 ) {
-    BasicAlertDialog(
-        onDismissRequest = onDismiss,
-    ) {
-        ElevatedCard(
-            shape = MaterialTheme.shapes.extraLarge,
-        ) {
-            Column(
-                modifier = Modifier.padding(vertical = 12.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.select_language),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(
-                        horizontal = 24.dp,
-                        vertical = 16.dp,
-                    ),
-                )
+	BasicAlertDialog(
+		onDismissRequest = onDismiss,
+	) {
+		ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge,
+		) {
+			Column(
+				modifier = Modifier.padding(vertical = 12.dp),
+			) {
+				Text(
+					text = stringResource(R.string.select_language),
+					style = MaterialTheme.typography.headlineSmall,
+					fontWeight = FontWeight.Bold,
+					modifier = Modifier.padding(
+						horizontal = 24.dp,
+						vertical = 16.dp,
+					),
+				)
 
-                ListItem(
-                    headlineContent = {
-                        Text(stringResource(R.string.lang_it))
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Language,
-                            contentDescription = null,
-                        )
-                    },
-                    modifier = Modifier.clickable {
-                        onLanguageSelected("it")
-                    },
-                )
+				ListItem(
+					headlineContent = {
+						Text(stringResource(R.string.lang_it))
+					},
+					leadingContent = {
+						Icon(
+							imageVector = Icons.Rounded.Language,
+							contentDescription = null,
+						)
+					},
+					modifier = Modifier.clickable {
+						onLanguageSelected("it")
+					},
+				)
 
-                ListItem(
-                    headlineContent = {
-                        Text(stringResource(R.string.lang_en))
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Language,
-                            contentDescription = null,
-                        )
-                    },
-                    modifier = Modifier.clickable {
-                        onLanguageSelected("en")
-                    },
-                )
+				ListItem(
+					headlineContent = {
+						Text(stringResource(R.string.lang_en))
+					},
+					leadingContent = {
+						Icon(
+							imageVector = Icons.Rounded.Language,
+							contentDescription = null,
+						)
+					},
+					modifier = Modifier.clickable {
+						onLanguageSelected("en")
+					},
+				)
 
-                Spacer(Modifier.height(4.dp))
+				Spacer(Modifier.height(4.dp))
 
-                TextButton(
-                    onClick = onDismiss,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(horizontal = 16.dp),
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        }
-    }
+				TextButton(
+					onClick = onDismiss,
+					modifier = Modifier
+						.align(Alignment.End)
+						.padding(horizontal = 16.dp),
+				) {
+					Text(stringResource(R.string.cancel))
+				}
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LanguagePickerDialogPreview() {
-    DietTheme {
-        LanguagePickerDialog(
-            onDismiss = {},
-            onLanguageSelected = {},
-        )
-    }
+	DietTheme {
+		LanguagePickerDialog(
+			onDismiss = {},
+			onLanguageSelected = {},
+		)
+	}
 }

@@ -28,93 +28,100 @@ import it.matato.dietreminder.viewmodel.DietViewModel
 
 @Composable
 fun DietsScreen(
-    vm: DietViewModel,
-    onConfigDiet: (Long) -> Unit,
+	vm: DietViewModel,
+	onConfigDiet: (Long) -> Unit,
+	onNavigateToImportDiet: () -> Unit,
 ) {
-    val diets by vm.diets.collectAsState()
-    var create by rememberSaveable { mutableStateOf(false) }
+	val diets by vm.diets.collectAsState()
+	var create by rememberSaveable { mutableStateOf(false) }
 
-    DietsContent(
-        diets = diets,
-        onCreateClick = { create = true },
-        onActivate = { vm.activate(it.id) },
-        onDuplicate = { vm.duplicate(it.id) },
-        onDelete = { vm.deleteDiet(it.id) },
-        onConfigure = { onConfigDiet(it.id) }
-    )
+	DietsContent(
+		diets = diets,
+		onCreateClick = { create = true },
+		onImportClick = onNavigateToImportDiet,
+		onActivate = { vm.activate(it.id) },
+		onDuplicate = { vm.duplicate(it.id) },
+		onDelete = { vm.deleteDiet(it.id) },
+		onConfigure = { onConfigDiet(it.id) },
+	)
 
-    if (create) {
-        NewDietDialog(
-            onDismiss = { create = false },
-            onCreate = { name, window ->
-                vm.create(name, window)
-                create = false
-            },
-        )
-    }
+	if (create) {
+		NewDietDialog(
+			onDismiss = { create = false },
+			onCreate = { name, window ->
+				vm.create(name, window)
+				create = false
+			},
+		)
+	}
 }
 
 @Composable
 fun DietsContent(
-    diets: List<Diet>,
-    onCreateClick: () -> Unit,
-    onActivate: (Diet) -> Unit,
-    onDuplicate: (Diet) -> Unit,
-    onDelete: (Diet) -> Unit,
-    onConfigure: (Diet) -> Unit,
+	diets: List<Diet>,
+	onCreateClick: () -> Unit,
+	onImportClick: () -> Unit,
+	onActivate: (Diet) -> Unit,
+	onDuplicate: (Diet) -> Unit,
+	onDelete: (Diet) -> Unit,
+	onConfigure: (Diet) -> Unit,
 ) {
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onCreateClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Add,
-                    contentDescription = stringResource(R.string.new_diet),
-                )
-            }
-        },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
-        ) {
-            item {
-                DietsHeader(count = diets.size)
-            }
+	Scaffold(
+		floatingActionButton = {
+			FloatingActionButton(
+				onClick = onCreateClick,
+				containerColor = MaterialTheme.colorScheme.primary,
+				contentColor = MaterialTheme.colorScheme.onPrimary,
+			) {
+				Icon(
+					imageVector = Icons.Rounded.Add,
+					contentDescription = stringResource(R.string.new_diet),
+				)
+			}
+		},
+	) { innerPadding ->
+		LazyColumn(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(innerPadding),
+			verticalArrangement = Arrangement.spacedBy(20.dp),
+			contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+		) {
+			item {
+				DietsHeader(
+					count = diets.size,
+					onImportClick = onImportClick,
+				)
+			}
 
-            item {
-                DietsSection(
-                    diets = diets,
-                    onActivate = onActivate,
-                    onDuplicate = onDuplicate,
-                    onDelete = onDelete,
-                    onConfigure = onConfigure,
-                )
-            }
-        }
-    }
+			item {
+				DietsSection(
+					diets = diets,
+					onActivate = onActivate,
+					onDuplicate = onDuplicate,
+					onDelete = onDelete,
+					onConfigure = onConfigure,
+				)
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DietsContentPreview() {
-    DietTheme {
-        DietsContent(
-            diets = listOf(
-                Diet(id = 1, name = "Summer Diet", nextMealWindowMinutes = 90, isActive = true),
-                Diet(id = 2, name = "Winter Diet", nextMealWindowMinutes = 60, isActive = false),
-            ),
-            onCreateClick = {},
-            onActivate = {},
-            onDuplicate = {},
-            onDelete = {},
-            onConfigure = {}
-        )
-    }
+	DietTheme {
+		DietsContent(
+			diets = listOf(
+				Diet(id = 1, name = "Summer Diet", nextMealWindowMinutes = 90, isActive = true),
+				Diet(id = 2, name = "Winter Diet", nextMealWindowMinutes = 60, isActive = false),
+			),
+			onCreateClick = {},
+			onImportClick = {},
+			onActivate = {},
+			onDuplicate = {},
+			onDelete = {},
+			onConfigure = {},
+		)
+	}
 }

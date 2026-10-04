@@ -9,61 +9,61 @@ import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.repository.FakeDietRepository
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
+import java.time.DayOfWeek
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.DayOfWeek
 
 @RunWith(AndroidJUnit4::class)
 class WeekFunctionalTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testWeek_DisplaysEmptyStateWhenNoActiveDiet() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val fakeRepository = FakeDietRepository()
-        val viewModel = DietViewModel(context, fakeRepository)
+	@Test
+	fun testWeek_DisplaysEmptyStateWhenNoActiveDiet() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val fakeRepository = FakeDietRepository()
+		val viewModel = DietViewModel(context, fakeRepository)
 
-        composeTestRule.setContent {
-            DietTheme {
-                WeekScreen(vm = viewModel)
-            }
-        }
+		composeTestRule.setContent {
+			DietTheme {
+				WeekScreen(vm = viewModel)
+			}
+		}
 
-        weekRobot(composeTestRule) {
-            verifyEmptyState()
-        }
-    }
+		weekRobot(composeTestRule) {
+			verifyEmptyState()
+		}
+	}
 
-    @Test
-    fun testWeek_DisplaysMealsForActiveDiet() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val fakeRepository = FakeDietRepository()
-        val viewModel = DietViewModel(context, fakeRepository)
+	@Test
+	fun testWeek_DisplaysMealsForActiveDiet() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val fakeRepository = FakeDietRepository()
+		val viewModel = DietViewModel(context, fakeRepository)
 
-        runBlocking {
-            val dietId = fakeRepository.create("Dieta Attiva", 60)
-            val meal = Meal(
-                dietId = dietId,
-                dayOfWeek = DayOfWeek.MONDAY,
-                type = MealType.LUNCH,
-                timeMinutes = 13 * 60,
-                description = "Pasta al pomodoro"
-            )
-            fakeRepository.saveMeal(meal, emptyList())
-        }
+		runBlocking {
+			val dietId = fakeRepository.create("Dieta Attiva", 60)
+			val meal = Meal(
+				dietId = dietId,
+				dayOfWeek = DayOfWeek.MONDAY,
+				type = MealType.LUNCH,
+				timeMinutes = 13 * 60,
+				description = "Pasta al pomodoro"
+			)
+			fakeRepository.saveMeal(meal, emptyList())
+		}
 
-        composeTestRule.setContent {
-            DietTheme {
-                WeekScreen(vm = viewModel, targetDayName = "MONDAY")
-            }
-        }
+		composeTestRule.setContent {
+			DietTheme {
+				WeekScreen(vm = viewModel, targetDayName = "MONDAY")
+			}
+		}
 
-        weekRobot(composeTestRule) {
-            verifyMealVisible("Pasta al pomodoro")
-        }
-    }
+		weekRobot(composeTestRule) {
+			verifyMealVisible("Pasta al pomodoro")
+		}
+	}
 }

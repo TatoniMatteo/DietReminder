@@ -15,21 +15,21 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class NotificationChannelConfigTest {
 
-    @Test
-    fun defaultChannelConfig_hasExpectedDefaults() {
-        val config = NotificationChannelConfig()
-        assertEquals("default_alarms", config.id)
-        assertEquals(1, config.version)
-        assertEquals(R.string.notifications_alarms, config.nameResId)
-    }
+	@Test
+	fun defaultChannelConfig_hasExpectedDefaults() {
+		val config = NotificationChannelConfig()
+		assertEquals("default_alarms", config.id)
+		assertEquals(1, config.version)
+		assertEquals(R.string.notifications_alarms, config.nameResId)
+	}
 
-    @Test
-    fun customSound_createsCustomNotificationSound() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val customSound = NotificationChannelConfig.customSound(context, R.raw.hydration_alarm)
+	@Test
+	fun customSound_createsCustomNotificationSound() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val customSound = NotificationChannelConfig.customSound(context, R.raw.hydration_alarm)
 
-        assertNotNull(customSound)
-        assertNotNull(customSound.uri)
-        assertNotNull(customSound.audioAttributes)
-    }
+		assertNotNull(customSound)
+		assertNotNull(customSound.uri)
+		assertNotNull(customSound.audioAttributes)
+	}
 }

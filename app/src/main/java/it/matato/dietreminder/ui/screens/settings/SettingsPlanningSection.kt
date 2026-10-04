@@ -20,72 +20,72 @@ import it.matato.dietreminder.viewmodel.DietViewModel
 
 @Composable
 fun SettingsPlanningSection(
-    defaultTimes: List<MealDefaultTime>,
-    vm: DietViewModel,
-    onMealTypeClick: (MealType) -> Unit,
+	defaultTimes: List<MealDefaultTime>,
+	vm: DietViewModel,
+	onMealTypeClick: (MealType) -> Unit,
 ) {
-    SettingsPlanningSectionContent(
-        defaultTimes = defaultTimes,
-        onMealTypeClick = onMealTypeClick,
-        getFallbackTime = { vm.getDefaultFallback(it) }
-    )
+	SettingsPlanningSectionContent(
+		defaultTimes = defaultTimes,
+		onMealTypeClick = onMealTypeClick,
+		getFallbackTime = { vm.getDefaultFallback(it) }
+	)
 }
 
 @Composable
 fun SettingsPlanningSectionContent(
-    defaultTimes: List<MealDefaultTime>,
-    onMealTypeClick: (MealType) -> Unit,
-    getFallbackTime: (MealType) -> Int,
+	defaultTimes: List<MealDefaultTime>,
+	onMealTypeClick: (MealType) -> Unit,
+	getFallbackTime: (MealType) -> Int,
 ) {
-    SettingsSection(
-        title = stringResource(R.string.planning),
-        icon = Icons.Rounded.AccessTime,
-    ) {
-        MealType.entries.forEachIndexed { index, type ->
-            if (index > 0) {
-                SettingsDivider()
-            }
+	SettingsSection(
+		title = stringResource(R.string.planning),
+		icon = Icons.Rounded.AccessTime,
+	) {
+		MealType.entries.forEachIndexed { index, type ->
+			if (index > 0) {
+				SettingsDivider()
+			}
 
-            val timeMinutes = defaultTimes
-                .find { it.type == type }
-                ?.timeMinutes
-                ?: getFallbackTime(type)
+			val timeMinutes = defaultTimes
+				.find { it.type == type }
+				?.timeMinutes
+				?: getFallbackTime(type)
 
-            SettingsListItem(
-                title = stringResource(type.resId),
-                subtitle = stringResource(R.string.default_time),
-                leadingIcon = Icons.Rounded.AccessTime,
-                trailingContent = {
-                    Text(
-                        text = "%02d:%02d".format(
-                            timeMinutes / 60,
-                            timeMinutes % 60,
-                        ),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                onClick = {
-                    onMealTypeClick(type)
-                },
-            )
-        }
-    }
+			SettingsListItem(
+				title = stringResource(type.resId),
+				subtitle = stringResource(R.string.default_time),
+				leadingIcon = Icons.Rounded.AccessTime,
+				trailingContent = {
+					Text(
+						text = "%02d:%02d".format(
+							timeMinutes / 60,
+							timeMinutes % 60,
+						),
+						style = MaterialTheme.typography.titleMedium,
+						color = MaterialTheme.colorScheme.primary,
+						fontWeight = FontWeight.Bold,
+					)
+				},
+				onClick = {
+					onMealTypeClick(type)
+				},
+			)
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SettingsPlanningSectionContentPreview() {
-    DietTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            SettingsPlanningSectionContent(
-                defaultTimes = listOf(
-                    MealDefaultTime(MealType.BREAKFAST, 480),
-                ),
-                onMealTypeClick = {},
-                getFallbackTime = { 0 }
-            )
-        }
-    }
+	DietTheme {
+		Column(modifier = Modifier.padding(16.dp)) {
+			SettingsPlanningSectionContent(
+				defaultTimes = listOf(
+					MealDefaultTime(MealType.BREAKFAST, 480),
+				),
+				onMealTypeClick = {},
+				getFallbackTime = { 0 }
+			)
+		}
+	}
 }

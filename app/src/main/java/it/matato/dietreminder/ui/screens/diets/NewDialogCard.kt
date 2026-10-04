@@ -43,143 +43,143 @@ import it.matato.dietreminder.ui.theme.DietTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewDietDialog(
-    onDismiss: () -> Unit,
-    onCreate: (String, Int) -> Unit,
+	onDismiss: () -> Unit,
+	onCreate: (String, Int) -> Unit,
 ) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var window by rememberSaveable { mutableFloatStateOf(90f) }
+	var name by rememberSaveable { mutableStateOf("") }
+	var window by rememberSaveable { mutableFloatStateOf(90f) }
 
-    BasicAlertDialog(
-        onDismissRequest = onDismiss,
-    ) {
-        NewDietDialogContent(
-            name = name,
-            window = window,
-            onNameChange = { name = it },
-            onWindowChange = { window = it },
-            onDismiss = onDismiss,
-            onCreate = { onCreate(name.trim(), window.toInt()) }
-        )
-    }
+	BasicAlertDialog(
+		onDismissRequest = onDismiss,
+	) {
+		NewDietDialogContent(
+			name = name,
+			window = window,
+			onNameChange = { name = it },
+			onWindowChange = { window = it },
+			onDismiss = onDismiss,
+			onCreate = { onCreate(name.trim(), window.toInt()) }
+		)
+	}
 }
 
 @Composable
 fun NewDietDialogContent(
-    name: String,
-    window: Float,
-    onNameChange: (String) -> Unit,
-    onWindowChange: (Float) -> Unit,
-    onDismiss: () -> Unit,
-    onCreate: () -> Unit,
+	name: String,
+	window: Float,
+	onNameChange: (String) -> Unit,
+	onWindowChange: (Float) -> Unit,
+	onDismiss: () -> Unit,
+	onCreate: () -> Unit,
 ) {
-    ElevatedCard(
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Restaurant,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(26.dp),
-                    )
-                }
+	ElevatedCard(
+		shape = MaterialTheme.shapes.extraLarge,
+		colors = CardDefaults.elevatedCardColors(
+			containerColor = MaterialTheme.colorScheme.surface,
+		),
+	) {
+		Column(
+			modifier = Modifier.padding(24.dp),
+			verticalArrangement = Arrangement.spacedBy(18.dp),
+		) {
+			Row(
+				verticalAlignment = Alignment.CenterVertically,
+			) {
+				Box(
+					modifier = Modifier
+						.size(50.dp)
+						.clip(CircleShape)
+						.background(MaterialTheme.colorScheme.primaryContainer),
+					contentAlignment = Alignment.Center,
+				) {
+					Icon(
+						imageVector = Icons.Rounded.Restaurant,
+						contentDescription = null,
+						tint = MaterialTheme.colorScheme.onPrimaryContainer,
+						modifier = Modifier.size(26.dp),
+					)
+				}
 
-                Spacer(modifier = Modifier.width(14.dp))
+				Spacer(modifier = Modifier.width(14.dp))
 
-                Text(
-                    text = stringResource(R.string.new_diet),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+				Text(
+					text = stringResource(R.string.new_diet),
+					style = MaterialTheme.typography.headlineSmall,
+					fontWeight = FontWeight.Bold,
+				)
+			}
 
-            OutlinedTextField(
-                value = name,
-                onValueChange = onNameChange,
-                label = {
-                    Text(stringResource(R.string.diet_name))
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = MaterialTheme.shapes.medium,
-            )
+			OutlinedTextField(
+				value = name,
+				onValueChange = onNameChange,
+				label = {
+					Text(stringResource(R.string.diet_name))
+				},
+				modifier = Modifier.fillMaxWidth(),
+				singleLine = true,
+				shape = MaterialTheme.shapes.medium,
+			)
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = stringResource(R.string.window_minutes),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
+			Column(
+				modifier = Modifier.fillMaxWidth(),
+			) {
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					horizontalArrangement = Arrangement.SpaceBetween,
+					verticalAlignment = Alignment.CenterVertically,
+				) {
+					Text(
+						text = stringResource(R.string.window_minutes),
+						style = MaterialTheme.typography.labelLarge,
+					)
 
-                    Text(
-                        text = "${window.toInt()} min",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
+					Text(
+						text = "${window.toInt()} min",
+						style = MaterialTheme.typography.labelLarge,
+						fontWeight = FontWeight.Bold,
+						color = MaterialTheme.colorScheme.primary,
+					)
+				}
 
-                Slider(
-                    value = window,
-                    onValueChange = onWindowChange,
-                    valueRange = 0f..120f,
-                )
-            }
+				Slider(
+					value = window,
+					onValueChange = onWindowChange,
+					valueRange = 0f .. 120f,
+				)
+			}
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.cancel))
-                }
+			Row(
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.End,
+			) {
+				TextButton(onClick = onDismiss) {
+					Text(stringResource(R.string.cancel))
+				}
 
-                Spacer(modifier = Modifier.width(4.dp))
+				Spacer(modifier = Modifier.width(4.dp))
 
-                Button(
-                    onClick = onCreate,
-                    enabled = name.isNotBlank(),
-                ) {
-                    Text(stringResource(R.string.create))
-                }
-            }
-        }
-    }
+				Button(
+					onClick = onCreate,
+					enabled = name.isNotBlank(),
+				) {
+					Text(stringResource(R.string.create))
+				}
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun NewDietDialogContentPreview() {
-    DietTheme {
-        NewDietDialogContent(
-            name = "My New Diet",
-            window = 60f,
-            onNameChange = {},
-            onWindowChange = {},
-            onDismiss = {},
-            onCreate = {}
-        )
-    }
+	DietTheme {
+		NewDietDialogContent(
+			name = "My New Diet",
+			window = 60f,
+			onNameChange = {},
+			onWindowChange = {},
+			onDismiss = {},
+			onCreate = {}
+		)
+	}
 }

@@ -19,22 +19,22 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class IngredientsScreenTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testIngredientsScreen_DisplaysTitle() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val fakeRepository = FakeDietRepository()
-        val viewModel = DietViewModel(context, fakeRepository)
+	@Test
+	fun testIngredientsScreen_DisplaysTitle() {
+		val context = ApplicationProvider.getApplicationContext<Application>()
+		val fakeRepository = FakeDietRepository()
+		val viewModel = DietViewModel(context, fakeRepository)
 
-        composeTestRule.setContent {
-            DietTheme {
-                IngredientsScreen(vm = viewModel)
-            }
-        }
+		composeTestRule.setContent {
+			DietTheme {
+				IngredientsScreen(vm = viewModel)
+			}
+		}
 
-        composeTestRule.onNode(hasText("Lista ingredienti") or hasText("Ingredients list"), useUnmergedTree = true)
-            .assertIsDisplayed()
-    }
+		composeTestRule.onNode(hasText("Lista ingredienti") or hasText("Ingredients list"), useUnmergedTree = true)
+			.assertIsDisplayed()
+	}
 }

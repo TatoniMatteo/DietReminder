@@ -29,137 +29,142 @@ import java.time.DayOfWeek
 
 @Composable
 fun HydrationScreen(vm: DietViewModel) {
-    val hydrationEnabled by vm.hydrationEnabled.collectAsState()
-    val hydrationInterval by vm.hydrationInterval.collectAsState()
-    val hydrationRanges by vm.hydrationRanges.collectAsState()
-    val activeDays by vm.hydrationDays.collectAsState()
+	val hydrationEnabled by vm.hydrationEnabled.collectAsState()
+	val hydrationInterval by vm.hydrationInterval.collectAsState()
+	val hydrationRanges by vm.hydrationRanges.collectAsState()
+	val activeDays by vm.hydrationDays.collectAsState()
 
-    var showAddRangeDialog by rememberSaveable { mutableStateOf(false) }
+	var showAddRangeDialog by rememberSaveable { mutableStateOf(false) }
 
-    HydrationContent(
-        hydrationEnabled = hydrationEnabled,
-        hydrationInterval = hydrationInterval,
-        hydrationRanges = hydrationRanges,
-        activeDays = activeDays,
-        onEnabledChange = vm::setHydrationEnabled,
-        onIntervalChange = vm::setHydrationInterval,
-        onDaysChange = vm::setHydrationDays,
-        onDeleteRange = { range ->
-            vm.setHydrationRanges(hydrationRanges - range)
-        },
-        onAddRangeClick = { showAddRangeDialog = true }
-    )
+	HydrationContent(
+		hydrationEnabled = hydrationEnabled,
+		hydrationInterval = hydrationInterval,
+		hydrationRanges = hydrationRanges,
+		activeDays = activeDays,
+		onEnabledChange = vm::setHydrationEnabled,
+		onIntervalChange = vm::setHydrationInterval,
+		onDaysChange = vm::setHydrationDays,
+		onDeleteRange = { range ->
+			vm.setHydrationRanges(hydrationRanges - range)
+		},
+		onAddRangeClick = { showAddRangeDialog = true }
+	)
 
-    if (showAddRangeDialog) {
-        AddHydrationRangeDialog(
-            onDismiss = { showAddRangeDialog = false },
-            onAdd = { start, end ->
-                vm.setHydrationRanges(
-                    hydrationRanges + HydrationRange(
-                        startMinutes = start,
-                        endMinutes = end,
-                    ),
-                )
-                showAddRangeDialog = false
-            },
-        )
-    }
+	if (showAddRangeDialog) {
+		AddHydrationRangeDialog(
+			onDismiss = { showAddRangeDialog = false },
+			onAdd = { start, end ->
+				vm.setHydrationRanges(
+					hydrationRanges + HydrationRange(
+						startMinutes = start,
+						endMinutes = end,
+					),
+				)
+				showAddRangeDialog = false
+			},
+		)
+	}
 }
 
 @Composable
 fun HydrationContent(
-    hydrationEnabled: Boolean,
-    hydrationInterval: Int,
-    hydrationRanges: List<HydrationRange>,
-    activeDays: Set<DayOfWeek>,
-    onEnabledChange: (Boolean) -> Unit,
-    onIntervalChange: (Int) -> Unit,
-    onDaysChange: (Set<DayOfWeek>) -> Unit,
-    onDeleteRange: (HydrationRange) -> Unit,
-    onAddRangeClick: () -> Unit,
+	hydrationEnabled: Boolean,
+	hydrationInterval: Int,
+	hydrationRanges: List<HydrationRange>,
+	activeDays: Set<DayOfWeek>,
+	onEnabledChange: (Boolean) -> Unit,
+	onIntervalChange: (Int) -> Unit,
+	onDaysChange: (Set<DayOfWeek>) -> Unit,
+	onDeleteRange: (HydrationRange) -> Unit,
+	onAddRangeClick: () -> Unit,
 ) {
-    Scaffold(
-        floatingActionButton = {
-            if (hydrationEnabled) {
-                FloatingActionButton(
-                    onClick = onAddRangeClick,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = stringResource(R.string.add),
-                    )
-                }
-            }
-        },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            contentPadding = PaddingValues(
-                start = 20.dp,
-                end = 20.dp,
-                top = 24.dp,
-                bottom = if (hydrationEnabled) 104.dp else 32.dp,
-            ),
-        ) {
-            item {
-                HydrationHeader()
-            }
+	Scaffold(
+		floatingActionButton = {
+			if (hydrationEnabled) {
+				FloatingActionButton(
+					onClick = onAddRangeClick,
+					containerColor = MaterialTheme.colorScheme.primary,
+					contentColor = MaterialTheme.colorScheme.onPrimary,
+				) {
+					Icon(
+						imageVector = Icons.Rounded.Add,
+						contentDescription = stringResource(R.string.add),
+					)
+				}
+			}
+		},
+	) { innerPadding ->
+		LazyColumn(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(innerPadding),
+			verticalArrangement = Arrangement.spacedBy(24.dp),
+			contentPadding = PaddingValues(
+				start = 20.dp,
+				end = 20.dp,
+				top = 24.dp,
+				bottom = if (hydrationEnabled) 104.dp else 32.dp,
+			),
+		) {
+			item {
+				HydrationHeader()
+			}
 
-            item {
-                HydrationSettingsSection(
-                    enabled = hydrationEnabled,
-                    onEnabledChange = onEnabledChange,
-                )
-            }
+			item {
+				HydrationSettingsSection(
+					enabled = hydrationEnabled,
+					onEnabledChange = onEnabledChange,
+				)
+			}
 
-            if (hydrationEnabled) {
-                item {
-                    HydrationIntervalSection(
-                        interval = hydrationInterval,
-                        onIntervalChange = onIntervalChange,
-                    )
-                }
+			if (hydrationEnabled) {
+				item {
+					HydrationIntervalSection(
+						interval = hydrationInterval,
+						onIntervalChange = onIntervalChange,
+					)
+				}
 
-                item {
-                    HydrationDaysSection(
-                        activeDays = activeDays,
-                        onDaysChange = onDaysChange,
-                    )
-                }
+				item {
+					HydrationDaysSection(
+						activeDays = activeDays,
+						onDaysChange = onDaysChange,
+					)
+				}
 
-                item {
-                    HydrationWindowsSection(
-                        ranges = hydrationRanges,
-                        onDelete = onDeleteRange,
-                    )
-                }
-            }
-        }
-    }
+				item {
+					HydrationWindowsSection(
+						ranges = hydrationRanges,
+						onDelete = onDeleteRange,
+					)
+				}
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun HydrationContentPreview() {
-    DietTheme {
-        HydrationContent(
-            hydrationEnabled = true,
-            hydrationInterval = 60,
-            hydrationRanges = listOf(
-                HydrationRange(540, 720),
-                HydrationRange(840, 1020),
-            ),
-            activeDays = setOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY),
-            onEnabledChange = {},
-            onIntervalChange = {},
-            onDaysChange = {},
-            onDeleteRange = {},
-            onAddRangeClick = {}
-        )
-    }
+	DietTheme {
+		HydrationContent(
+			hydrationEnabled = true,
+			hydrationInterval = 60,
+			hydrationRanges = listOf(
+				HydrationRange(540, 720),
+				HydrationRange(840, 1020),
+			),
+			activeDays = setOf(
+				DayOfWeek.MONDAY,
+				DayOfWeek.TUESDAY,
+				DayOfWeek.WEDNESDAY,
+				DayOfWeek.THURSDAY,
+				DayOfWeek.FRIDAY),
+			onEnabledChange = {},
+			onIntervalChange = {},
+			onDaysChange = {},
+			onDeleteRange = {},
+			onAddRangeClick = {}
+		)
+	}
 }

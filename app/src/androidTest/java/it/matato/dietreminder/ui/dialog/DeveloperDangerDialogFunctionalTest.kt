@@ -12,26 +12,26 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class DeveloperDangerDialogFunctionalTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testDeveloperDangerDialog_DisplaysTitleAndMessage() {
-        composeTestRule.setContent {
-            DietTheme {
-                DeveloperDangerDialog(
-                    title = "Reset",
-                    message = "Are you sure?",
-                    onDismiss = {},
-                    onConfirm = {}
-                )
-            }
-        }
+	@Test
+	fun testDeveloperDangerDialog_DisplaysTitleAndMessage() {
+		composeTestRule.setContent {
+			DietTheme {
+				DeveloperDangerDialog(
+					title = "Reset",
+					message = "Are you sure?",
+					onDismiss = {},
+					onConfirm = {}
+				)
+			}
+		}
 
-        composeTestRule.onNode(hasText("Reset"), useUnmergedTree = true)
-            .assertIsDisplayed()
+		composeTestRule.onNode(hasText("Reset"), useUnmergedTree = true)
+			.assertIsDisplayed()
 
-        composeTestRule.onNode(hasText("Are you sure?"), useUnmergedTree = true)
-            .assertIsDisplayed()
-    }
+		composeTestRule.onNode(hasText("Are you sure?"), useUnmergedTree = true)
+			.assertIsDisplayed()
+	}
 }

@@ -15,26 +15,26 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class DeveloperDangerDialogTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+	@get:Rule
+	val composeTestRule = createComposeRule()
 
-    @Test
-    fun testDeveloperDangerDialog_DisplaysTitleAndMessage() {
-        composeTestRule.setContent {
-            DietTheme {
-                DeveloperDangerDialog(
-                    title = "Test Danger",
-                    message = "Are you sure?",
-                    onDismiss = {},
-                    onConfirm = {}
-                )
-            }
-        }
+	@Test
+	fun testDeveloperDangerDialog_DisplaysTitleAndMessage() {
+		composeTestRule.setContent {
+			DietTheme {
+				DeveloperDangerDialog(
+					title = "Test Danger",
+					message = "Are you sure?",
+					onDismiss = {},
+					onConfirm = {}
+				)
+			}
+		}
 
-        composeTestRule.onNode(hasText("Test Danger"), useUnmergedTree = true)
-            .assertIsDisplayed()
+		composeTestRule.onNode(hasText("Test Danger"), useUnmergedTree = true)
+			.assertIsDisplayed()
 
-        composeTestRule.onNode(hasText("Are you sure?"), useUnmergedTree = true)
-            .assertIsDisplayed()
-    }
+		composeTestRule.onNode(hasText("Are you sure?"), useUnmergedTree = true)
+			.assertIsDisplayed()
+	}
 }

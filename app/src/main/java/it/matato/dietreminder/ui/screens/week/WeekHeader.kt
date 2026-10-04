@@ -25,50 +25,50 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun WeekHeader(dietName: String?) {
-    Column(
-        modifier = Modifier.padding(
-            start = 24.dp,
-            end = 24.dp,
-            top = 18.dp,
-            bottom = 8.dp,
-        ),
-    ) {
-        Text(
-            text = stringResource(R.string.week),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
+	Column(
+		modifier = Modifier.padding(
+			start = 24.dp,
+			end = 24.dp,
+			top = 18.dp,
+			bottom = 8.dp,
+		),
+	) {
+		Text(
+			text = stringResource(R.string.week),
+			style = MaterialTheme.typography.headlineMedium,
+			fontWeight = FontWeight.Bold,
+			color = MaterialTheme.colorScheme.onBackground,
+		)
 
-        Spacer(modifier = Modifier.height(4.dp))
+		Spacer(modifier = Modifier.height(4.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(7.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
-            )
+		Row(
+			verticalAlignment = Alignment.CenterVertically,
+		) {
+			Box(
+				modifier = Modifier
+					.size(7.dp)
+					.clip(CircleShape)
+					.background(MaterialTheme.colorScheme.primary),
+			)
 
-            Spacer(modifier = Modifier.width(8.dp))
+			Spacer(modifier = Modifier.width(8.dp))
 
-            Text(
-                text = dietName ?: stringResource(R.string.no_diet),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-            )
-        }
-    }
+			Text(
+				text = dietName ?: stringResource(R.string.no_diet),
+				style = MaterialTheme.typography.bodyMedium,
+				fontWeight = FontWeight.Medium,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
+				maxLines = 1,
+			)
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun WeekHeaderPreview() {
-    DietTheme {
-        WeekHeader(dietName = "Summer Diet")
-    }
+	DietTheme {
+		WeekHeader(dietName = "Summer Diet")
+	}
 }
