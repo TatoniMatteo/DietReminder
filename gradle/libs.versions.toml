@@ -2,7 +2,7 @@
 #noinspection UnusedVersionCatalogEntry
 versionCode = "2"
 #noinspection UnusedVersionCatalogEntry
-versionName = "1.1.0"
+versionName = "1.2.0-SNAPSHOT"
 #noinspection UnusedVersionCatalogEntry
 compileSdk = "37"
 #noinspection UnusedVersionCatalogEntry
