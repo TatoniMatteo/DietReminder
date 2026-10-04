@@ -37,7 +37,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -61,7 +60,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -75,6 +76,8 @@ import it.matato.dietreminder.data.database.relation.ShoppingListWithItems
 import it.matato.dietreminder.data.model.QuantityUnit
 import it.matato.dietreminder.ui.components.IconContainer
 import it.matato.dietreminder.ui.components.QuantityInputRow
+import it.matato.dietreminder.ui.LocalOfflineMode
+import it.matato.dietreminder.ui.OfflineAwareFloatingActionButton
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
 import java.time.format.TextStyle
@@ -160,6 +163,7 @@ fun ShoppingListDetailContent(
 	onDeleteList: () -> Unit,
 	onRenameList: (String) -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	var editingItem by remember { mutableStateOf<ShoppingListItem?>(null) }
 	var showMenu by remember { mutableStateOf(false) }
 	var showRenameDialog by remember { mutableStateOf(false) }
@@ -214,7 +218,7 @@ fun ShoppingListDetailContent(
 					},
 					actions = {
 						Box {
-							IconButton(onClick = { showMenu = true }) {
+							IconButton(onClick = { showMenu = true }, enabled = !isOffline) {
 								Icon(
 									imageVector = Icons.Rounded.MoreVert,
 									contentDescription = null,
@@ -231,6 +235,7 @@ fun ShoppingListDetailContent(
 										showMenu = false
 										showRenameDialog = true
 									},
+									enabled = !isOffline,
 									leadingIcon = {
 										Icon(Icons.Rounded.Edit, contentDescription = null)
 									},
@@ -241,6 +246,7 @@ fun ShoppingListDetailContent(
 										showMenu = false
 										showDeleteConfirmDialog = true
 									},
+									enabled = !isOffline,
 									leadingIcon = {
 										Icon(
 											Icons.Rounded.Delete,
@@ -258,19 +264,20 @@ fun ShoppingListDetailContent(
 					LinearProgressIndicator(
 						progress = { animatedProgress },
 						modifier = Modifier
-                            .fillMaxWidth()
-                            .height(6.dp),
+							.fillMaxWidth()
+							.height(6.dp),
 					)
 					Row(
 						modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 6.dp),
+							.fillMaxWidth()
+							.padding(horizontal = 16.dp, vertical = 6.dp),
 						horizontalArrangement = Arrangement.SpaceBetween,
 						verticalAlignment = Alignment.CenterVertically,
 					) {
 						Text(
-							text = stringResource(
-								R.string.items_purchased_count,
+							text = pluralStringResource(
+								R.plurals.items_purchased_count,
+								boughtCount,
 								boughtCount,
 								totalCount,
 							),
@@ -290,7 +297,7 @@ fun ShoppingListDetailContent(
 		},
 		floatingActionButton = {
 			Box(contentAlignment = Alignment.BottomEnd) {
-				FloatingActionButton(
+				OfflineAwareFloatingActionButton(
 					onClick = { fabExpanded = !fabExpanded },
 					containerColor = MaterialTheme.colorScheme.primary,
 					contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -311,6 +318,7 @@ fun ShoppingListDetailContent(
 							fabExpanded = false
 							onAddCustomClick()
 						},
+						enabled = !isOffline,
 						leadingIcon = {
 							Icon(Icons.Rounded.Edit, contentDescription = null)
 						},
@@ -322,6 +330,7 @@ fun ShoppingListDetailContent(
 								fabExpanded = false
 								onImportDietClick()
 							},
+							enabled = !isOffline,
 							leadingIcon = {
 								Icon(Icons.Rounded.Restaurant, contentDescription = null)
 							},
@@ -333,8 +342,8 @@ fun ShoppingListDetailContent(
 	) { innerPadding ->
 		Column(
 			modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+				.fillMaxSize()
+				.padding(innerPadding),
 		) {
 			if (listWithItems.items.isEmpty()) {
 				Box(
@@ -403,10 +412,10 @@ fun ShoppingListDetailContent(
 							Spacer(modifier = Modifier.height(8.dp))
 							Row(
 								modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(MaterialTheme.shapes.medium)
-                                    .clickable { purchasedExpanded = !purchasedExpanded }
-                                    .padding(vertical = 4.dp),
+									.fillMaxWidth()
+									.clip(MaterialTheme.shapes.medium)
+									.clickable { purchasedExpanded = !purchasedExpanded }
+									.padding(vertical = 4.dp),
 								verticalAlignment = Alignment.CenterVertically,
 							) {
 								SectionHeader(
@@ -501,6 +510,7 @@ fun ShoppingListDetailContent(
 						showCompletedDeleteConfirmDialog = false
 						onDeleteList()
 					},
+					enabled = !isOffline,
 				) {
 					Text(
 						stringResource(R.string.delete),
@@ -530,6 +540,7 @@ private fun FreshShoppingListItemCard(
 	onEdit: () -> Unit,
 	onDelete: () -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	var expanded by remember { mutableStateOf(false) }
 	var showMenu by remember { mutableStateOf(false) }
 
@@ -552,14 +563,15 @@ private fun FreshShoppingListItemCard(
 		) {
 			Row(
 				modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { expanded = !expanded }
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+					.fillMaxWidth()
+					.clickable { expanded = !expanded }
+					.padding(horizontal = 12.dp, vertical = 8.dp),
 				verticalAlignment = Alignment.CenterVertically,
 			) {
 				Checkbox(
 					checked = isAllBought,
 					onCheckedChange = { onToggleItem() },
+					enabled = !isOffline,
 				)
 
 				Spacer(modifier = Modifier.width(8.dp))
@@ -585,9 +597,9 @@ private fun FreshShoppingListItemCard(
 
 						Box(
 							modifier = Modifier
-                                .clip(MaterialTheme.shapes.extraSmall)
-                                .background(MaterialTheme.colorScheme.tertiaryContainer)
-                                .padding(horizontal = 6.dp, vertical = 2.dp),
+								.clip(MaterialTheme.shapes.extraSmall)
+								.background(MaterialTheme.colorScheme.tertiaryContainer)
+								.padding(horizontal = 6.dp, vertical = 2.dp),
 						) {
 							Text(
 								text = stringResource(R.string.type_fresh_daily),
@@ -614,7 +626,7 @@ private fun FreshShoppingListItemCard(
 				)
 
 				Box {
-					IconButton(onClick = { showMenu = true }) {
+					IconButton(onClick = { showMenu = true }, enabled = !isOffline) {
 						Icon(
 							imageVector = Icons.Rounded.MoreVert,
 							contentDescription = null,
@@ -632,6 +644,7 @@ private fun FreshShoppingListItemCard(
 								showMenu = false
 								onEdit()
 							},
+							enabled = !isOffline,
 							leadingIcon = {
 								Icon(Icons.Rounded.Edit, contentDescription = null)
 							},
@@ -642,6 +655,7 @@ private fun FreshShoppingListItemCard(
 								showMenu = false
 								onDelete()
 							},
+							enabled = !isOffline,
 							leadingIcon = {
 								Icon(
 									Icons.Rounded.Delete,
@@ -668,14 +682,15 @@ private fun FreshShoppingListItemCard(
 
 						Row(
 							modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onToggleDay(day.id, !day.isBought) }
-                                .padding(horizontal = 24.dp, vertical = 6.dp),
+								.fillMaxWidth()
+								.clickable(enabled = !isOffline) { onToggleDay(day.id, !day.isBought) }
+								.padding(horizontal = 24.dp, vertical = 6.dp),
 							verticalAlignment = Alignment.CenterVertically,
 						) {
 							Checkbox(
 								checked = day.isBought,
 								onCheckedChange = { onToggleDay(day.id, !day.isBought) },
+								enabled = !isOffline,
 							)
 
 							Spacer(modifier = Modifier.width(8.dp))
@@ -723,15 +738,15 @@ private fun CompletedListCard(
 
 	OutlinedCard(
 		modifier = Modifier
-            .fillMaxWidth()
-            .scale(scale)
-            .padding(vertical = 8.dp),
+			.fillMaxWidth()
+			.scale(scale)
+			.padding(vertical = 8.dp),
 		shape = MaterialTheme.shapes.large,
 	) {
 		Column(
 			modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
+				.fillMaxWidth()
+				.padding(20.dp),
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.spacedBy(12.dp),
 		) {
@@ -757,6 +772,7 @@ private fun CompletedListCard(
 
 			Button(
 				onClick = onDeleteClick,
+				enabled = !LocalOfflineMode.current,
 				colors = ButtonDefaults.buttonColors(
 					containerColor = MaterialTheme.colorScheme.errorContainer,
 					contentColor = MaterialTheme.colorScheme.onErrorContainer,
@@ -790,9 +806,9 @@ private fun SectionHeader(title: String, count: Int) {
 
 		Box(
 			modifier = Modifier
-                .clip(MaterialTheme.shapes.extraSmall)
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(horizontal = 6.dp, vertical = 2.dp),
+				.clip(MaterialTheme.shapes.extraSmall)
+				.background(MaterialTheme.colorScheme.primaryContainer)
+				.padding(horizontal = 6.dp, vertical = 2.dp),
 		) {
 			Text(
 				text = count.toString(),
@@ -811,6 +827,7 @@ private fun ShoppingListItemRow(
 	onEdit: () -> Unit,
 	onDelete: () -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	var showMenu by remember { mutableStateOf(false) }
 
 	OutlinedCard(
@@ -819,14 +836,16 @@ private fun ShoppingListItemRow(
 	) {
 		Row(
 			modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onToggle)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+				.fillMaxWidth()
+				.clickable(enabled = !isOffline, onClick = onToggle)
+				.padding(horizontal = 12.dp, vertical = 8.dp),
 			verticalAlignment = Alignment.CenterVertically,
 		) {
 			Checkbox(
 				checked = item.isBought,
 				onCheckedChange = { onToggle() },
+				enabled = !isOffline,
+				modifier = Modifier.testTag("shopping-item-checkbox"),
 			)
 
 			Spacer(modifier = Modifier.width(8.dp))
@@ -853,7 +872,7 @@ private fun ShoppingListItemRow(
 			}
 
 			Box {
-				IconButton(onClick = { showMenu = true }) {
+				IconButton(onClick = { showMenu = true }, enabled = !isOffline) {
 					Icon(
 						imageVector = Icons.Rounded.MoreVert,
 						contentDescription = null,
@@ -871,6 +890,7 @@ private fun ShoppingListItemRow(
 							showMenu = false
 							onEdit()
 						},
+						enabled = !isOffline,
 						leadingIcon = {
 							Icon(Icons.Rounded.Edit, contentDescription = null)
 						},
@@ -881,6 +901,7 @@ private fun ShoppingListItemRow(
 							showMenu = false
 							onDelete()
 						},
+						enabled = !isOffline,
 						leadingIcon = {
 							Icon(
 								Icons.Rounded.Delete,
@@ -996,8 +1017,8 @@ private fun RenameShoppingListDialog(
 private fun EmptyShoppingListItemsState() {
 	Column(
 		modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp, vertical = 48.dp),
+			.fillMaxWidth()
+			.padding(horizontal = 32.dp, vertical = 48.dp),
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.spacedBy(12.dp),
 	) {

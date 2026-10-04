@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.database.entity.Diet
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
@@ -21,6 +22,7 @@ fun SettingsBackupSection(
 	onImport: () -> Unit,
 	onExport: (Long, String) -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	SettingsSection(
 		title = stringResource(R.string.backup_data),
 		icon = Icons.Rounded.Backup,
@@ -29,6 +31,7 @@ fun SettingsBackupSection(
 			title = stringResource(R.string.import_diet),
 			subtitle = stringResource(R.string.import_desc),
 			leadingIcon = Icons.Rounded.FileUpload,
+			enabled = !isOffline,
 			onClick = onImport,
 		)
 

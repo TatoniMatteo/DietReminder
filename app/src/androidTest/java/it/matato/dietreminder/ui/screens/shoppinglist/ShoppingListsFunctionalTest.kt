@@ -12,7 +12,7 @@ import it.matato.dietreminder.data.database.entity.Meal
 import it.matato.dietreminder.data.database.relation.CourseWithItems
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.model.QuantityUnit
-import it.matato.dietreminder.data.repository.FakeDietRepository
+import it.matato.dietreminder.data.repository.fake.FakeDietRepository
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
 import java.time.DayOfWeek
@@ -139,7 +139,7 @@ class ShoppingListsFunctionalTest {
 		}
 
 		composeTestRule.onNode(hasText("Salmone")).assertExists()
-		composeTestRule.onNode(hasText("Importa 1 alimenti") or hasText("Import 1 foods")).performClick()
+		composeTestRule.onNode(hasText("Importa 1 alimento") or hasText("Import 1 food")).performClick()
 
 		assertTrue(backClicked)
 	}

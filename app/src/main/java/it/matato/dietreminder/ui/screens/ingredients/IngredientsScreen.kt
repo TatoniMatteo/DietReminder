@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -191,7 +192,11 @@ private fun ExpandableIngredientCard(ingredient: IngredientSummary) {
 						.padding(horizontal = 8.dp, vertical = 4.dp),
 				) {
 					Text(
-						text = stringResource(R.string.meals_count, ingredient.totalOccurrences),
+						text = pluralStringResource(
+							R.plurals.meals_count,
+							ingredient.totalOccurrences,
+							ingredient.totalOccurrences,
+						),
 						style = MaterialTheme.typography.labelSmall,
 						fontWeight = FontWeight.Bold,
 						color = MaterialTheme.colorScheme.onPrimaryContainer,

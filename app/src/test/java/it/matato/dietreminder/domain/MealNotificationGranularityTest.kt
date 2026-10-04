@@ -7,7 +7,7 @@ import it.matato.dietreminder.TestDietApplication
 import it.matato.dietreminder.data.database.entity.Diet
 import it.matato.dietreminder.data.database.entity.Meal
 import it.matato.dietreminder.data.model.MealType
-import it.matato.dietreminder.data.repository.FakeDietRepository
+import it.matato.dietreminder.data.repository.fake.FakeDietRepository
 import it.matato.dietreminder.viewmodel.DietViewModel
 import java.time.DayOfWeek
 import kotlinx.coroutines.ExperimentalCoroutinesApi

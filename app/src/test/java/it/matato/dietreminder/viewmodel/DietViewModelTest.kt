@@ -13,16 +13,20 @@ import it.matato.dietreminder.data.export.DietJsonCodec
 import it.matato.dietreminder.data.model.HydrationRange
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.model.QuantityUnit
-import it.matato.dietreminder.data.repository.FakeDietRepository
+import it.matato.dietreminder.data.repository.fake.FakeDietRepository
+import it.matato.dietreminder.util.UpdateManagerStatus
 import java.time.DayOfWeek
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.flow.first
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -45,14 +49,31 @@ class DietViewModelTest {
 	@Before
 	fun setUp() {
 		Dispatchers.setMain(testDispatcher)
+		UpdateManagerStatus.isOffline = false
 		val context = ApplicationProvider.getApplicationContext<Application>()
 		repository = FakeDietRepository()
 		viewModel = DietViewModel(context, repository)
+		UpdateManagerStatus.isChecking = false
 	}
 
 	@After
 	fun tearDown() {
+		UpdateManagerStatus.isOffline = false
+		UpdateManagerStatus.isChecking = false
 		Dispatchers.resetMain()
+	}
+
+	@Test
+	fun createDiet_whenOffline_isBlockedAndReportsReadOnlyState() = runTest {
+		UpdateManagerStatus.isOffline = true
+		val blockedEvent = async(start = CoroutineStart.UNDISPATCHED) {
+			viewModel.writeBlockedEvents.first()
+		}
+
+		viewModel.create("Offline diet", 60)
+
+		assertTrue(viewModel.diets.value.isEmpty())
+		blockedEvent.await()
 	}
 
 	@Test
@@ -242,6 +263,23 @@ class DietViewModelTest {
 		viewModel.setHydrationRanges(customRanges)
 		advanceUntilIdle()
 		assertEquals(customRanges, viewModel.hydrationRanges.value)
+	}
+
+	@Test
+	fun localConfigurationCanBeUpdatedWhileOffline() = runTest {
+		UpdateManagerStatus.isOffline = true
+		backgroundScope.launch { viewModel.theme.collect {} }
+		backgroundScope.launch { viewModel.mealRemindersEnabled.collect {} }
+		backgroundScope.launch { viewModel.hydrationEnabled.collect {} }
+
+		viewModel.setTheme("dark")
+		viewModel.setMealRemindersEnabled(false)
+		viewModel.setHydrationEnabled(false)
+		advanceUntilIdle()
+
+		assertEquals("dark", viewModel.theme.value)
+		assertFalse(viewModel.mealRemindersEnabled.value)
+		assertFalse(viewModel.hydrationEnabled.value)
 	}
 
 	@Test

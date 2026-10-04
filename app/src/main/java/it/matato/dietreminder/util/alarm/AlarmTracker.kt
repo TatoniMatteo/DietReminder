@@ -1,22 +1,26 @@
 package it.matato.dietreminder.util.alarm
 
 import android.content.Context
-import it.matato.dietreminder.DietApplication
-import it.matato.dietreminder.data.database.entity.ConfigKey
+import android.content.SharedPreferences
+import androidx.core.content.edit
 import it.matato.dietreminder.data.model.ScheduledAlarm
 import it.matato.dietreminder.util.AppLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 
 object AlarmTracker {
+
+	private const val PREFERENCES_NAME = "scheduled_alarms"
+	private const val REGISTRY_KEY = "registry"
 
 	private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 	private val mutex = Mutex()
@@ -60,11 +64,17 @@ object AlarmTracker {
 	}
 
 	fun observeAlarms(context: Context): Flow<List<ScheduledAlarm>> {
-		val repo = (context.applicationContext as DietApplication).repository
-
-		return repo.observeConfig(ConfigKey.SCHEDULED_ALARMS_REGISTRY).map { config ->
-			decodeAlarms(config?.value)
-		}
+		val preferences = preferences(context)
+		return callbackFlow {
+			val listener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+				if (key == REGISTRY_KEY) {
+					trySend(decodeAlarms(prefs.getString(REGISTRY_KEY, null)))
+				}
+			}
+			preferences.registerOnSharedPreferenceChangeListener(listener)
+			trySend(decodeAlarms(preferences.getString(REGISTRY_KEY, null)))
+			awaitClose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
+		}.distinctUntilChanged()
 	}
 
 	suspend fun getAlarms(context: Context): List<ScheduledAlarm> {
@@ -74,10 +84,7 @@ object AlarmTracker {
 	}
 
 	private suspend fun getAlarmsInternal(context: Context): List<ScheduledAlarm> {
-		val repo = (context.applicationContext as DietApplication).repository
-		val json = repo.observeConfig(ConfigKey.SCHEDULED_ALARMS_REGISTRY).first()?.value
-
-		return decodeAlarms(json)
+		return decodeAlarms(preferences(context).getString(REGISTRY_KEY, null))
 	}
 
 	private fun decodeAlarms(json: String?): List<ScheduledAlarm> {
@@ -97,11 +104,11 @@ object AlarmTracker {
 		context: Context,
 		alarms: List<ScheduledAlarm>,
 	) {
-		val repo = (context.applicationContext as DietApplication).repository
-
-		repo.saveConfig(
-			ConfigKey.SCHEDULED_ALARMS_REGISTRY,
-			Json.encodeToString(alarms),
-		)
+		preferences(context).edit {
+			putString(REGISTRY_KEY, Json.encodeToString(alarms))
+		}
 	}
+
+	private fun preferences(context: Context): SharedPreferences =
+		context.applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
 }

@@ -10,7 +10,7 @@ import it.matato.dietreminder.data.database.entity.Meal
 import it.matato.dietreminder.data.database.relation.CourseWithItems
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.model.QuantityUnit
-import it.matato.dietreminder.data.repository.FakeDietRepository
+import it.matato.dietreminder.data.repository.fake.FakeDietRepository
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
 import java.time.DayOfWeek

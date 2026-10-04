@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
@@ -65,8 +66,9 @@ fun SettingsScreen(
 	val exportSuccessMessage = stringResource(R.string.json_exported)
 	val exportFailedMessage = stringResource(R.string.export_failed)
 	val developerModeActivatedMessage = stringResource(R.string.developer_mode_activated)
-	val developerClicksRemaining = stringResource(
-		R.string.developer_clicks_remaining,
+	val developerClicksRemaining = pluralStringResource(
+		R.plurals.developer_clicks_remaining,
+		7 - developerClickCount,
 		7 - developerClickCount,
 	)
 
@@ -207,8 +209,8 @@ fun SettingsContent(
 	) { innerPadding ->
 		LazyColumn(
 			modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+				.fillMaxSize()
+				.padding(innerPadding),
 			verticalArrangement = Arrangement.spacedBy(24.dp),
 			contentPadding = PaddingValues(
 				horizontal = 20.dp,

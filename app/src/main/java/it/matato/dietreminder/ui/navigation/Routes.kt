@@ -1,6 +1,5 @@
 package it.matato.dietreminder.ui.navigation
 
-import java.time.DayOfWeek
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -25,7 +24,7 @@ data object DeveloperRoute
 data class MealDetailRoute(
 	val mealId: Long,
 	val dietId: Long,
-	val dayOfWeek: DayOfWeek,
+	val dayOfWeek: String,
 )
 
 @Serializable

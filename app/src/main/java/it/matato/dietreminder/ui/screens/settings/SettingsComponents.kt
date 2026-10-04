@@ -98,6 +98,7 @@ fun SettingsListItem(
 	subtitle: String? = null,
 	leadingIcon: ImageVector? = null,
 	trailingContent: @Composable (() -> Unit)? = null,
+	enabled: Boolean = true,
 	onClick: () -> Unit,
 ) {
 	ListItem(
@@ -136,7 +137,7 @@ fun SettingsListItem(
 			}
 		},
 		trailingContent = trailingContent,
-		modifier = Modifier.clickable(onClick = onClick),
+		modifier = Modifier.clickable(enabled = enabled, onClick = onClick),
 	)
 }
 

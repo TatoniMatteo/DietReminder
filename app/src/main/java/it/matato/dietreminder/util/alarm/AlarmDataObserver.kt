@@ -45,13 +45,13 @@ object AlarmDataObserver {
 
 	@OptIn(ExperimentalCoroutinesApi::class)
 	private fun createChangeFlow(app: DietApplication): Flow<Change> {
-		val activeDietChanges = app.repository.active
+		val activeDietChanges = app.dietRepository.active
 			.map { Change.ActiveDiet }
 
-		val mealChanges = app.repository.active
+		val mealChanges = app.dietRepository.active
 			.flatMapLatest { activeDiet ->
 				activeDiet?.let {
-					app.repository.observeMeals(it.id)
+					app.dietRepository.observeMeals(it.id)
 						.map { Change.Meals }
 				} ?: emptyFlow()
 			}
@@ -75,7 +75,7 @@ object AlarmDataObserver {
 		app: DietApplication,
 		key: ConfigKey,
 	): Flow<Change> =
-		app.repository.observeConfig(key)
+		app.configRepository.observeConfig(key)
 			.distinctUntilChangedBy { it?.value }
 			.map { Change.Config(key) }
 

@@ -46,13 +46,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.model.QuantityUnit
-import it.matato.dietreminder.data.repository.DietImportItemConfig
+import it.matato.dietreminder.data.repository.contracts.DietImportItemConfig
 import it.matato.dietreminder.domain.IngredientOccurrence
 import it.matato.dietreminder.domain.IngredientSummary
 import it.matato.dietreminder.domain.QuantityAggregator
@@ -105,6 +107,7 @@ fun ImportDietFoodsContent(
 	onBack: () -> Unit,
 	onConfirmImport: (List<DietImportItemConfig>) -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	val selectedState = remember(ingredients) {
 		mutableStateMapOf<String, Boolean>().apply {
 			ingredients.forEach { put(it.name, true) }
@@ -178,13 +181,17 @@ fun ImportDietFoodsContent(
 							}
 							onConfirmImport(configs)
 						},
-						enabled = selectedCount > 0,
+						enabled = selectedCount > 0 && !isOffline,
 						modifier = Modifier.fillMaxWidth(),
 					) {
 						Icon(Icons.Rounded.Check, contentDescription = null)
 						Spacer(modifier = Modifier.width(8.dp))
 						Text(
-							text = stringResource(R.string.import_selected_count, selectedCount),
+							text = pluralStringResource(
+								R.plurals.import_selected_count,
+								selectedCount,
+								selectedCount,
+							),
 							fontWeight = FontWeight.Bold,
 						)
 					}

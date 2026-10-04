@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.model.MealType
+import it.matato.dietreminder.ui.LocalOfflineMode
 import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
@@ -35,6 +36,7 @@ fun MealHeader(
 	onSave: () -> Unit,
 	onDelete: () -> Unit,
 ) {
+	val isOffline = LocalOfflineMode.current
 	Row(
 		modifier = Modifier.fillMaxWidth(),
 		verticalAlignment = Alignment.CenterVertically,
@@ -67,7 +69,7 @@ fun MealHeader(
 		}
 
 		if (!isNew) {
-			IconButton(onClick = onDelete) {
+			IconButton(onClick = onDelete, enabled = !isOffline) {
 				Icon(
 					imageVector = Icons.Rounded.Delete,
 					contentDescription = stringResource(R.string.delete),
@@ -76,7 +78,7 @@ fun MealHeader(
 			}
 		}
 
-		Button(onClick = onSave) {
+		Button(onClick = onSave, enabled = !isOffline) {
 			Icon(
 				imageVector = Icons.Rounded.Save,
 				contentDescription = null,
