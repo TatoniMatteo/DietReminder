@@ -69,7 +69,7 @@ class GitHubVersionPolicyRepository(
 
 	private companion object {
 		const val POLICY_URL =
-			"https://raw.githubusercontent.com/TatoniMatteo/DietReminder/main/version-policy.json"
+			"https://raw.githubusercontent.com/TatoniMatteo/DietReminder/master/version-policy.json"
 		const val CONNECTION_TIMEOUT_MS = 10_000
 		const val READ_TIMEOUT_MS = 10_000
 	}
