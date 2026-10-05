@@ -61,8 +61,8 @@ class GitHubVersionPolicyRepositoryTest {
 		val (policy, isFromCache) = repository.fetchPolicy()
 
 		assertNotNull(policy)
-		assertEquals(2, policy.latestVersionCode)
-		assertEquals("1.2.0", policy.latestVersionName)
+		assertEquals(3, policy.latestVersionCode)
+		assertEquals("1.2.1", policy.latestVersionName)
 		assertEquals(true, isFromCache)
 	}
 }
