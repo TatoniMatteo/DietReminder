@@ -27,7 +27,7 @@ class AlarmTrackerTest {
 		UpdateManagerStatus.isOffline = false
 		UpdateManagerStatus.isChecking = false
 		runBlocking {
-			AlarmTracker.clearAll(context)
+			AlarmTracker.clearAll(context).join()
 		}
 	}
 
@@ -40,9 +40,7 @@ class AlarmTrackerTest {
 	@Test
 	fun registerAndGetAlarms_worksCorrectly() = runBlocking {
 		val alarm = ScheduledAlarm(id = 101, type = "MEAL", timeMillis = 100000L, label = "Pranzo")
-		AlarmTracker.registerAlarm(context, alarm)
-
-		Thread.sleep(100)
+		AlarmTracker.registerAlarm(context, alarm).join()
 
 		val alarms = AlarmTracker.getAlarms(context)
 		assertEquals(1, alarms.size)
@@ -52,11 +50,9 @@ class AlarmTrackerTest {
 	@Test
 	fun unregisterAlarm_removesAlarmFromRegistry() = runBlocking {
 		val alarm = ScheduledAlarm(id = 102, type = "LUNCH", timeMillis = 200000L, label = "Pranzo")
-		AlarmTracker.registerAlarm(context, alarm)
-		Thread.sleep(100)
+		AlarmTracker.registerAlarm(context, alarm).join()
 
-		AlarmTracker.unregisterAlarm(context, 102)
-		Thread.sleep(100)
+		AlarmTracker.unregisterAlarm(context, 102).join()
 
 		val alarms = AlarmTracker.getAlarms(context)
 		assertTrue(alarms.isEmpty())
@@ -67,8 +63,7 @@ class AlarmTrackerTest {
 		UpdateManagerStatus.isOffline = true
 		val alarm = ScheduledAlarm(id = 103, type = "MEAL", timeMillis = 300000L, label = "Cena")
 
-		AlarmTracker.registerAlarm(context, alarm)
-		Thread.sleep(100)
+		AlarmTracker.registerAlarm(context, alarm).join()
 
 		val alarms = AlarmTracker.getAlarms(context)
 		assertEquals(listOf(alarm), alarms)

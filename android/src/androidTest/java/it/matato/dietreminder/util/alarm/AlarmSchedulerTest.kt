@@ -4,9 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import it.matato.dietreminder.data.model.ScheduledAlarm
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -21,8 +19,7 @@ class AlarmSchedulerTest {
 	fun setUp() {
 		context = ApplicationProvider.getApplicationContext()
 		runBlocking {
-			AlarmTracker.clearAll(context)
-			awaitAlarms { it.isEmpty() }
+			AlarmTracker.clearAll(context).join()
 		}
 	}
 
@@ -34,22 +31,11 @@ class AlarmSchedulerTest {
 			timeMillis = System.currentTimeMillis() + 60_000,
 			label = "Dinner",
 		)
-		AlarmTracker.registerAlarm(context, alarm)
-		awaitAlarms { alarms -> alarms.contains(alarm) }
+		AlarmTracker.registerAlarm(context, alarm).join()
 
-		AlarmScheduler.cancelAlarm(context, alarm.id)
+		AlarmScheduler.cancelAlarm(context, alarm.id).join()
 
-		val remaining = awaitAlarms { alarms -> alarms.none { it.id == alarm.id } }
+		val remaining = AlarmTracker.getAlarms(context)
 		assertEquals(emptyList<ScheduledAlarm>(), remaining)
 	}
-
-	private suspend fun awaitAlarms(predicate: (List<ScheduledAlarm>) -> Boolean): List<ScheduledAlarm> =
-		withTimeout(2_000) {
-			var alarms = AlarmTracker.getAlarms(context)
-			while (!predicate(alarms)) {
-				delay(10)
-				alarms = AlarmTracker.getAlarms(context)
-			}
-			alarms
-		}
 }

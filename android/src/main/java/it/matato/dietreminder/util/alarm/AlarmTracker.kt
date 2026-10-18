@@ -7,6 +7,7 @@ import it.matato.dietreminder.data.model.ScheduledAlarm
 import it.matato.dietreminder.util.AppLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +18,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 
+/** Registry writes are asynchronous; join their returned job when completion is required. */
 object AlarmTracker {
 
 	private const val PREFERENCES_NAME = "scheduled_alarms"
@@ -25,8 +27,8 @@ object AlarmTracker {
 	private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 	private val mutex = Mutex()
 
-	fun registerAlarm(context: Context, alarm: ScheduledAlarm) {
-		scope.launch {
+	fun registerAlarm(context: Context, alarm: ScheduledAlarm): Job {
+		return scope.launch {
 			mutex.withLock {
 				val current = getAlarmsInternal(context)
 				val updated = (current.filter { it.id != alarm.id } + alarm).sortedBy { it.timeMillis }
@@ -41,8 +43,8 @@ object AlarmTracker {
 	fun unregisterAlarm(
 		context: Context,
 		id: Int,
-	) {
-		scope.launch {
+	): Job {
+		return scope.launch {
 			mutex.withLock {
 				val current = getAlarmsInternal(context)
 				val updated = current.filter { it.id != id }
@@ -54,8 +56,8 @@ object AlarmTracker {
 		}
 	}
 
-	fun clearAll(context: Context) {
-		scope.launch {
+	fun clearAll(context: Context): Job {
+		return scope.launch {
 			mutex.withLock {
 				saveAlarms(context, emptyList())
 				AppLog.d("Alarm registry cleared")

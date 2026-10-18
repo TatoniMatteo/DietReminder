@@ -12,6 +12,7 @@ import it.matato.dietreminder.util.AppLog
 import it.matato.dietreminder.util.notification.receiver.AlarmSyncReceiver
 import it.matato.dietreminder.util.notification.receiver.CourseReceiver
 import it.matato.dietreminder.util.notification.receiver.TestAlarmReceiver
+import kotlinx.coroutines.Job
 import java.time.Instant
 import java.util.Calendar
 
@@ -188,7 +189,7 @@ object AlarmScheduler {
 		)
 	}
 
-	fun cancelAlarm(context: Context, id: Int) {
+	fun cancelAlarm(context: Context, id: Int): Job {
 		val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
 		cancelAlarmManagerAlarm(
@@ -198,7 +199,7 @@ object AlarmScheduler {
 			id = id
 		)
 
-		AlarmTracker.unregisterAlarm(context, id)
+		return AlarmTracker.unregisterAlarm(context, id)
 	}
 
 	fun cancelAllAlarms(context: Context) {
