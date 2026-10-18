@@ -1,19 +1,21 @@
 package it.matato.dietreminder.ui.screens.mealdetail
 
 import android.app.Application
-import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.database.entity.Course
 import it.matato.dietreminder.data.database.entity.FoodItem
 import it.matato.dietreminder.data.database.relation.CourseWithItems
 import it.matato.dietreminder.data.model.MealType
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import it.matato.dietreminder.data.repository.fake.FakeDietRepository
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
@@ -128,7 +130,9 @@ class MealDetailFunctionalTest {
                 )
             }
         }
-        composeTestRule.onNodeWithText("Ingrediente 5").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("meal_detail_list")
+            .performScrollToNode(hasText("Ingrediente 5"))
+        composeTestRule.onNodeWithText("Ingrediente 5").assertIsDisplayed()
         val save = InstrumentationRegistry.getInstrumentation().targetContext.getString(R.string.save)
         composeTestRule.onNodeWithText(save).assertIsDisplayed().performClick()
         composeTestRule.runOnIdle { assertTrue(saved) }
