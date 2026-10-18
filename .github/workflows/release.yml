@@ -8,19 +8,21 @@ on:
 
 concurrency:
   group: release-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
   build-and-release:
     name: Build & Publish Release
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -31,7 +33,39 @@ jobs:
           java-version: '21'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Validate Release Version
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import tomllib
+          from pathlib import Path
+
+          tag = os.environ["TAG_NAME"]
+          if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", tag):
+              raise SystemExit(f"Invalid release tag {tag!r}; expected vX.Y.Z")
+
+          with Path("gradle/libs.versions.toml").open("rb") as catalog_file:
+              versions = tomllib.load(catalog_file)["versions"]
+          version_name = versions["versionName"]
+          version_code = int(versions["versionCode"])
+          if tag != f"v{version_name}":
+              raise SystemExit(
+                  f"Tag {tag} does not match versionName {version_name!r}"
+              )
+
+          # Release metadata is now published through the administrator dashboard.
+          # The bundled asset is an offline fallback and may describe an older release.
+          with Path("android/src/main/assets/version-policy.json").open(encoding="utf-8") as policy_file:
+              policy = json.load(policy_file)
+          if not 1 <= policy["minSupportedVersionCode"] <= policy["deprecatedVersionCode"] <= policy["latestVersionCode"] <= version_code:
+              raise SystemExit("Bundled offline version policy has inconsistent bounds")
+          PY
 
       - name: Validate Release Secrets
         env:
@@ -57,15 +91,6 @@ jobs:
           
           if [ -z "$KEY_PASSWORD" ]; then
             echo "::error::GitHub Secret 'KEY_PASSWORD' is missing or empty!"
-            exit 1
-          fi
-
-      - name: Validate Release Tag
-        env:
-          TAG_NAME: ${{ github.ref_name }}
-        run: |
-          if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::Invalid release tag '$TAG_NAME'. Expected format: v1.2.3"
             exit 1
           fi
 
@@ -111,7 +136,7 @@ jobs:
           echo "Configured alias '$KEY_ALIAS' validated successfully."
 
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew :android:testDebugUnitTest :backend:check
 
       - name: Build Release Artifacts
         env:
@@ -119,14 +144,14 @@ jobs:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleRelease bundleRelease
+        run: ./gradlew :android:assembleRelease :android:bundleRelease
 
       - name: Prepare Release Artifacts & Checksums
         env:
           TAG_NAME: ${{ github.ref_name }}
         run: |
-          APK_PATH="android/build/outputs/apk/release/app-release.apk"
-          AAB_PATH="android/build/outputs/bundle/release/app-release.aab"
+          APK_PATH="android/build/outputs/apk/release/android-release.apk"
+          AAB_PATH="android/build/outputs/bundle/release/android-release.aab"
           
           if [ ! -f "$APK_PATH" ]; then
             echo "::error::Release APK was not generated."
@@ -154,7 +179,7 @@ jobs:
           cat SHA256SUMS.txt
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             artifacts/*
