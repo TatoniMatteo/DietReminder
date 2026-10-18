@@ -1,0 +1,83 @@
+name: dietreminder
+
+services:
+  postgres:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: ${DB_NAME:-dietreminder}
+      POSTGRES_USER: ${DB_USERNAME:-dietreminder}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+    restart: unless-stopped
+
+  backend:
+    image: ${BACKEND_IMAGE:-dietreminder-backend:local}
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-dietreminder}
+      DB_USERNAME: ${DB_USERNAME:-dietreminder}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_DRIVE_REDIRECT_URI: ${GOOGLE_DRIVE_REDIRECT_URI:-http://localhost:8088/api/google/drive/callback}
+      GOOGLE_TOKEN_ENCRYPTION_KEY: ${GOOGLE_TOKEN_ENCRYPTION_KEY:-}
+      WEB_SECURE_COOKIES: ${WEB_SECURE_COOKIES:-true}
+      AUTH_SESSION_HOURS: ${AUTH_SESSION_HOURS:-720}
+      AUTH_ATTEMPT_LIMIT: ${AUTH_ATTEMPT_LIMIT:-30}
+      AUTH_MAIL_FROM: ${AUTH_MAIL_FROM:-no-reply@dietreminder.local}
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SMTP_AUTH:-true}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS:-true}
+    ports:
+      - "${BACKEND_BIND_ADDRESS:-127.0.0.1}:${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/actuator/health/readiness | grep -q '\"status\":\"UP\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    stop_grace_period: 30s
+    restart: unless-stopped
+
+  web:
+    image: ${WEB_IMAGE:-dietreminder-web:local}
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    ports:
+      - "${WEB_BIND_ADDRESS:-127.0.0.1}:${WEB_PORT:-8088}:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  mail:
+    image: axllent/mailpit:v1.27.4
+    profiles: [dev]
+    ports:
+      - "127.0.0.1:${MAIL_UI_PORT:-8025}:8025"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
