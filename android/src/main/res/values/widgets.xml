@@ -1,0 +1,22 @@
+<resources>
+    <string name="widget_meals">Meals</string>
+    <string name="widget_shopping">Shopping list</string>
+    <string name="widget_meals_description">Your next meal and all of today’s meals to browse.</string>
+    <string name="widget_shopping_description">Browse lists and tick purchases from your home screen.</string>
+    <string name="widget_today_meals">Today’s meals</string>
+    <string name="widget_next_default">Next up</string>
+    <string name="widget_previous_meal">Previous meal</string>
+    <string name="widget_next_meal">Next meal</string>
+    <string name="widget_previous_list">Previous list</string>
+    <string name="widget_next_list">Next list</string>
+    <string name="widget_open_app">Open Diet Reminder</string>
+    <string name="widget_open_list">Open list</string>
+    <string name="widget_no_meals">No meals planned</string>
+    <string name="widget_tomorrow">Tomorrow</string>
+    <string name="widget_shopping_remaining">%1$d to buy</string>
+    <string name="widget_no_lists">Create your first list in the app</string>
+    <string name="widget_empty_list">Your list is empty</string>
+    <string name="widget_mark_bought">Mark as bought: %1$s</string>
+    <string name="widget_mark_pending">Mark as pending: %1$s</string>
+    <string name="widget_write_failed">Purchase not saved. Retry or open the app.</string>
+<string name="widget_preview_food">Apples</string><string name="widget_preview_meal_detail">12:30 · Pasta and vegetables</string><string name="widget_preview_shopping_detail">Fruit and vegetables · 2 to buy</string><string name="widget_loading">Loading…</string></resources>

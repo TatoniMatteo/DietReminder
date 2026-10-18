@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.sqlite.db.SupportSQLiteDatabase
 import it.matato.dietreminder.data.database.dao.ConfigDao
 import it.matato.dietreminder.data.database.dao.CourseDao
 import it.matato.dietreminder.data.database.dao.DietDao
@@ -33,7 +34,7 @@ import it.matato.dietreminder.data.database.entity.ShoppingListItemDay
 		ShoppingListItem::class,
 		ShoppingListItemDay::class,
 	],
-	version = 9,
+	version = 10,
 	exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -53,13 +54,29 @@ abstract class AppDatabase : RoomDatabase() {
 
 	companion object {
 
-		fun create(context: Context): AppDatabase =
+        val MIGRATION_9_10 = object : androidx.room.migration.Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE shopping_list ADD COLUMN remindersEnabled INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE shopping_list ADD COLUMN reminderTimeMinutes INTEGER NOT NULL DEFAULT 1080")
+                db.execSQL("ALTER TABLE shopping_list_item ADD COLUMN category TEXT")
+                db.execSQL("ALTER TABLE shopping_list_item ADD COLUMN purchaseDayOfWeek INTEGER")
+                db.execSQL("ALTER TABLE shopping_list_item_day ADD COLUMN purchaseDayOfWeek INTEGER")
+            }
+        }
+
+		fun create(context: Context, name: String = "diet.db"): AppDatabase =
 			Room.databaseBuilder(
 				context,
 				AppDatabase::class.java,
-				"diet.db"
+				name
 			)
-				.fallbackToDestructiveMigration(true)
+                .addCallback(object : Callback() {
+                    override fun onOpen(db: SupportSQLiteDatabase) {
+                        // Keys are stored as strings; no schema change or destructive migration is needed.
+                        db.execSQL("DELETE FROM app_config WHERE `key` IN ('HYDRATION_ENABLED', 'HYDRATION_RANGES', 'HYDRATION_DAYS', 'HYDRATION_INTERVAL')")
+                    }
+                })
+				.addMigrations(MIGRATION_9_10)
 				.build()
 	}
 }

@@ -1,5 +1,17 @@
 package it.matato.dietreminder.ui.screens.ingredients
 
+import androidx.compose.material3.FilledTonalIconButton
+import it.matato.dietreminder.ui.theme.AppMotion
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.expandVertically
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppTopBar
+import it.matato.dietreminder.ui.components.AppScaffold
+import it.matato.dietreminder.ui.components.AppCard
+import it.matato.dietreminder.data.model.resId
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,21 +27,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
-import androidx.compose.material.icons.rounded.Restaurant
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -93,9 +98,9 @@ fun IngredientsContent(
 	ingredients: List<IngredientSummary>,
 	onBack: (() -> Unit)? = null,
 ) {
-	Scaffold(
+	AppScaffold(
 		topBar = {
-			TopAppBar(
+			AppTopBar(
 				title = {
 					Text(
 						text = stringResource(R.string.ingredients_title),
@@ -104,7 +109,7 @@ fun IngredientsContent(
 				},
 				navigationIcon = {
 					if (onBack != null) {
-						IconButton(onClick = onBack) {
+						FilledTonalIconButton(onClick = onBack) {
 							Icon(
 								imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
 								contentDescription = stringResource(R.string.back),
@@ -130,12 +135,12 @@ fun IngredientsContent(
 					.fillMaxSize()
 					.padding(innerPadding),
 				contentPadding = PaddingValues(
-					start = 16.dp,
-					end = 16.dp,
+					start = AppSpace.screen,
+					end = AppSpace.screen,
 					top = 12.dp,
 					bottom = 32.dp,
 				),
-				verticalArrangement = Arrangement.spacedBy(12.dp),
+				verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 			) {
 				if (ingredients.isEmpty()) {
 					item {
@@ -158,7 +163,7 @@ fun IngredientsContent(
 private fun ExpandableIngredientCard(ingredient: IngredientSummary) {
 	var expanded by remember { mutableStateOf(false) }
 
-	OutlinedCard(
+	AppCard(
 		modifier = Modifier
 			.fillMaxWidth()
 			.clickable { expanded = !expanded },
@@ -170,7 +175,7 @@ private fun ExpandableIngredientCard(ingredient: IngredientSummary) {
 			Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(horizontal = 16.dp, vertical = 14.dp),
+					.padding(horizontal = AppSpace.screen, vertical = AppSpace.group),
 				verticalAlignment = Alignment.CenterVertically,
 			) {
 				Text(
@@ -212,7 +217,9 @@ private fun ExpandableIngredientCard(ingredient: IngredientSummary) {
 				)
 			}
 
-			AnimatedVisibility(visible = expanded) {
+			AnimatedVisibility(visible = expanded,
+                enter = expandVertically(tween(AppMotion.standard)) + fadeIn(tween(AppMotion.quick)),
+                exit = shrinkVertically(tween(AppMotion.standard)) + fadeOut(tween(AppMotion.quick))) {
 				Column(
 					modifier = Modifier.fillMaxWidth(),
 				) {
@@ -223,7 +230,7 @@ private fun ExpandableIngredientCard(ingredient: IngredientSummary) {
 
 						if (index < ingredient.occurrences.lastIndex) {
 							HorizontalDivider(
-								modifier = Modifier.padding(horizontal = 16.dp),
+								modifier = Modifier.padding(horizontal = AppSpace.screen),
 								color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
 							)
 						}
@@ -247,7 +254,7 @@ private fun IngredientOccurrenceRow(occurrence: IngredientOccurrence) {
 	Row(
 		modifier = Modifier
 			.fillMaxWidth()
-			.padding(horizontal = 16.dp, vertical = 10.dp),
+			.padding(horizontal = AppSpace.screen, vertical = 10.dp),
 		verticalAlignment = Alignment.CenterVertically,
 	) {
 		Box(
@@ -303,7 +310,7 @@ private fun EmptyIngredientsState() {
 			.fillMaxWidth()
 			.padding(vertical = 48.dp),
 		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.spacedBy(12.dp),
+		verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 	) {
 		IconContainer(
 			icon = Icons.Rounded.Restaurant,

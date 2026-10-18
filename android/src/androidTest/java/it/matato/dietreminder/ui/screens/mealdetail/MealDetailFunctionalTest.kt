@@ -2,6 +2,16 @@ package it.matato.dietreminder.ui.screens.mealdetail
 
 import android.app.Application
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.test.platform.app.InstrumentationRegistry
+import it.matato.dietreminder.R
+import it.matato.dietreminder.data.database.entity.Course
+import it.matato.dietreminder.data.database.entity.FoodItem
+import it.matato.dietreminder.data.database.relation.CourseWithItems
+import it.matato.dietreminder.data.model.MealType
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import it.matato.dietreminder.data.repository.fake.FakeDietRepository
@@ -102,4 +112,26 @@ class MealDetailFunctionalTest {
 			assertEquals("100", firstCourse.items[0].amount)
 		}
 	}
+    @Test
+    fun saveRemainsVisibleWhenEditingTheBottomOfALongMeal() {
+        var saved = false
+        composeTestRule.setContent {
+            DietTheme {
+                MealDetailContent(
+                    isLoading = false, isNew = false, type = MealType.LUNCH, timeMinutes = 780,
+                    customLabel = "", description = "Note", isNotificationEnabled = false, isNotificationSwitchEnabled = true,
+                    courses = listOf(CourseWithItems(Course(id = 1, mealId = 1, name = "Piatto unico"),
+                        (1..5).map { FoodItem(id = it.toLong(), courseId = 1, name = "Ingrediente $it", amount = "80") })),
+                    onBack = {}, onSave = { saved = true }, onDelete = {}, onTimeClick = {}, onTypeChange = {},
+                    onCustomLabelChange = {}, onDescriptionChange = {}, onNotificationEnabledChange = {},
+                    onAddCourse = {}, onUpdateCourse = { _, _ -> }, onDeleteCourse = {},
+                )
+            }
+        }
+        composeTestRule.onNodeWithText("Ingrediente 5").performScrollTo().assertIsDisplayed()
+        val save = InstrumentationRegistry.getInstrumentation().targetContext.getString(R.string.save)
+        composeTestRule.onNodeWithText(save).assertIsDisplayed().performClick()
+        composeTestRule.runOnIdle { assertTrue(saved) }
+    }
+
 }

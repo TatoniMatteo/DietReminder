@@ -1,14 +1,13 @@
 package it.matato.dietreminder.ui.screens.developer
 
+import it.matato.dietreminder.ui.theme.AppSpace
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.NotificationsActive
-import androidx.compose.material.icons.rounded.Timer
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -26,7 +25,7 @@ fun DeveloperNotificationSection(
 	onScheduledTrigger: () -> Unit,
 ) {
 	Column(
-		verticalArrangement = Arrangement.spacedBy(12.dp),
+		verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 	) {
 		SectionTitle(
 			title = stringResource(R.string.notification_tests),
@@ -57,7 +56,7 @@ fun DeveloperNotificationSection(
 @Composable
 private fun DeveloperNotificationSectionPreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			DeveloperNotificationSection(
 				onScheduledTrigger = {},
 			)

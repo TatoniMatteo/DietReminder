@@ -51,7 +51,7 @@ class AlarmTrackerTest {
 
 	@Test
 	fun unregisterAlarm_removesAlarmFromRegistry() = runBlocking {
-		val alarm = ScheduledAlarm(id = 102, type = "HYDRATION", timeMillis = 200000L, label = "Idratazione")
+		val alarm = ScheduledAlarm(id = 102, type = "LUNCH", timeMillis = 200000L, label = "Pranzo")
 		AlarmTracker.registerAlarm(context, alarm)
 		Thread.sleep(100)
 

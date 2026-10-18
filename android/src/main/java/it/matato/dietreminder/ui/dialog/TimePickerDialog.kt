@@ -1,5 +1,7 @@
 package it.matato.dietreminder.ui.dialog
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,12 +45,12 @@ fun TimePickerDialog(
 	BasicAlertDialog(
 		onDismissRequest = onDismiss,
 	) {
-		ElevatedCard(
+		AppCard(
 			shape = MaterialTheme.shapes.extraLarge,
 		) {
 			Column(
 				modifier = Modifier.padding(16.dp),
-				verticalArrangement = Arrangement.spacedBy(12.dp),
+				verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 				horizontalAlignment = Alignment.CenterHorizontally,
 			) {
 				Text(

@@ -1,5 +1,6 @@
 package it.matato.dietreminder.data.database
 
+
 import androidx.room.TypeConverter
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.model.QuantityUnit

@@ -1,5 +1,10 @@
 package it.matato.dietreminder.ui.screens.shoppinglist
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppTopBar
+import it.matato.dietreminder.ui.components.AppScaffold
+import it.matato.dietreminder.ui.components.AppCard
+import it.matato.dietreminder.data.model.format
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,14 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Kitchen
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.ShoppingCart
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -31,12 +29,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.material3.Surface
+import androidx.compose.material3.FilledTonalIconButton
+import it.matato.dietreminder.ui.theme.AppMotion
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -127,18 +127,20 @@ fun ShoppingListsContent(
 	onRenameList: (Long, String) -> Unit,
 ) {
 	val isOffline = LocalOfflineMode.current
-	Scaffold(
-		topBar = {
-			TopAppBar(
+	AppScaffold(
+        topBar = {
+            Column {
+            AppTopBar(
 				title = {
 					Text(
 						text = stringResource(R.string.shopping_lists),
+                        style = MaterialTheme.typography.headlineLarge,
 						fontWeight = FontWeight.Bold,
 					)
 				},
 				navigationIcon = {
 					if (onBack != null) {
-						IconButton(onClick = onBack) {
+						FilledTonalIconButton(onClick = onBack) {
 							Icon(
 								imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
 								contentDescription = stringResource(R.string.back),
@@ -147,7 +149,7 @@ fun ShoppingListsContent(
 					}
 				},
 				actions = {
-					IconButton(onClick = onIngredientsClick) {
+					FilledTonalIconButton(onClick = onIngredientsClick) {
 						Icon(
 							imageVector = Icons.Rounded.Kitchen,
 							contentDescription = stringResource(R.string.ingredients_title),
@@ -155,6 +157,10 @@ fun ShoppingListsContent(
 					}
 				},
 			)
+            Text(stringResource(R.string.shopping_description),
+                Modifier.padding(horizontal = AppSpace.screen).padding(bottom = AppSpace.group),
+                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
 		},
 		floatingActionButton = {
 			OfflineAwareFloatingActionButton(
@@ -184,12 +190,12 @@ fun ShoppingListsContent(
 					.fillMaxSize()
 					.padding(innerPadding),
 				contentPadding = PaddingValues(
-					start = 16.dp,
-					end = 16.dp,
+					start = AppSpace.screen,
+					end = AppSpace.screen,
 					top = 12.dp,
 					bottom = 88.dp,
 				),
-				verticalArrangement = Arrangement.spacedBy(12.dp),
+				verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 			) {
 				items(
 					items = shoppingLists,
@@ -216,7 +222,8 @@ private fun ShoppingListCard(
 ) {
 	val totalItems = listWithItems.items.size
 	val boughtItems = listWithItems.items.count { it.isAllDaysBought }
-	val progress = if (totalItems > 0) boughtItems.toFloat() / totalItems.toFloat() else 0f
+    val progress = if (totalItems > 0) boughtItems.toFloat() / totalItems.toFloat() else 0f
+    val animatedProgress by animateFloatAsState(progress, tween(AppMotion.standard), label = "shoppingListProgress")
 
 	val createdDateFormatted = remember(listWithItems.list.createdAt) {
 		val date = Instant.ofEpochMilli(listWithItems.list.createdAt)
@@ -229,7 +236,7 @@ private fun ShoppingListCard(
 	var showRenameDialog by remember { mutableStateOf(false) }
 	var showDeleteConfirmDialog by remember { mutableStateOf(false) }
 
-	OutlinedCard(
+	AppCard(
 		modifier = Modifier
 			.fillMaxWidth()
 			.clickable(onClick = onClick),
@@ -238,12 +245,14 @@ private fun ShoppingListCard(
 		Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(16.dp),
+				.padding(AppSpace.card),
 		) {
 			Row(
 				modifier = Modifier.fillMaxWidth(),
 				verticalAlignment = Alignment.CenterVertically,
 			) {
+                IconContainer(icon = Icons.Rounded.ShoppingCart, size = 48.dp, iconSize = 24.dp)
+                Spacer(Modifier.width(AppSpace.item))
 				Column(modifier = Modifier.weight(1f)) {
 					Text(
 						text = listWithItems.list.name,
@@ -265,7 +274,7 @@ private fun ShoppingListCard(
 					IconButton(onClick = { showMenu = true }, enabled = !LocalOfflineMode.current) {
 						Icon(
 							imageVector = Icons.Rounded.MoreVert,
-							contentDescription = null,
+							contentDescription = stringResource(R.string.more_actions),
 						)
 					}
 
@@ -326,7 +335,7 @@ private fun ShoppingListCard(
 			Spacer(modifier = Modifier.height(6.dp))
 
 			LinearProgressIndicator(
-				progress = { progress },
+				progress = { animatedProgress },
 				modifier = Modifier.fillMaxWidth(),
 			)
 		}
@@ -385,9 +394,10 @@ private fun NewShoppingListDialog(
 		title = { Text(stringResource(R.string.new_shopping_list)) },
 		text = {
 			Column(
-				verticalArrangement = Arrangement.spacedBy(12.dp),
+				verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 			) {
 				OutlinedTextField(
+                shape = androidx.compose.material3.MaterialTheme.shapes.medium,
 					value = name,
 					onValueChange = { name = it },
 					label = { Text(stringResource(R.string.list_name)) },
@@ -448,6 +458,7 @@ private fun RenameShoppingListDialog(
 		title = { Text(stringResource(R.string.rename_list)) },
 		text = {
 			OutlinedTextField(
+                shape = androidx.compose.material3.MaterialTheme.shapes.medium,
 				value = name,
 				onValueChange = { name = it },
 				label = { Text(stringResource(R.string.list_name)) },
@@ -482,7 +493,7 @@ private fun EmptyShoppingListsState() {
 			.fillMaxWidth()
 			.padding(horizontal = 32.dp, vertical = 48.dp),
 		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.spacedBy(12.dp),
+		verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 	) {
 		IconContainer(
 			icon = Icons.Rounded.ShoppingCart,

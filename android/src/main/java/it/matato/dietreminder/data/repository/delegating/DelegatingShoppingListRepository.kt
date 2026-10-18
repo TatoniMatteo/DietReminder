@@ -18,6 +18,11 @@ class DelegatingShoppingListRepository(
 	private val currentRepo: ShoppingListReadRepository
 		get() = if (isOfflineProvider()) localCacheRepository else onlineRepository
 
+    override suspend fun updateShoppingAllocation(day: it.matato.dietreminder.data.database.entity.ShoppingListItemDay) { requireOnlineWrites(isOfflineProvider); onlineRepository.updateShoppingAllocation(day) }
+    override suspend fun updateShoppingReminders(listId: Long, enabled: Boolean, timeMinutes: Int) { requireOnlineWrites(isOfflineProvider); onlineRepository.updateShoppingReminders(listId, enabled, timeMinutes) }
+
+    override suspend fun moveShoppingPurchase(itemId: Long, dayId: Long?, purchaseDay: java.time.DayOfWeek?) { requireOnlineWrites(isOfflineProvider); onlineRepository.moveShoppingPurchase(itemId, dayId, purchaseDay) }
+
 	override val allShoppingLists: Flow<List<ShoppingListWithItems>> get() = currentRepo.allShoppingLists
 
 	override fun observeShoppingList(id: Long): Flow<ShoppingListWithItems?> = currentRepo.observeShoppingList(id)

@@ -1,5 +1,8 @@
 package it.matato.dietreminder.domain
 
+import it.matato.dietreminder.data.model.getSymbol
+import it.matato.dietreminder.data.model.format
+
 import android.content.Context
 import it.matato.dietreminder.data.model.QuantityUnit
 import java.util.Locale

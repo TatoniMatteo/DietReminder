@@ -26,7 +26,7 @@ class NotificationChannelConfigTest {
 	@Test
 	fun customSound_createsCustomNotificationSound() {
 		val context = ApplicationProvider.getApplicationContext<Application>()
-		val customSound = NotificationChannelConfig.customSound(context, R.raw.hydration_alarm)
+		val customSound = NotificationChannelConfig.customSound(context, R.raw.meal_alarm)
 
 		assertNotNull(customSound)
 		assertNotNull(customSound.uri)

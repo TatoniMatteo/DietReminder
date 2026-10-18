@@ -5,14 +5,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.Restaurant
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.padding
+import it.matato.dietreminder.ui.theme.AppMotion
+import it.matato.dietreminder.ui.theme.AppSpace
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
@@ -46,31 +49,32 @@ fun DietsListItem(
 	}
 
 	val backgroundColor = if (diet.isActive) {
-		MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+		MaterialTheme.colorScheme.primaryContainer
 	} else {
-		MaterialTheme.colorScheme.surface
+		MaterialTheme.colorScheme.surfaceContainerLow
 	}
 
+    val animatedBackground by animateColorAsState(backgroundColor, tween(AppMotion.standard), label = "activeDiet")
 	Box(
 		modifier = Modifier
 			.fillMaxWidth()
-			.background(backgroundColor),
+			.background(animatedBackground),
 	) {
-		ListItem(
-			modifier = Modifier.clickable(onClick = onConfigure),
+        ListItem(
+            colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+            modifier = Modifier.clickable(onClick = onConfigure).padding(vertical = AppSpace.row),
 			headlineContent = {
 				Text(
 					text = diet.name,
 					fontWeight = FontWeight.SemiBold,
-					maxLines = 1,
+					maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
 				)
 			},
 			supportingContent = {
-				Text(
-					text = stringResource(
-						R.string.window_minutes_value,
-						diet.nextMealWindowMinutes,
-					),
+                Text(
+                    text = if (diet.isActive) stringResource(R.string.diet_active_badge)
+                    else stringResource(R.string.window_minutes_value, diet.nextMealWindowMinutes),
 					color = MaterialTheme.colorScheme.onSurfaceVariant,
 				)
 			},
@@ -78,7 +82,7 @@ fun DietsListItem(
 				Box(
 					modifier = Modifier
 						.size(44.dp)
-						.clip(CircleShape)
+						.clip(MaterialTheme.shapes.medium)
 						.background(
 							if (diet.isActive) {
 								MaterialTheme.colorScheme.primary

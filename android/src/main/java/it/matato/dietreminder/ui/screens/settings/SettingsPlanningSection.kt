@@ -1,9 +1,10 @@
 package it.matato.dietreminder.ui.screens.settings
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.data.model.resId
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccessTime
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -78,7 +79,7 @@ fun SettingsPlanningSectionContent(
 @Composable
 private fun SettingsPlanningSectionContentPreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			SettingsPlanningSectionContent(
 				defaultTimes = listOf(
 					MealDefaultTime(MealType.BREAKFAST, 480),

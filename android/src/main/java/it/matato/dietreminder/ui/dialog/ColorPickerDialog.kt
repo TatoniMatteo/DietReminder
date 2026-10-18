@@ -1,5 +1,7 @@
 package it.matato.dietreminder.ui.dialog
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,12 +49,12 @@ fun ColorPickerDialog(
 	BasicAlertDialog(
 		onDismissRequest = onDismiss,
 	) {
-		ElevatedCard(
+		AppCard(
 			shape = MaterialTheme.shapes.extraLarge,
 		) {
 			Column(
 				modifier = Modifier.padding(24.dp),
-				verticalArrangement = Arrangement.spacedBy(20.dp),
+				verticalArrangement = Arrangement.spacedBy(AppSpace.card),
 			) {
 				Text(
 					text = stringResource(R.string.choose_seed_color),

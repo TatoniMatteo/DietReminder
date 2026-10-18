@@ -27,7 +27,7 @@ class NotificationHelper(
 		notificationManager.notify(
 			notificationId,
 			NotificationCompat.Builder(context, channel.id)
-				.setSmallIcon(R.drawable.app_icon_foreground)
+				.setSmallIcon(R.drawable.notification_icon)
 				.setContentTitle(title)
 				.setContentText(message)
 				.setPriority(NotificationCompat.PRIORITY_HIGH)

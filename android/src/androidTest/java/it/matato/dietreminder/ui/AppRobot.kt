@@ -1,6 +1,6 @@
 package it.matato.dietreminder.ui
 
-import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import it.matato.dietreminder.ui.screens.diets.DietsScreenRobot
@@ -9,11 +9,11 @@ import it.matato.dietreminder.ui.screens.ingredients.IngredientsScreenRobot
 import it.matato.dietreminder.ui.screens.ingredients.ingredientsRobot
 
 fun appRobot(
-	composeTestRule: SemanticsNodeInteractionsProvider,
+	composeTestRule: ComposeContentTestRule,
 	block: AppRobot.() -> Unit
 ) = AppRobot(composeTestRule).apply(block)
 
-class AppRobot(private val composeTestRule: SemanticsNodeInteractionsProvider) {
+class AppRobot(private val composeTestRule: ComposeContentTestRule) {
 
 	fun navigateToWeek() {
 		composeTestRule.onNode(hasText("Settimana") or hasText("Week"))
@@ -27,11 +27,6 @@ class AppRobot(private val composeTestRule: SemanticsNodeInteractionsProvider) {
 
 	fun navigateToShoppingList() {
 		composeTestRule.onNode(hasText("Spesa") or hasText("Shopping"))
-			.performClick()
-	}
-
-	fun navigateToHydration() {
-		composeTestRule.onNode(hasText("Idratazione") or hasText("Hydration"))
 			.performClick()
 	}
 

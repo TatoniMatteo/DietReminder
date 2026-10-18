@@ -1,5 +1,8 @@
 package it.matato.dietreminder.ui.screens.settings
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppScaffold
+import it.matato.dietreminder.data.model.resId
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -7,7 +10,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -42,7 +44,16 @@ fun SettingsScreen(
 	vm: DietViewModel,
 	onNavigateToDeveloper: () -> Unit = {},
 	onNavigateToImportDiet: () -> Unit = {},
+    section: String? = null,
+    onNavigateToSettingsPage: ((String) -> Unit)? = null,
+    onBack: () -> Unit = {},
+    onNavigateToShopping: () -> Unit = {},
 ) {
+    var localPage by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
+    val page = section ?: localPage
+    val openPage: (String) -> Unit = { selected -> onNavigateToSettingsPage?.invoke(selected) ?: run { localPage = selected } }
+    val goBack: () -> Unit = { if (section != null) onBack() else localPage = null }
+    androidx.activity.compose.BackHandler(enabled = page != null, onBack = goBack)
 	val context = LocalContext.current
 	val diets by vm.diets.collectAsState()
 	val isDeveloperMode by vm.isDeveloperMode.collectAsState()
@@ -99,6 +110,7 @@ fun SettingsScreen(
 	}
 
 	SettingsContent(
+        page = page, onSelectPage = openPage, onBack = goBack, onShopping = onNavigateToShopping,
 		diets = diets,
 		isDeveloperMode = isDeveloperMode,
 		currentTheme = currentTheme,
@@ -201,77 +213,47 @@ fun SettingsContent(
 	onVersionClick: () -> Unit,
 	snackBarHostState: SnackbarHostState,
 	getFallbackTime: (MealType) -> Int,
+    page: String? = null,
+    onSelectPage: (String) -> Unit = {},
+    onBack: () -> Unit = {},
+    onShopping: () -> Unit = {},
 ) {
-	Scaffold(
-		snackbarHost = {
-			SnackbarHost(snackBarHostState)
-		},
-	) { innerPadding ->
-		LazyColumn(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(innerPadding),
-			verticalArrangement = Arrangement.spacedBy(24.dp),
-			contentPadding = PaddingValues(
-				horizontal = 20.dp,
-				vertical = 24.dp,
-			),
-		) {
-			item {
-				SettingsHeader()
-			}
-
-			item {
-				SettingsAppearanceSection(
-					currentTheme = currentTheme,
-					dynamicEnabled = dynamicColorsEnabled,
-					seedColorHex = seedColorHex,
-					currentLanguage = currentLanguage,
-					onThemeChange = onThemeChange,
-					onDynamicColorsChange = onDynamicColorsChange,
-					onColorClick = onColorClick,
-					onLanguageClick = onLanguageClick,
-				)
-			}
-
-			item {
-				SettingsPlanningSectionContent(
-					defaultTimes = defaultTimes,
-					onMealTypeClick = onMealTypeClick,
-					getFallbackTime = getFallbackTime,
-				)
-			}
-
-			item {
-				SettingsNotificationsSection(
-					enabled = mealRemindersEnabled,
-					onEnabledChange = onRemindersEnabledChange,
-				)
-			}
-
-			item {
-				SettingsBackupSection(
-					diets = diets,
-					onImport = onImportClick,
-					onExport = onExportClick,
-				)
-			}
-
-			if (isDeveloperMode) {
-				item {
-					SettingsDeveloperSection(
-						onNavigateToDeveloper = onNavigateToDeveloper,
-					)
-				}
-			}
-
-			item {
-				SettingsAboutSection(
-					onVersionClick = onVersionClick,
-				)
-			}
-		}
-	}
+    val selected = SettingsPage.entries.find { it.key == page }
+    AppScaffold(
+        topBar = { if (selected != null) it.matato.dietreminder.ui.components.AppTopBar(
+            title = { androidx.compose.material3.Text(stringResource(selected.title)) },
+            navigationIcon = { androidx.compose.material3.IconButton(onClick = onBack) { androidx.compose.material3.Icon(it.matato.dietreminder.ui.icons.AppIcons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.back)) } },
+        ) },
+        snackbarHost = { SnackbarHost(snackBarHostState) },
+    ) { innerPadding ->
+        LazyColumn(Modifier.fillMaxSize().padding(innerPadding),
+            verticalArrangement = Arrangement.spacedBy(AppSpace.section),
+            contentPadding = PaddingValues(horizontal = AppSpace.screen, vertical = AppSpace.group),
+        ) {
+            if (selected == null) {
+                item { SettingsHeader() }
+                item { SettingsAccountSummary { onSelectPage("account") } }
+                item { SettingsHub(isDeveloperMode, onSelectPage) }
+            } else when (selected) {
+                SettingsPage.APPEARANCE -> item { SettingsAppearanceSection(currentTheme, dynamicColorsEnabled, seedColorHex, currentLanguage, onThemeChange, onDynamicColorsChange, onColorClick, onLanguageClick) }
+                SettingsPage.ACCOUNT -> {
+                    item { it.matato.dietreminder.ui.screens.account.AccountSettingsSection() }
+                    item { it.matato.dietreminder.ui.screens.account.AccountSecuritySection() }
+                }
+                SettingsPage.PLANNING -> item { SettingsPlanningSectionContent(defaultTimes, onMealTypeClick, getFallbackTime) }
+                SettingsPage.NOTIFICATIONS -> {
+                    item { SettingsNotificationsSection(mealRemindersEnabled, onRemindersEnabledChange) }
+                    item { SettingsShoppingNotificationsLink(onShopping) }
+                }
+                SettingsPage.BACKUP -> {
+                    item { it.matato.dietreminder.ui.screens.account.AccountBackupSettingsSection() }
+                    item { SettingsBackupSection(diets, onImportClick, onExportClick) }
+                }
+                SettingsPage.ABOUT -> item { SettingsAboutSection(onVersionClick) }
+                SettingsPage.DEVELOPER -> item { if (isDeveloperMode) SettingsDeveloperSection(onNavigateToDeveloper) }
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)

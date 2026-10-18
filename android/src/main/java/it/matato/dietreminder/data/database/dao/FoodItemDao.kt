@@ -8,6 +8,9 @@ import it.matato.dietreminder.data.database.entity.FoodItem
 
 @Dao
 interface FoodItemDao {
+    @Query("SELECT * FROM food_items ORDER BY id")
+    suspend fun getAllForSync(): List<FoodItem>
+
 
 	@Insert
 	suspend fun insert(item: FoodItem): Long

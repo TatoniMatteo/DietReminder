@@ -6,32 +6,25 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.model.HydrationRange
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.model.ScheduledAlarm
 import it.matato.dietreminder.util.AppLog
 import it.matato.dietreminder.util.notification.receiver.AlarmSyncReceiver
 import it.matato.dietreminder.util.notification.receiver.CourseReceiver
-import it.matato.dietreminder.util.notification.receiver.HydrationReceiver
 import it.matato.dietreminder.util.notification.receiver.TestAlarmReceiver
 import java.time.Instant
 import java.util.Calendar
-import kotlinx.serialization.json.Json
 
 object AlarmScheduler {
 
-	private const val HYDRATION_ALARM_ID = 999
 	private const val DAILY_SYNC_ALARM_ID = 1000
 
 	private const val EXTRA_TYPE = "type"
 	private const val EXTRA_TITLE = "title"
 	private const val EXTRA_MESSAGE = "message"
-	private const val EXTRA_INTERVAL = "interval"
-	private const val EXTRA_RANGES_JSON = "ranges_json"
 	private const val EXTRA_MEAL_ID = "meal_id"
 	private const val EXTRA_DAY_NAME = "day_name"
 
-	private const val TYPE_HYDRATION = "HYDRATION"
 	private const val TYPE_DAILY_SYNC = "DAILY_SYNC"
 
 	private const val TEST_ALARM_ID = 1001
@@ -64,6 +57,7 @@ object AlarmScheduler {
 		val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
 		val triggerIntent = Intent(context, CourseReceiver::class.java).apply {
+            putExtra("account_scope", (context.applicationContext as it.matato.dietreminder.DietApplication).currentAccountScope())
 			putExtra(EXTRA_TITLE, title)
 			putExtra(EXTRA_MESSAGE, message)
 			putExtra(EXTRA_MEAL_ID, mealId)
@@ -150,99 +144,6 @@ object AlarmScheduler {
 		AppLog.d("Test alarm scheduled in ${delayMillis}ms")
 	}
 
-	fun scheduleHydrationAlarm(
-		context: Context,
-		intervalMinutes: Int,
-		ranges: List<HydrationRange>
-	) {
-		if (ranges.isEmpty()) {
-			AppLog.w("No hydration ranges configured, skipping alarm")
-			cancelAlarm(context, HYDRATION_ALARM_ID)
-			return
-		}
-
-		if (intervalMinutes <= 0) {
-			AppLog.w("Invalid hydration interval: $intervalMinutes minutes")
-			cancelAlarm(context, HYDRATION_ALARM_ID)
-			return
-		}
-
-		val normalizedRanges = ranges
-			.filter { it.startMinutes < it.endMinutes }
-			.sortedBy { it.startMinutes }
-
-		if (normalizedRanges.isEmpty()) {
-			AppLog.w("No valid hydration ranges configured, skipping alarm")
-			cancelAlarm(context, HYDRATION_ALARM_ID)
-			return
-		}
-
-		val now = Calendar.getInstance()
-		val currentMinutes =
-			now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
-
-		val nextTriggerMillis = calculateNextHydrationTrigger(
-			now = now,
-			currentMinutes = currentMinutes,
-			intervalMinutes = intervalMinutes,
-			ranges = normalizedRanges
-		)
-
-		if (nextTriggerMillis == null) {
-			AppLog.d("No hydration alarm can be scheduled today")
-			cancelAlarm(context, HYDRATION_ALARM_ID)
-			return
-		}
-
-		if (!isToday(nextTriggerMillis)) {
-			AppLog.w("Skipping hydration alarm because the trigger is not today")
-			cancelAlarm(context, HYDRATION_ALARM_ID)
-			return
-		}
-
-		if (nextTriggerMillis <= System.currentTimeMillis()) {
-			AppLog.w("Skipping hydration alarm because the trigger is in the past")
-			cancelAlarm(context, HYDRATION_ALARM_ID)
-			return
-		}
-
-		val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-		val triggerIntent = Intent(context, HydrationReceiver::class.java).apply {
-			putExtra(EXTRA_TITLE, context.getString(R.string.hydration_notification_title))
-			putExtra(EXTRA_MESSAGE, context.getString(R.string.hydration_notification_message))
-			putExtra(EXTRA_INTERVAL, intervalMinutes)
-			putExtra(EXTRA_RANGES_JSON, Json.encodeToString(normalizedRanges))
-		}
-
-		val triggerPendingIntent = PendingIntent.getBroadcast(
-			context,
-			HYDRATION_ALARM_ID,
-			triggerIntent,
-			PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-		)
-
-		AppLog.d(
-			"Scheduling hydration alarm at ${Instant.ofEpochMilli(nextTriggerMillis)}"
-		)
-
-		scheduleExactAlarmManagerAlarm(
-			alarmManager = alarmManager,
-			timeMillis = nextTriggerMillis,
-			pendingIntent = triggerPendingIntent
-		)
-
-		AlarmTracker.registerAlarm(
-			context,
-			ScheduledAlarm(
-				id = HYDRATION_ALARM_ID,
-				type = TYPE_HYDRATION,
-				timeMillis = nextTriggerMillis,
-				label = context.getString(R.string.hydration_notification_title)
-			)
-		)
-	}
-
 	fun scheduleDailySync(context: Context) {
 		val calendar = Calendar.getInstance().apply {
 			add(Calendar.DAY_OF_YEAR, 1)
@@ -317,59 +218,11 @@ object AlarmScheduler {
 		cancelAlarmManagerAlarm(
 			alarmManager = alarmManager,
 			context = context,
-			receiverClass = HydrationReceiver::class.java,
-			id = HYDRATION_ALARM_ID
-		)
-
-		cancelAlarmManagerAlarm(
-			alarmManager = alarmManager,
-			context = context,
 			receiverClass = AlarmSyncReceiver::class.java,
 			id = DAILY_SYNC_ALARM_ID
 		)
 
 		AlarmTracker.clearAll(context)
-	}
-
-	private fun calculateNextHydrationTrigger(
-		now: Calendar,
-		currentMinutes: Int,
-		intervalMinutes: Int,
-		ranges: List<HydrationRange>
-	): Long? {
-		val activeRange = ranges.firstOrNull {
-			currentMinutes >= it.startMinutes && currentMinutes < it.endMinutes
-		}
-
-		if (activeRange != null) {
-			val candidateMillis = now.timeInMillis + intervalMinutes * 60 * 1000L
-
-			val candidate = Calendar.getInstance().apply {
-				timeInMillis = candidateMillis
-			}
-
-			val candidateMinutes =
-				candidate.get(Calendar.HOUR_OF_DAY) * 60 + candidate.get(Calendar.MINUTE)
-
-			if (candidateMinutes < activeRange.endMinutes && isToday(candidateMillis)) {
-				return candidateMillis
-			}
-		}
-
-		val nextRange = ranges.firstOrNull {
-			it.startMinutes > currentMinutes
-		}
-
-		if (nextRange == null) {
-			return null
-		}
-
-		return Calendar.getInstance().apply {
-			set(Calendar.HOUR_OF_DAY, nextRange.startMinutes / 60)
-			set(Calendar.MINUTE, nextRange.startMinutes % 60)
-			set(Calendar.SECOND, 0)
-			set(Calendar.MILLISECOND, 0)
-		}.timeInMillis
 	}
 
 	private fun scheduleAlarmClock(
@@ -455,7 +308,6 @@ object AlarmScheduler {
 
 	private fun receiverClassFor(id: Int): Class<*> {
 		return when (id) {
-			HYDRATION_ALARM_ID -> HydrationReceiver::class.java
 			DAILY_SYNC_ALARM_ID -> AlarmSyncReceiver::class.java
 			else -> CourseReceiver::class.java
 		}

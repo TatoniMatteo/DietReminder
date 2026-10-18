@@ -1,9 +1,9 @@
 package it.matato.dietreminder.ui.screens.settings
 
+import it.matato.dietreminder.ui.theme.AppSpace
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Notifications
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -43,7 +43,7 @@ fun SettingsNotificationsSection(
 @Composable
 private fun SettingsNotificationsSectionPreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			SettingsNotificationsSection(
 				enabled = true,
 				onEnabledChange = {},

@@ -31,6 +31,9 @@ class CourseReceiver : BroadcastReceiver() {
 	}
 
 	private suspend fun process(context: Context, intent: Intent) {
+        val app = context.applicationContext as it.matato.dietreminder.DietApplication
+        val scope = intent.getStringExtra("account_scope") ?: "local"
+        if (scope == "locked" || scope != app.currentAccountScope()) return
 		val title = intent.getStringExtra(EXTRA_TITLE)
 			?: context.getString(R.string.app_name)
 
@@ -58,6 +61,7 @@ class CourseReceiver : BroadcastReceiver() {
 			intent = notificationIntent
 		)
 
+		if (scope != app.currentAccountScope()) return
 		NotificationHelper(context).show(
 			notificationId = notificationId,
 			title = title,

@@ -17,15 +17,11 @@ import it.matato.dietreminder.data.database.entity.ShoppingList
 import it.matato.dietreminder.data.database.entity.ShoppingListItem
 import it.matato.dietreminder.data.database.relation.ShoppingListItemWithDays
 import it.matato.dietreminder.data.database.relation.ShoppingListWithItems
-import it.matato.dietreminder.data.model.HydrationRange
 import it.matato.dietreminder.data.model.MealType
-import it.matato.dietreminder.ui.screens.hydration.HydrationContent
 import it.matato.dietreminder.ui.screens.dietconfig.DietConfigContent
 import it.matato.dietreminder.ui.screens.diets.DietsActionsMenu
 import it.matato.dietreminder.ui.screens.diets.DietsContent
 import it.matato.dietreminder.ui.screens.diets.DietsHeader
-import it.matato.dietreminder.ui.screens.hydration.HydrationRangeItem
-import it.matato.dietreminder.ui.screens.hydration.HydrationSettingsSection
 import it.matato.dietreminder.ui.screens.mealdetail.MealHeader
 import it.matato.dietreminder.ui.screens.mealdetail.MealInformationSection
 import it.matato.dietreminder.ui.screens.mealdetail.MealNotesSection
@@ -173,36 +169,6 @@ class OfflineWriteControlsFunctionalTest {
 	}
 
 	@Test
-	fun hydrationReminderSwitchIsEnabled() {
-		showOffline { HydrationSettingsSection(true, {}) }
-		composeTestRule.onNodeWithTag("hydration-reminders-switch").assertIsEnabled()
-	}
-
-	@Test
-	fun hydrationAddRangeButtonIsEnabled() {
-		showOffline {
-			HydrationContent(
-				hydrationEnabled = true,
-				hydrationInterval = 60,
-				hydrationRanges = emptyList(),
-				activeDays = emptySet(),
-				onEnabledChange = {},
-				onIntervalChange = {},
-				onDaysChange = {},
-				onDeleteRange = {},
-				onAddRangeClick = {},
-			)
-		}
-		composeTestRule.onNodeWithContentDescription(context.getString(R.string.add)).assertIsEnabled()
-	}
-
-	@Test
-	fun hydrationRangeDeleteMenuButtonIsEnabled() {
-		showOffline { HydrationRangeItem(HydrationRange(540, 720), {}) }
-		composeTestRule.onNodeWithContentDescription(context.getString(R.string.delete)).assertIsEnabled()
-	}
-
-	@Test
 	fun shoppingListCreateButtonIsDisabled() {
 		showOffline {
 			ShoppingListsContent(emptyList(), onSelectList = {}, onIngredientsClick = {}, onCreateClick = {}, onDeleteList = {}, onRenameList = { _, _ -> })
@@ -240,7 +206,7 @@ class OfflineWriteControlsFunctionalTest {
 			)
 		}
 		composeTestRule.onNodeWithText("Mela").assertExists()
-		composeTestRule.onNodeWithTag("shopping-item-checkbox").assertIsNotEnabled()
+		composeTestRule.onNodeWithTag("shoppingCheck_1:0").assertIsNotEnabled()
 	}
 
 	@Test

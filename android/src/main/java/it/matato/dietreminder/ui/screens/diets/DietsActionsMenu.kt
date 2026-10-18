@@ -1,12 +1,9 @@
 package it.matato.dietreminder.ui.screens.diets
 
+import it.matato.dietreminder.ui.theme.AppSpace
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.ContentCopy
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Tune
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -103,7 +100,7 @@ fun DietsActionsMenu(
 @Composable
 private fun DietsActionsMenuPreview() {
 	DietTheme {
-		Box(modifier = Modifier.padding(16.dp)) {
+		Box(modifier = Modifier.padding(AppSpace.card)) {
 			DietsActionsMenu(
 				expanded = true,
 				isActive = false,

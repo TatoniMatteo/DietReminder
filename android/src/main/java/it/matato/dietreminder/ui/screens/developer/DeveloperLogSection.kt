@@ -1,5 +1,7 @@
 package it.matato.dietreminder.ui.screens.developer
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,8 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.rounded.Description
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,16 +38,16 @@ fun DeveloperLogSection(
 	selectedLevel: LogLevel,
 	onLevelSelected: (LogLevel) -> Unit,
 	onClearLogs: () -> Unit,
-) = Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+) = Column(verticalArrangement = Arrangement.spacedBy(AppSpace.item)) {
 	SectionTitle(
 		title = stringResource(R.string.log_console),
-		icon = androidx.compose.material.icons.Icons.Rounded.Description
+		icon = it.matato.dietreminder.ui.icons.AppIcons.Rounded.Description
 	)
 
-	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+	AppCard(modifier = Modifier.fillMaxWidth()) {
 		Column(
-			modifier = Modifier.padding(16.dp),
-			verticalArrangement = Arrangement.spacedBy(12.dp)
+			modifier = Modifier.padding(AppSpace.card),
+			verticalArrangement = Arrangement.spacedBy(AppSpace.item)
 		) {
 			Text(
 				text = stringResource(R.string.log_levels),
@@ -97,7 +97,7 @@ fun DeveloperLogSection(
 @Composable
 private fun DeveloperLogSectionPreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			DeveloperLogSection(
 				logs = listOf(
 					LogEntry("12:00:00", LogLevel.INFO, "Application started"),

@@ -1,5 +1,7 @@
 package it.matato.dietreminder.domain
 
+import it.matato.dietreminder.data.model.format
+
 import it.matato.dietreminder.data.database.relation.MealWithDetails
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.model.QuantityUnit

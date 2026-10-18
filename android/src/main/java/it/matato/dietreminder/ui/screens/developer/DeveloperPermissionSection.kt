@@ -1,5 +1,7 @@
 package it.matato.dietreminder.ui.screens.developer
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,10 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Security
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.Button
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,23 +29,23 @@ fun DeveloperPermissionsSection(
 	onCheckPermissions: () -> Unit,
 ) {
 	Column(
-		verticalArrangement = Arrangement.spacedBy(12.dp),
+		verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 	) {
 		SectionTitle(
 			title = stringResource(R.string.developer_settings),
 			icon = Icons.Rounded.Security,
 		)
 
-		ElevatedCard(
+		AppCard(
 			modifier = Modifier.fillMaxWidth(),
 		) {
 			Column(
-				modifier = Modifier.padding(20.dp),
-				verticalArrangement = Arrangement.spacedBy(16.dp),
+				modifier = Modifier.padding(AppSpace.card),
+				verticalArrangement = Arrangement.spacedBy(AppSpace.group),
 			) {
 				Row(
 					modifier = Modifier.fillMaxWidth(),
-					horizontalArrangement = Arrangement.spacedBy(16.dp),
+					horizontalArrangement = Arrangement.spacedBy(AppSpace.group),
 				) {
 					Icon(
 						imageVector = Icons.Rounded.Security,
@@ -93,7 +93,7 @@ fun DeveloperPermissionsSection(
 @Composable
 private fun DeveloperPermissionsSectionPreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			DeveloperPermissionsSection(
 				onCheckPermissions = {},
 			)

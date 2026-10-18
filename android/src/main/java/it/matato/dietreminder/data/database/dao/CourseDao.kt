@@ -8,6 +8,9 @@ import it.matato.dietreminder.data.database.entity.Course
 
 @Dao
 interface CourseDao {
+    @Query("SELECT * FROM courses ORDER BY id")
+    suspend fun getAllForSync(): List<Course>
+
 
 	@Insert
 	suspend fun insert(course: Course): Long

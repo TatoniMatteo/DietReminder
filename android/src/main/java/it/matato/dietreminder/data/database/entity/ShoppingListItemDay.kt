@@ -1,5 +1,7 @@
 package it.matato.dietreminder.data.database.entity
 
+import it.matato.dietreminder.data.model.format
+
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -27,6 +29,7 @@ data class ShoppingListItemDay(
 	val amount: String = "",
 	val unit: QuantityUnit = QuantityUnit.GRAMS,
 	val isBought: Boolean = false,
+    val purchaseDayOfWeek: DayOfWeek? = null,
 ) {
 	val displayQuantity: String
 		get() = unit.format(amount)

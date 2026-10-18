@@ -25,6 +25,10 @@ interface ShoppingListReadRepository {
 }
 
 interface ShoppingListWriteRepository {
+    suspend fun updateShoppingAllocation(day: it.matato.dietreminder.data.database.entity.ShoppingListItemDay)
+    suspend fun updateShoppingReminders(listId: Long, enabled: Boolean, timeMinutes: Int)
+    suspend fun moveShoppingPurchase(itemId: Long, dayId: Long?, purchaseDay: DayOfWeek?)
+
 	suspend fun createShoppingList(
 		name: String, dietId: Long? = null, items: List<ShoppingListInitialItem> = emptyList()): Long
 

@@ -1,10 +1,11 @@
 package it.matato.dietreminder.ui.screens.settings
 
+import it.matato.dietreminder.ui.theme.AppSpace
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Update
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -22,6 +23,14 @@ fun SettingsAboutSection(
 		title = stringResource(R.string.app_info),
 		icon = Icons.Rounded.Person,
 	) {
+        androidx.compose.foundation.layout.Row(
+            Modifier.padding(horizontal = AppSpace.card, vertical = AppSpace.group),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        ) {
+            androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(R.drawable.brand_logo), null, Modifier.then(Modifier.size(40.dp)))
+            androidx.compose.foundation.layout.Spacer(Modifier.width(12.dp))
+            androidx.compose.material3.Text(stringResource(R.string.app_name), style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
+        }
 		SettingsListItem(
 			title = stringResource(R.string.version),
 			subtitle = "${BuildConfig.VERSION_NAME} (Build ${BuildConfig.VERSION_CODE})",
@@ -44,7 +53,7 @@ fun SettingsAboutSection(
 @Composable
 private fun SettingsAboutSectionPreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			SettingsAboutSection(
 				onVersionClick = {},
 			)

@@ -1,7 +1,8 @@
 package it.matato.dietreminder.ui.screens.settings
 
 import android.app.Application
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.*
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.core.app.ApplicationProvider
@@ -34,4 +35,16 @@ class SettingsScreenFunctionalTest {
 		composeTestRule.onNode(hasText("Impostazioni") or hasText("Settings"), useUnmergedTree = true)
 			.assertIsDisplayed()
 	}
+
+    @Test
+    fun appearanceHasDedicatedPageAndBackReturnsToCategories() {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        val vm = DietViewModel(context, FakeDietRepository())
+        composeTestRule.setContent { DietTheme { SettingsScreen(vm = vm) } }
+        composeTestRule.onNodeWithTag("settingsPage_appearance").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("layoutCompact").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("settingsAccountSummary").assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(context.getString(it.matato.dietreminder.R.string.back)).performClick()
+        composeTestRule.onNodeWithTag("settingsAccountSummary").assertIsDisplayed()
+    }
 }

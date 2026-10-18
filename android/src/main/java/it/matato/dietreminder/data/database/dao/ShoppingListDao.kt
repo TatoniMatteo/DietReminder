@@ -14,6 +14,18 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ShoppingListDao {
+    @Update suspend fun updateDay(day: it.matato.dietreminder.data.database.entity.ShoppingListItemDay)
+    @Query("UPDATE shopping_list_item_day SET isBought = :bought WHERE shoppingListItemId = :itemId")
+    suspend fun updateAllDaysBought(itemId: Long, bought: Boolean)
+    @Query("UPDATE shopping_list_item_day SET purchaseDayOfWeek = :day WHERE id = :dayId AND shoppingListItemId = :itemId")
+    suspend fun moveDay(itemId: Long, dayId: Long, day: java.time.DayOfWeek?)
+    @Query("UPDATE shopping_list_item SET purchaseDayOfWeek = :day WHERE id = :itemId")
+    suspend fun moveItem(itemId: Long, day: java.time.DayOfWeek?)
+
+    @Query("SELECT * FROM shopping_list ORDER BY id") suspend fun listsForSync(): List<ShoppingList>
+    @Query("SELECT * FROM shopping_list_item ORDER BY id") suspend fun itemsForSync(): List<ShoppingListItem>
+    @Query("SELECT * FROM shopping_list_item_day ORDER BY id") suspend fun daysForSync(): List<ShoppingListItemDay>
+
 	@Transaction
 	@Query("SELECT * FROM shopping_list ORDER BY createdAt DESC")
 	fun observeAllWithItems(): Flow<List<ShoppingListWithItems>>

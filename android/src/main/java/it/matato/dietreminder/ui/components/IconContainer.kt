@@ -3,9 +3,7 @@ package it.matato.dietreminder.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Restaurant
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -27,7 +25,7 @@ fun IconContainer(
 	Box(
 		modifier = Modifier
 			.size(size)
-			.clip(CircleShape)
+			.clip(MaterialTheme.shapes.medium)
 			.background(MaterialTheme.colorScheme.primaryContainer),
 		contentAlignment = Alignment.Center,
 	) {

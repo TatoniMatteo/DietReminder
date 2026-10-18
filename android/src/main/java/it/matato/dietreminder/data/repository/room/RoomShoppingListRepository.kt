@@ -24,6 +24,18 @@ class RoomShoppingListRepository(
 	private val meals: MealDao,
 ) : ShoppingListRepository {
 
+    override suspend fun updateShoppingAllocation(day: it.matato.dietreminder.data.database.entity.ShoppingListItemDay) = shoppingLists.updateDay(day)
+
+    override suspend fun updateShoppingReminders(listId: Long, enabled: Boolean, timeMinutes: Int) {
+        require(timeMinutes in 0..1439)
+        val list = shoppingLists.getWithItems(listId)?.list ?: return
+        shoppingLists.updateList(list.copy(remindersEnabled = enabled, reminderTimeMinutes = timeMinutes))
+    }
+    override suspend fun moveShoppingPurchase(itemId: Long, dayId: Long?, purchaseDay: java.time.DayOfWeek?) {
+        if (dayId == null) shoppingLists.moveItem(itemId, purchaseDay)
+        else shoppingLists.moveDay(itemId, dayId, purchaseDay)
+    }
+
 	override val allShoppingLists: Flow<List<ShoppingListWithItems>> = shoppingLists.observeAllWithItems()
 
 	override fun observeShoppingList(id: Long): Flow<ShoppingListWithItems?> =
@@ -90,9 +102,10 @@ class RoomShoppingListRepository(
 		shoppingLists.updateItem(item)
 	}
 
-	override suspend fun toggleShoppingListItemBought(itemId: Long, isBought: Boolean) {
-		shoppingLists.updateBoughtStatus(itemId, isBought)
-	}
+    override suspend fun toggleShoppingListItemBought(itemId: Long, isBought: Boolean) = database.withTransaction {
+        shoppingLists.updateAllDaysBought(itemId, isBought)
+        shoppingLists.updateBoughtStatus(itemId, isBought)
+    }
 
 	override suspend fun toggleShoppingListItemDayBought(dayId: Long, isBought: Boolean) = database.withTransaction {
 		shoppingLists.updateDayBoughtStatus(dayId, isBought)

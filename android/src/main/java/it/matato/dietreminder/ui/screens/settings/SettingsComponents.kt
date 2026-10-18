@@ -1,5 +1,7 @@
 package it.matato.dietreminder.ui.screens.settings
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,15 +11,13 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Settings
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,8 +40,10 @@ fun SettingsHeader() {
 			text = stringResource(R.string.settings),
 			style = MaterialTheme.typography.headlineLarge,
 			fontWeight = FontWeight.Bold,
-		)
-	}
+        )
+        Text(stringResource(R.string.settings_description), style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
 }
 
 @Composable
@@ -73,11 +75,11 @@ fun SettingsSection(
 			)
 		}
 
-		OutlinedCard(
+		AppCard(
 			modifier = Modifier,
 			shape = MaterialTheme.shapes.large,
 			colors = CardDefaults.outlinedCardColors(
-				containerColor = MaterialTheme.colorScheme.surface,
+				containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
 			),
 		) {
 			Column(content = content)
@@ -88,7 +90,8 @@ fun SettingsSection(
 @Composable
 fun SettingsDivider() {
 	HorizontalDivider(
-		modifier = Modifier.padding(horizontal = 16.dp),
+		modifier = Modifier.padding(horizontal = AppSpace.card),
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
 	)
 }
 
@@ -101,7 +104,8 @@ fun SettingsListItem(
 	enabled: Boolean = true,
 	onClick: () -> Unit,
 ) {
-	ListItem(
+    ListItem(
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
 		headlineContent = {
 			Text(
 				text = title,
@@ -123,7 +127,7 @@ fun SettingsListItem(
 						.size(40.dp)
 						.background(
 							color = MaterialTheme.colorScheme.primaryContainer,
-							shape = CircleShape,
+							shape = MaterialTheme.shapes.medium,
 						),
 					contentAlignment = Alignment.Center,
 				) {
@@ -137,7 +141,7 @@ fun SettingsListItem(
 			}
 		},
 		trailingContent = trailingContent,
-		modifier = Modifier.clickable(enabled = enabled, onClick = onClick),
+		modifier = Modifier.clickable(enabled = enabled, onClick = onClick).padding(vertical = AppSpace.row),
 	)
 }
 
@@ -149,7 +153,7 @@ fun parseSeedColor(value: String): Color = runCatching {
 @Composable
 private fun SettingsHeaderPreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			SettingsHeader()
 		}
 	}
@@ -159,7 +163,7 @@ private fun SettingsHeaderPreview() {
 @Composable
 private fun SettingsSectionPreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			SettingsSection(
 				title = "Test Section",
 				icon = Icons.Rounded.Settings,

@@ -12,9 +12,6 @@ data class WeekRoute(
 data object DietsRoute
 
 @Serializable
-data object HydrationRoute
-
-@Serializable
 data object SettingsRoute
 
 @Serializable
@@ -53,3 +50,6 @@ data class ImportDietFoodsRoute(
 
 @Serializable
 data object ImportDietRoute
+
+@Serializable
+data class SettingsDetailRoute(val section: String)

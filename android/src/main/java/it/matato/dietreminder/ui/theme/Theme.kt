@@ -15,23 +15,27 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-private const val THEME_ANIMATION_DURATION_MS = 700
+private const val THEME_ANIMATION_DURATION_MS = AppMotion.standard
 
 private val THEME_ANIMATION_EASING: Easing = FastOutSlowInEasing
 
 @Composable
 fun DietTheme(
 	darkTheme: Boolean = isSystemInDarkTheme(),
-	dynamicColor: Boolean = true,
+	dynamicColor: Boolean = false,
 	seedColor: Color? = null,
 	content: @Composable () -> Unit,
 ) {
 	val context = LocalContext.current
+    val layoutPreferences = remember(context) { UiLayoutPreferences(context) }
+    val compact by layoutPreferences.compact.collectAsState(initial = layoutPreferences.isCompact)
 
 	val targetScheme = remember(
 		darkTheme,
@@ -49,9 +53,9 @@ fun DietTheme(
 
 			seedColor != null -> colorSchemeFromSeed(seedColor, darkTheme)
 
-			darkTheme -> darkColorScheme()
+			darkTheme -> brandColorScheme(true)
 
-			else -> lightColorScheme()
+			else -> brandColorScheme(false)
 		}
 	}
 
@@ -59,8 +63,11 @@ fun DietTheme(
 
 	MaterialTheme(
 		colorScheme = colorScheme,
-		content = content,
-	)
+		shapes = AppShapes,
+        typography = AppTypography,
+    ) {
+        CompositionLocalProvider(LocalCompactLayout provides compact, content = content)
+    }
 }
 
 @Composable

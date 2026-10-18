@@ -1,16 +1,15 @@
 package it.matato.dietreminder.ui.screens.developer
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.DeleteForever
-import androidx.compose.material.icons.rounded.DeveloperMode
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,7 +41,7 @@ fun DeveloperDangerZone(
 	var dialog by remember { mutableStateOf<DangerDialogState?>(null) }
 
 	Column(
-		verticalArrangement = Arrangement.spacedBy(12.dp),
+		verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 	) {
 		Text(
 			text = stringResource(R.string.danger_zone),
@@ -51,15 +50,15 @@ fun DeveloperDangerZone(
 			color = error,
 		)
 
-		ElevatedCard(
+		AppCard(
 			modifier = Modifier.fillMaxWidth(),
 			colors = CardDefaults.elevatedCardColors(
 				containerColor = errorContainer.copy(alpha = 0.35f),
 			),
 		) {
 			Column(
-				modifier = Modifier.padding(20.dp),
-				verticalArrangement = Arrangement.spacedBy(20.dp),
+				modifier = Modifier.padding(AppSpace.card),
+				verticalArrangement = Arrangement.spacedBy(AppSpace.section),
 			) {
 				DangerAction(
 					icon = Icons.Rounded.DeveloperMode,
@@ -111,7 +110,7 @@ fun DeveloperDangerZone(
 @Composable
 private fun DeveloperDangerZonePreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			DeveloperDangerZone(
 				onResetDatabase = {},
 				onDisableDeveloperMode = {},
@@ -139,7 +138,7 @@ private fun DangerAction(
 			.fillMaxWidth()
 			.clickable(enabled = enabled, onClick = onClick)
 			.padding(vertical = 4.dp),
-		horizontalArrangement = Arrangement.spacedBy(16.dp),
+		horizontalArrangement = Arrangement.spacedBy(AppSpace.group),
 	) {
 		Icon(
 			imageVector = icon,

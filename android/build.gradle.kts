@@ -1,5 +1,6 @@
 plugins {
-	alias(libs.plugins.android.application)
+    jacoco
+	id("com.android.application") // Version and classpath are provided by the root build.
 	alias(libs.plugins.kotlin.compose)
 	alias(libs.plugins.kotlin.serialization)
 	alias(libs.plugins.ksp)
@@ -16,6 +17,10 @@ android {
 		targetSdk = libs.versions.targetSdk.get().toInt()
 		versionCode = libs.versions.versionCode.get().toInt()
 		versionName = libs.versions.versionName.get()
+        val backendUrl = providers.gradleProperty("backendBaseUrl")
+            .getOrElse("http://10.0.2.2:8080/")
+        require(backendUrl.endsWith("/")) { "backendBaseUrl must end with /" }
+        buildConfigField("String", "BACKEND_BASE_URL", "\"${backendUrl}\"")
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
@@ -36,6 +41,10 @@ android {
 	}
 
 	buildTypes {
+        debug {
+            enableUnitTestCoverage = false
+            enableAndroidTestCoverage = true
+        }
 		release {
 			isMinifyEnabled = false
 			proguardFiles(
@@ -74,6 +83,11 @@ android {
 }
 
 dependencies {
+	implementation(project(":common"))
+	implementation(project(":client"))
+	implementation(libs.androidx.credentials)
+	implementation(libs.androidx.credentials.play.services)
+	implementation(libs.google.id)
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.activity.compose)
 	implementation(libs.androidx.lifecycle.runtime.compose)
@@ -112,6 +126,7 @@ dependencies {
 	testImplementation(libs.kotlinx.coroutines.test)
 
 	// Instrumented testing
+    androidTestImplementation("androidx.work:work-testing:${libs.versions.work.get()}")
 	androidTestImplementation(libs.androidx.test.runner)
 	androidTestImplementation(libs.androidx.test.espresso.core)
 	androidTestImplementation(libs.androidx.test.core.ktx)
@@ -120,4 +135,29 @@ dependencies {
 	androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 	androidTestImplementation(libs.kotlinx.coroutines.test)
 	debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+// Robolectric loads application classes without a code-source URL.
+tasks.withType<Test>().configureEach {
+    extensions.findByType<org.gradle.testing.jacoco.plugins.JacocoTaskExtension>()?.apply {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+val localCoverageClasses = files(
+    fileTree(layout.buildDirectory.dir("intermediates/classes/debug/transformDebugClassesWithAsm/dirs")) {
+        exclude("**/R.class", "**/R$*.class", "**/BuildConfig.class", "**/*_Factory*.class", "**/*_Impl*.class", "**/Hilt_*.class", "**/Dagger*.class", "**/*_MembersInjector*.class", "hilt_aggregated_deps/**", "dagger/**")
+    }
+)
+tasks.register<org.gradle.testing.jacoco.tasks.JacocoReport>("localCoverageReport") {
+    dependsOn("testDebugUnitTest")
+    executionData.setFrom(layout.buildDirectory.file("jacoco/testDebugUnitTest.exec"))
+    classDirectories.setFrom(localCoverageClasses)
+    sourceDirectories.setFrom(files("src/main/java"))
+    reports {
+        html.required.set(true); xml.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/coverage/local"))
+        xml.outputLocation.set(layout.buildDirectory.file("reports/coverage/local/report.xml"))
+    }
 }

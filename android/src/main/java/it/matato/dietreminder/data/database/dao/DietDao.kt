@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DietDao {
+    @Query("SELECT * FROM diets ORDER BY id")
+    suspend fun getAllForSync(): List<Diet>
+
 
 	@Query("SELECT * FROM diets ORDER BY isActive DESC, name")
 	fun observeAll(): Flow<List<Diet>>

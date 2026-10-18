@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.imePadding
+import it.matato.dietreminder.ui.theme.AppSpace
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -212,12 +215,18 @@ fun MealDetailContent(
 	onUpdateCourse: (Int, CourseWithItems) -> Unit,
 	onDeleteCourse: (Int) -> Unit,
 ) {
-	Scaffold { padding ->
+	Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        topBar = {
+            if (!isLoading) MealActions(isNew, onBack, onSave, onDelete,
+                Modifier.padding(horizontal = AppSpace.screen, vertical = AppSpace.inline))
+        },
+    ) { padding ->
 		if (isLoading) {
 			Box(
 				modifier = Modifier
 					.fillMaxSize()
-					.padding(padding),
+					.padding(padding).imePadding(),
 				contentAlignment = Alignment.Center,
 			) {
 				CircularProgressIndicator()
@@ -226,17 +235,18 @@ fun MealDetailContent(
 			LazyColumn(
 				modifier = Modifier
 					.fillMaxSize()
-					.padding(padding),
-				verticalArrangement = Arrangement.spacedBy(24.dp),
+					.padding(padding).imePadding(),
+				verticalArrangement = Arrangement.spacedBy(AppSpace.section),
 				contentPadding = PaddingValues(
-					start = 20.dp,
-					end = 20.dp,
-					top = 20.dp,
-					bottom = 104.dp,
+					start = AppSpace.screen,
+					end = AppSpace.screen,
+					top = AppSpace.group,
+					bottom = AppSpace.section,
 				),
 			) {
 				item {
 					MealHeader(
+                        showActions = false,
 						isNew = isNew,
 						type = type,
 						timeMinutes = timeMinutes,

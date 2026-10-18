@@ -1,5 +1,6 @@
 package it.matato.dietreminder.ui.screens.week
 
+import it.matato.dietreminder.ui.theme.AppSpace
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,19 +61,17 @@ private fun ItemRows(course: CourseWithItems) {
 
 			Spacer(modifier = Modifier.width(9.dp))
 
-			Text(
-				text = buildString {
-					append(item.name)
-
-					if (item.displayQuantity.isNotEmpty()) {
-						append("  ")
-						append(item.displayQuantity)
-					}
-				},
-				style = MaterialTheme.typography.bodyMedium,
-				color = MaterialTheme.colorScheme.onSurface,
-				modifier = Modifier.weight(1f),
-			)
+            Text(
+                text = item.name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
+            if (item.displayQuantity.isNotBlank()) {
+                Spacer(Modifier.width(12.dp))
+                Text(item.displayQuantity, style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
 		}
 	}
 }
@@ -81,7 +80,7 @@ private fun ItemRows(course: CourseWithItems) {
 @Composable
 private fun CourseSectionPreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			CourseSection(
 				course = CourseWithItems(
 					course = Course(id = 1, mealId = 1, name = "Main Course"),

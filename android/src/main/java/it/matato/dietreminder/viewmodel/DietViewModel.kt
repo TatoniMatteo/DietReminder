@@ -12,7 +12,6 @@ import it.matato.dietreminder.data.database.relation.CourseWithItems
 import it.matato.dietreminder.data.database.relation.MealWithDetails
 import it.matato.dietreminder.data.export.DietExport
 import it.matato.dietreminder.data.model.AppVersionState
-import it.matato.dietreminder.data.model.HydrationRange
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.model.QuantityUnit
 import it.matato.dietreminder.data.repository.contracts.ConfigRepository
@@ -22,7 +21,7 @@ import it.matato.dietreminder.data.repository.contracts.ShoppingListInitialItem
 import it.matato.dietreminder.data.repository.contracts.ShoppingListRepository
 import it.matato.dietreminder.data.repository.contracts.VersionPolicyRepository
 import it.matato.dietreminder.data.repository.delegating.OfflineWriteException
-import it.matato.dietreminder.data.repository.github.GitHubVersionPolicyRepository
+import it.matato.dietreminder.data.repository.remote.ServerVersionPolicyRepository
 import it.matato.dietreminder.domain.IngredientSummary
 import it.matato.dietreminder.domain.NextMeal
 import it.matato.dietreminder.domain.nextMeal
@@ -45,7 +44,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 
 sealed interface ImportCheckResult {
 	data object Valid : ImportCheckResult
@@ -57,17 +55,22 @@ sealed interface ImportCheckResult {
 @OptIn(ExperimentalCoroutinesApi::class)
 class DietViewModel @Inject constructor(
 	private val application: Application,
-	private val dietRepository: DietRepository,
-	private val shoppingListRepository: ShoppingListRepository,
-	private val configRepository: ConfigRepository,
+	dietRepository: DietRepository,
+	shoppingListRepository: ShoppingListRepository,
+	configRepository: ConfigRepository,
 	versionPolicyRepository: VersionPolicyRepository,
 ) : ViewModel() {
+    private val bound = (dietRepository as? it.matato.dietreminder.data.auth.ScopedAccountRepository)?.snapshot()
+    private val dietRepository: DietRepository = bound ?: dietRepository
+    private val shoppingListRepository: ShoppingListRepository = bound ?: shoppingListRepository
+    private val configRepository: ConfigRepository = bound ?: configRepository
+
 
 	constructor(
 		application: Application,
 		repository: DietRepository,
 		versionPolicyRepository: VersionPolicyRepository =
-			(repository as? VersionPolicyRepository) ?: GitHubVersionPolicyRepository(application),
+			(repository as? VersionPolicyRepository) ?: ServerVersionPolicyRepository(application),
 	) : this(
 		application = application,
 		dietRepository = repository,
@@ -156,19 +159,19 @@ class DietViewModel @Inject constructor(
 		)
 
 	val useDynamicColors = configRepository.observeConfig(ConfigKey.USE_DYNAMIC_COLORS)
-		.map { it?.value != "false" }
+		.map { it?.value == "true" }
 		.stateIn(
 			viewModelScope,
 			SharingStarted.WhileSubscribed(5000),
-			true,
+			false,
 		)
 
 	val seedColor = configRepository.observeConfig(ConfigKey.SEED_COLOR)
-		.map { it?.value ?: "0xFF6750A4" }
+		.map { it?.value ?: "0xFF246A42" }
 		.stateIn(
 			viewModelScope,
 			SharingStarted.WhileSubscribed(5000),
-			"0xFF6750A4",
+			"0xFF246A42",
 		)
 
 	val language = configRepository.observeConfig(ConfigKey.LANGUAGE)
@@ -179,53 +182,8 @@ class DietViewModel @Inject constructor(
 			"it",
 		)
 
-	val hydrationRanges = configRepository.observeConfig(ConfigKey.HYDRATION_RANGES)
-		.map { config ->
-			config?.value?.let { value ->
-				try {
-					Json.decodeFromString<List<HydrationRange>>(value)
-				} catch (_: Exception) {
-					defaultHydrationRanges()
-				}
-			} ?: defaultHydrationRanges()
-		}
-		.stateIn(
-			viewModelScope,
-			SharingStarted.WhileSubscribed(5000),
-			defaultHydrationRanges(),
-		)
-
-	val hydrationEnabled = configRepository.observeConfig(ConfigKey.HYDRATION_ENABLED)
-		.map { it?.value == "true" }
-		.stateIn(
-			viewModelScope,
-			SharingStarted.WhileSubscribed(5000),
-			true,
-		)
-
-	val hydrationInterval = configRepository.observeConfig(ConfigKey.HYDRATION_INTERVAL)
-		.map { it?.value?.toIntOrNull() ?: 120 }
-		.stateIn(
-			viewModelScope,
-			SharingStarted.WhileSubscribed(5000),
-			120,
-		)
-
-	val hydrationDays = configRepository.observeConfig(ConfigKey.HYDRATION_DAYS)
-		.map { config ->
-			config?.value
-				?.split(",")
-				?.mapNotNull { runCatching { DayOfWeek.valueOf(it.trim()) }.getOrNull() }
-				?.toSet() ?: DayOfWeek.entries.toSet()
-		}
-		.stateIn(
-			viewModelScope,
-			SharingStarted.WhileSubscribed(5000),
-			DayOfWeek.entries.toSet(),
-		)
-
 	val mealRemindersEnabled = configRepository.observeConfig(ConfigKey.MEAL_REMINDERS_ENABLED)
-		.map { it?.value != "false" }
+		.map { it?.value == "true" }
 		.stateIn(
 			viewModelScope,
 			SharingStarted.WhileSubscribed(5000),
@@ -297,42 +255,6 @@ class DietViewModel @Inject constructor(
 		}
 	}
 
-	fun setHydrationRanges(ranges: List<HydrationRange>) {
-		launchLocalWrite {
-			configRepository.saveConfig(
-				ConfigKey.HYDRATION_RANGES,
-				Json.encodeToString(ranges),
-			)
-		}
-	}
-
-	fun setHydrationEnabled(enabled: Boolean) {
-		launchLocalWrite {
-			configRepository.saveConfig(
-				ConfigKey.HYDRATION_ENABLED,
-				enabled.toString(),
-			)
-		}
-	}
-
-	fun setHydrationInterval(interval: Int) {
-		launchLocalWrite {
-			configRepository.saveConfig(
-				ConfigKey.HYDRATION_INTERVAL,
-				interval.toString(),
-			)
-		}
-	}
-
-	fun setHydrationDays(days: Set<DayOfWeek>) {
-		launchLocalWrite {
-			configRepository.saveConfig(
-				ConfigKey.HYDRATION_DAYS,
-				days.joinToString(",") { it.name },
-			)
-		}
-	}
-
 	fun setMealRemindersEnabled(enabled: Boolean) {
 		launchLocalWrite {
 			configRepository.saveConfig(
@@ -347,7 +269,7 @@ class DietViewModel @Inject constructor(
 			val diet = diets.value.find { it.id == dietId } ?: return@launchWrite
 			val updated = diet.withDayNotificationToggled(day, enabled)
 			dietRepository.updateDiet(updated)
-			DietReminder.updateAll(application)
+			it.matato.dietreminder.widget.Widgets.updateAll(application)
 			AlarmSyncHelper.syncAlarms(application)
 		}
 	}
@@ -436,14 +358,14 @@ class DietViewModel @Inject constructor(
 	fun activate(id: Long) {
 		launchWrite {
 			dietRepository.activate(id)
-			DietReminder.updateAll(application)
+			it.matato.dietreminder.widget.Widgets.updateAll(application)
 		}
 	}
 
 	fun deleteDiet(id: Long) {
 		launchWrite {
 			dietRepository.delete(id)
-			DietReminder.updateAll(application)
+			it.matato.dietreminder.widget.Widgets.updateAll(application)
 		}
 	}
 
@@ -456,14 +378,14 @@ class DietViewModel @Inject constructor(
 	fun saveMeal(meal: Meal, courses: List<CourseWithItems>) {
 		launchWrite {
 			dietRepository.saveMeal(meal, courses)
-			DietReminder.updateAll(application)
+			it.matato.dietreminder.widget.Widgets.updateAll(application)
 		}
 	}
 
 	fun deleteMeal(id: Long) {
 		launchWrite {
 			dietRepository.deleteMeal(id)
-			DietReminder.updateAll(application)
+			it.matato.dietreminder.widget.Widgets.updateAll(application)
 		}
 	}
 
@@ -526,6 +448,15 @@ class DietViewModel @Inject constructor(
 	suspend fun exportDiet(id: Long): String {
 		return dietRepository.exportJson(id)
 	}
+
+    fun updateShoppingAllocation(day: it.matato.dietreminder.data.database.entity.ShoppingListItemDay) { launchWrite { shoppingListRepository.updateShoppingAllocation(day) } }
+
+    fun updateShoppingReminders(listId: Long, enabled: Boolean, timeMinutes: Int) {
+        launchWrite { shoppingListRepository.updateShoppingReminders(listId, enabled, timeMinutes) }
+    }
+    fun moveShoppingPurchase(itemId: Long, dayId: Long?, purchaseDay: java.time.DayOfWeek?) {
+        launchWrite { shoppingListRepository.moveShoppingPurchase(itemId, dayId, purchaseDay) }
+    }
 
 	fun observeShoppingList(id: Long) = shoppingListRepository.observeShoppingList(id)
 
@@ -601,12 +532,5 @@ class DietViewModel @Inject constructor(
 		}
 	}
 
-	private fun defaultHydrationRanges(): List<HydrationRange> {
-		return listOf(
-			HydrationRange(
-				startMinutes = 8 * 60,
-				endMinutes = 22 * 60,
-			),
-		)
-	}
+
 }

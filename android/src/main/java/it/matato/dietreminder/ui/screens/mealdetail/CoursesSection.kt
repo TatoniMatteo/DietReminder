@@ -1,6 +1,11 @@
 package it.matato.dietreminder.ui.screens.mealdetail
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.foundation.background
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import it.matato.dietreminder.ui.theme.AppMotion
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,13 +15,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Restaurant
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -77,8 +79,8 @@ fun CoursesList(
 	onAddCourse: () -> Unit,
 ) {
 	val isOffline = LocalOfflineMode.current
-	OutlinedCard(
-		modifier = Modifier.fillMaxWidth(),
+	AppCard(
+		modifier = Modifier.fillMaxWidth().animateContentSize(tween(AppMotion.standard)),
 		shape = MaterialTheme.shapes.large,
 	) {
 		Column {
@@ -127,7 +129,7 @@ fun EmptyCourses(
 	onAddCourse: () -> Unit,
 ) {
 	val isOffline = LocalOfflineMode.current
-	OutlinedCard(
+	AppCard(
 		modifier = Modifier
 			.fillMaxWidth()
 			.clickable(enabled = !isOffline, onClick = onAddCourse),
@@ -136,9 +138,9 @@ fun EmptyCourses(
 		Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(28.dp),
+				.padding(AppSpace.section),
 			horizontalAlignment = Alignment.CenterHorizontally,
-			verticalArrangement = Arrangement.spacedBy(12.dp),
+			verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 		) {
 			IconContainer(
 				icon = Icons.Rounded.Restaurant,

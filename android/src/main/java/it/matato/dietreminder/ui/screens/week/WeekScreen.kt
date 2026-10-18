@@ -11,7 +11,23 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.testTag
+import it.matato.dietreminder.R
+import it.matato.dietreminder.domain.nextMeal
+import it.matato.dietreminder.ui.theme.AppSpace
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,12 +50,20 @@ fun WeekScreen(
 	vm: DietViewModel,
 	targetMealId: Long? = null,
 	targetDayName: String? = null,
+	onOpenDiet: ((Long?) -> Unit)? = null,
+	onEditMeal: ((MealWithDetails) -> Unit)? = null,
 ) {
 	val active by vm.active.collectAsState()
 	val meals by vm.meals.collectAsState()
 
 	val days = DayOfWeek.entries
-	val today = LocalDate.now().dayOfWeek
+	val now by produceState(initialValue = LocalDateTime.now()) {
+        while (true) {
+            value = LocalDateTime.now()
+            delay(30_000)
+        }
+    }
+    val today = now.dayOfWeek
 
 	val initialPage = remember {
 		val targetDay = targetDayName
@@ -69,6 +93,10 @@ fun WeekScreen(
 
 	WeekContent(
 		dietName = active?.name,
+        now = now,
+        mealWindowMinutes = active?.nextMealWindowMinutes ?: 90,
+        onManageDiet = onOpenDiet?.let { open -> { open(active?.id) } },
+        onEditMeal = onEditMeal,
 		meals = meals,
 		targetMealId = targetMealId,
 		days = days,
@@ -84,73 +112,68 @@ fun WeekScreen(
 
 @Composable
 fun WeekContent(
-	dietName: String?,
-	meals: List<MealWithDetails>,
-	targetMealId: Long?,
-	days: List<DayOfWeek>,
-	today: DayOfWeek,
-	pagerState: PagerState,
-	onDaySelected: (Int) -> Unit,
+    dietName: String?,
+    meals: List<MealWithDetails>,
+    targetMealId: Long?,
+    days: List<DayOfWeek>,
+    today: DayOfWeek,
+    pagerState: PagerState,
+    onDaySelected: (Int) -> Unit,
+    now: LocalDateTime = LocalDateTime.now(),
+    mealWindowMinutes: Int = 90,
+    onManageDiet: (() -> Unit)? = null,
+    onEditMeal: ((MealWithDetails) -> Unit)? = null,
 ) {
-	Scaffold { innerPadding ->
-		Column(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(innerPadding),
-		) {
-			WeekHeader(
-				dietName = dietName,
-			)
-
-			WeekDaySelector(
-				days = days,
-				selectedPage = pagerState.currentPage,
-				today = today,
-				onDaySelected = onDaySelected,
-			)
-
-			HorizontalPager(
-				state = pagerState,
-				modifier = Modifier
-					.fillMaxWidth()
-					.weight(1f),
-				verticalAlignment = Alignment.Top,
-			) { page ->
-				val selectedDay = days[page]
-
-				val dayMeals = remember(meals, selectedDay) {
-					meals
-						.filter { it.meal.dayOfWeek == selectedDay }
-						.sortedBy { it.meal.timeMinutes }
-				}
-
-				if (dayMeals.isEmpty()) {
-					EmptyDayState()
-				} else {
-					LazyColumn(
-						modifier = Modifier.fillMaxSize(),
-						contentPadding = PaddingValues(
-							start = 20.dp,
-							end = 20.dp,
-							top = 12.dp,
-							bottom = 28.dp,
-						),
-						verticalArrangement = Arrangement.spacedBy(14.dp),
-					) {
-						items(
-							items = dayMeals,
-							key = { it.meal.id },
-						) { mealDetails ->
-							MealTimelineItem(
-								mealDetails = mealDetails,
-								initiallyExpanded = mealDetails.meal.id == targetMealId,
-							)
-						}
-					}
-				}
-			}
-		}
-	}
+    val locale = LocalLocale.current.platformLocale
+    val next = remember(meals, now, mealWindowMinutes) { nextMeal(meals, now, mealWindowMinutes) }
+    Surface(color = MaterialTheme.colorScheme.surface) {
+        Column(Modifier.fillMaxSize()) {
+            WeekHeader(dietName, onToday = { onDaySelected(days.indexOf(today).coerceAtLeast(0)) })
+            WeekDaySelector(days, pagerState.currentPage, today, onDaySelected)
+            Spacer(Modifier.height(AppSpace.inline))
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxWidth().weight(1f).testTag("weekPager"),
+                verticalAlignment = Alignment.Top,
+            ) { page ->
+                val selectedDay = days[page]
+                val date = now.toLocalDate().with(selectedDay)
+                val dayMeals = remember(meals, selectedDay) {
+                    meals.filter { it.meal.dayOfWeek == selectedDay }.sortedBy { it.meal.timeMinutes }
+                }
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = AppSpace.screen, vertical = AppSpace.group),
+                    verticalArrangement = Arrangement.spacedBy(AppSpace.item),
+                ) {
+                    item(key = "dayHeading") {
+                        Row(Modifier.fillMaxWidth().padding(bottom = AppSpace.small), verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                date.format(DateTimeFormatter.ofPattern("EEEE d MMMM", locale)).replaceFirstChar { it.titlecase(locale) },
+                                Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(pluralStringResource(R.plurals.week_meal_count, dayMeals.size, dayMeals.size),
+                                style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    if (dayMeals.isEmpty()) {
+                        item(key = "empty") { EmptyDayState(hasDiet = dietName != null, onManageDiet = onManageDiet) }
+                    }
+                    items(items = dayMeals, key = { it.meal.id }) { details ->
+                        val highlighted = selectedDay == now.dayOfWeek && next?.dateTime?.toLocalDate() == now.toLocalDate() && next?.meal?.meal?.id == details.meal.id
+                        MealTimelineItem(
+                            mealDetails = details,
+                            initiallyExpanded = details.meal.id == targetMealId,
+                            isHighlighted = highlighted,
+                            isCurrent = highlighted && next!!.timeRemainingMinutes <= 0,
+                            onEdit = onEditMeal?.let { edit -> { edit(details) } },
+                            modifier = Modifier.animateItem(),
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)

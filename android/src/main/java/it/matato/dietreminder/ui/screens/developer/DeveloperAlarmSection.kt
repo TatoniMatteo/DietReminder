@@ -1,14 +1,14 @@
 package it.matato.dietreminder.ui.screens.developer
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Alarm
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.Button
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -32,19 +32,19 @@ fun DeveloperAlarmsSection(
 	onClearAlarms: () -> Unit,
 ) {
 	Column(
-		verticalArrangement = Arrangement.spacedBy(12.dp),
+		verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 	) {
 		SectionTitle(
 			title = stringResource(R.string.scheduled_alarms),
 			icon = Icons.Rounded.Alarm,
 		)
 
-		ElevatedCard(
+		AppCard(
 			modifier = Modifier.fillMaxWidth(),
 		) {
 			Column(
-				modifier = Modifier.padding(20.dp),
-				verticalArrangement = Arrangement.spacedBy(12.dp),
+				modifier = Modifier.padding(AppSpace.card),
+				verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 			) {
 				if (alarms.isEmpty()) {
 					Text(
@@ -94,11 +94,10 @@ fun DeveloperAlarmsSection(
 @Composable
 private fun DeveloperAlarmsSectionPreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			DeveloperAlarmsSection(
 				alarms = listOf(
 					ScheduledAlarm(1, "MEAL", System.currentTimeMillis() + 3600000, "Lunch"),
-					ScheduledAlarm(2, "HYDRATION", System.currentTimeMillis() + 7200000, "Water"),
 				),
 				onCancelAlarm = {},
 				onRunChecker = {},

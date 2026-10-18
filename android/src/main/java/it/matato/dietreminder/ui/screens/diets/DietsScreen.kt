@@ -1,15 +1,18 @@
 package it.matato.dietreminder.ui.screens.diets
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppScaffold
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
+import androidx.compose.foundation.lazy.items
+import it.matato.dietreminder.ui.components.AppCard
+import androidx.compose.foundation.layout.fillMaxWidth
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,7 +71,7 @@ fun DietsContent(
 	onConfigure: (Diet) -> Unit,
 ) {
 	val isOffline = LocalOfflineMode.current
-	Scaffold(
+	AppScaffold(
 		floatingActionButton = {
 			OfflineAwareFloatingActionButton(
 				onClick = onCreateClick,
@@ -86,8 +89,8 @@ fun DietsContent(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(innerPadding),
-			verticalArrangement = Arrangement.spacedBy(20.dp),
-			contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+			verticalArrangement = Arrangement.spacedBy(AppSpace.group),
+			contentPadding = PaddingValues(start = AppSpace.screen, end = AppSpace.screen, top = AppSpace.group, bottom = 96.dp),
 		) {
 			item {
 				DietsHeader(
@@ -97,15 +100,17 @@ fun DietsContent(
 				)
 			}
 
-			item {
-				DietsSection(
-					diets = diets,
-					onActivate = onActivate,
-					onDuplicate = onDuplicate,
-					onDelete = onDelete,
-					onConfigure = onConfigure,
-				)
-			}
+            if (diets.isEmpty()) {
+                item(key = "empty") { EmptyDietsCard() }
+            } else {
+                items(diets, key = { it.id }) { diet ->
+                    AppCard(Modifier.fillMaxWidth().animateItem()) {
+                        DietsListItem(diet, onActivate = { onActivate(diet) },
+                            onDuplicate = { onDuplicate(diet) }, onDelete = { onDelete(diet) },
+                            onConfigure = { onConfigure(diet) }, isOffline = isOffline)
+                    }
+                }
+            }
 		}
 	}
 }

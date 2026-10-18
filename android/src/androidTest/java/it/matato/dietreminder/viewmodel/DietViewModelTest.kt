@@ -4,8 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import it.matato.dietreminder.data.repository.fake.FakeDietRepository
-import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -23,10 +22,9 @@ class DietViewModelTest {
 		val viewModel = DietViewModel(context, repository)
 
 		assertTrue(repository.all.first().isEmpty())
+		withTimeout(5000) { viewModel.versionStatus.first { !it.isChecking } }
 		viewModel.create("Test Instrumented Diet", 60)
-		delay(100.milliseconds)
-
-		val diets = repository.all.first()
+		val diets = withTimeout(5000) { repository.all.first { it.size == 1 } }
 		assertEquals(1, diets.size)
 		assertEquals("Test Instrumented Diet", diets[0].name)
 	}

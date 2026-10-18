@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import it.matato.dietreminder.ui.theme.AppMotion
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -17,7 +18,6 @@ import androidx.navigation.toRoute
 import it.matato.dietreminder.ui.screens.developer.DeveloperScreen
 import it.matato.dietreminder.ui.screens.dietconfig.DietConfigScreen
 import it.matato.dietreminder.ui.screens.diets.DietsScreen
-import it.matato.dietreminder.ui.screens.hydration.HydrationScreen
 import it.matato.dietreminder.ui.screens.importdiet.ImportDietScreen
 import it.matato.dietreminder.ui.screens.ingredients.IngredientsScreen
 import it.matato.dietreminder.ui.screens.mealdetail.MealDetailScreen
@@ -28,18 +28,21 @@ import it.matato.dietreminder.ui.screens.shoppinglist.ShoppingListsScreen
 import it.matato.dietreminder.ui.screens.week.WeekScreen
 import it.matato.dietreminder.viewmodel.DietViewModel
 
-const val TRANSITION_DURATION = 300
+const val TRANSITION_DURATION = AppMotion.standard
 
 class AppNavigator(val navController: NavHostController) {
 
-	fun navigateToRoot(destination: RootDestination) {
-		navController.navigate(destination.route()) {
+    fun navigateToRoot(destination: RootDestination) {
+        val reselecting = destination.matches(navController.currentDestination?.route)
+        // Reselecting the current section returns to its root rather than restoring its detail.
+        if (reselecting && navController.popBackStack(destination.route(), inclusive = false)) return
+        navController.navigate(destination.route()) {
 			popUpTo(navController.graph.startDestinationId) {
 				saveState = true
 			}
 
 			launchSingleTop = true
-			restoreState = true
+            restoreState = !reselecting
 		}
 	}
 
@@ -52,7 +55,7 @@ class AppNavigator(val navController: NavHostController) {
 	}
 
 	fun isRootDestination(route: String?): Boolean {
-		return RootDestination.entries.any { it.matches(route) }
+		return route?.contains("SettingsDetailRoute") != true && RootDestination.entries.any { it.matches(route) }
 	}
 }
 
@@ -69,27 +72,39 @@ fun AppNavigation(
 		navController = navController,
 		startDestination = WeekRoute(),
 		enterTransition = {
-			slideIntoContainer(
+            if (navigator.isRootDestination(initialState.destination.route) && navigator.isRootDestination(targetState.destination.route)) {
+                fadeIn(tween(AppMotion.standard))
+            } else slideIntoContainer(
 				towards = AnimatedContentTransitionScope.SlideDirection.Start,
 				animationSpec = tween(TRANSITION_DURATION),
+                initialOffset = { it / 8 },
 			) + fadeIn(tween(TRANSITION_DURATION))
 		},
 		exitTransition = {
-			slideOutOfContainer(
+            if (navigator.isRootDestination(initialState.destination.route) && navigator.isRootDestination(targetState.destination.route)) {
+                fadeOut(tween(AppMotion.quick))
+            } else slideOutOfContainer(
 				towards = AnimatedContentTransitionScope.SlideDirection.Start,
 				animationSpec = tween(TRANSITION_DURATION),
+                targetOffset = { it / 8 },
 			) + fadeOut(tween(TRANSITION_DURATION))
 		},
 		popEnterTransition = {
-			slideIntoContainer(
+            if (navigator.isRootDestination(initialState.destination.route) && navigator.isRootDestination(targetState.destination.route)) {
+                fadeIn(tween(AppMotion.standard))
+            } else slideIntoContainer(
 				towards = AnimatedContentTransitionScope.SlideDirection.End,
 				animationSpec = tween(TRANSITION_DURATION),
+                initialOffset = { it / 8 },
 			) + fadeIn(tween(TRANSITION_DURATION))
 		},
 		popExitTransition = {
-			slideOutOfContainer(
+            if (navigator.isRootDestination(initialState.destination.route) && navigator.isRootDestination(targetState.destination.route)) {
+                fadeOut(tween(AppMotion.quick))
+            } else slideOutOfContainer(
 				towards = AnimatedContentTransitionScope.SlideDirection.End,
 				animationSpec = tween(TRANSITION_DURATION),
+                targetOffset = { it / 8 },
 			) + fadeOut(tween(TRANSITION_DURATION))
 		},
 	) {
@@ -106,6 +121,13 @@ fun AppNavigation(
 				vm = vm,
 				targetMealId = route.mealId,
 				targetDayName = route.dayName,
+                onOpenDiet = { dietId ->
+                    if (dietId == null) navigator.navigateToRoot(RootDestination.DIETS)
+                    else navigator.navigate(DietConfigRoute(dietId))
+                },
+                onEditMeal = { details ->
+                    navigator.navigate(MealDetailRoute(details.meal.id, details.meal.dietId, details.meal.dayOfWeek.name))
+                },
 			)
 		}
 
@@ -129,16 +151,6 @@ fun AppNavigation(
 			)
 		}
 
-		composable<HydrationRoute>(
-			deepLinks = listOf(
-				navDeepLink<HydrationRoute>(
-					basePath = "dietreminder://hydration",
-				),
-			),
-		) {
-			HydrationScreen(vm = vm)
-		}
-
 		composable<SettingsRoute>(
 			deepLinks = listOf(
 				navDeepLink<SettingsRoute>(
@@ -148,6 +160,8 @@ fun AppNavigation(
 		) {
 			SettingsScreen(
 				vm = vm,
+                onNavigateToSettingsPage = { navigator.navigate(SettingsDetailRoute(it)) },
+                onNavigateToShopping = { navigator.navigate(ShoppingListsRoute) },
 				onNavigateToDeveloper = {
 					navigator.navigate(DeveloperRoute)
 				},
@@ -156,6 +170,17 @@ fun AppNavigation(
 				},
 			)
 		}
+
+        composable<SettingsDetailRoute> {
+            val route = it.toRoute<SettingsDetailRoute>()
+            SettingsScreen(vm = vm, section = route.section,
+                onNavigateToSettingsPage = { navigator.navigate(SettingsDetailRoute(it)) },
+                onBack = { navigator.navigateUp() },
+                onNavigateToDeveloper = { navigator.navigate(DeveloperRoute) },
+                onNavigateToImportDiet = { navigator.navigate(ImportDietRoute) },
+                onNavigateToShopping = { navigator.navigate(ShoppingListsRoute) },
+            )
+        }
 
 		composable<DeveloperRoute> {
 			DeveloperScreen(
@@ -249,7 +274,7 @@ fun AppNavigation(
 			)
 		}
 
-		composable<ShoppingListDetailRoute> {
+		composable<ShoppingListDetailRoute>(deepLinks = listOf(navDeepLink<ShoppingListDetailRoute>(basePath = "dietreminder://shopping"))) {
 			val route = it.toRoute<ShoppingListDetailRoute>()
 
 			ShoppingListDetailScreen(

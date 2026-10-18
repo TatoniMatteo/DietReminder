@@ -1,6 +1,20 @@
 package it.matato.dietreminder.ui.screens.shoppinglist
 
+
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.expandVertically
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppTopBar
+import it.matato.dietreminder.ui.components.AppScaffold
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.material3.CardDefaults
+import it.matato.dietreminder.ui.theme.AppMotion
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -19,16 +33,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.Restaurant
-import androidx.compose.material.icons.rounded.ShoppingCart
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -42,12 +47,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -122,6 +124,9 @@ fun ShoppingListDetailScreen(
 			vm.deleteShoppingList(listId)
 			onBack()
 		},
+        onMovePurchase = vm::moveShoppingPurchase,
+        onAllocation = vm::updateShoppingAllocation,
+        onReminders = { enabled, time -> vm.updateShoppingReminders(listId, enabled, time) },
 		onRenameList = { newName ->
 			vm.updateShoppingListName(listId, newName)
 		},
@@ -162,6 +167,9 @@ fun ShoppingListDetailContent(
 	onImportDietClick: () -> Unit,
 	onDeleteList: () -> Unit,
 	onRenameList: (String) -> Unit,
+    onAllocation: (ShoppingListItemDay) -> Unit = {},
+    onMovePurchase: (Long, Long?, java.time.DayOfWeek?) -> Unit = { _, _, _ -> },
+    onReminders: (Boolean, Int) -> Unit = { _, _ -> },
 ) {
 	val isOffline = LocalOfflineMode.current
 	var editingItem by remember { mutableStateOf<ShoppingListItem?>(null) }
@@ -170,19 +178,10 @@ fun ShoppingListDetailContent(
 	var showDeleteConfirmDialog by remember { mutableStateOf(false) }
 	var showCompletedDeleteConfirmDialog by remember { mutableStateOf(false) }
 	var fabExpanded by remember { mutableStateOf(false) }
-	var purchasedExpanded by remember { mutableStateOf(false) }
-
-	val pendingItems = remember(listWithItems.items) {
-		listWithItems.items.filter { !it.isAllDaysBought }
-	}
-	val boughtItems = remember(listWithItems.items) {
-		listWithItems.items.filter { it.isAllDaysBought }
-	}
-
-	val totalCount = listWithItems.items.size
-	val boughtCount = boughtItems.size
-	val progress = if (totalCount > 0) boughtCount.toFloat() / totalCount.toFloat() else 0f
-	val isAllCompleted = totalCount > 0 && boughtCount == totalCount
+    val purchases = remember(listWithItems) { shoppingEntries(listWithItems) }
+    val totalCount = purchases.size
+    val boughtCount = purchases.count { it.bought }
+    val progress = if (totalCount > 0) boughtCount.toFloat() / totalCount else 0f
 
 	val animatedProgress by animateFloatAsState(
 		targetValue = progress,
@@ -190,16 +189,10 @@ fun ShoppingListDetailContent(
 		label = "progress_anim",
 	)
 
-	val purchasedChevronRotation by animateFloatAsState(
-		targetValue = if (purchasedExpanded) 180f else 0f,
-		animationSpec = spring(dampingRatio = 0.7f, stiffness = 500f),
-		label = "purchased_chevron_rotation",
-	)
-
-	Scaffold(
+	AppScaffold(
 		topBar = {
 			Column {
-				TopAppBar(
+				AppTopBar(
 					title = {
 						Text(
 							text = listWithItems.list.name,
@@ -209,7 +202,7 @@ fun ShoppingListDetailContent(
 						)
 					},
 					navigationIcon = {
-						IconButton(onClick = onBack) {
+						FilledTonalIconButton(onClick = onBack) {
 							Icon(
 								imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
 								contentDescription = stringResource(R.string.back),
@@ -221,7 +214,7 @@ fun ShoppingListDetailContent(
 							IconButton(onClick = { showMenu = true }, enabled = !isOffline) {
 								Icon(
 									imageVector = Icons.Rounded.MoreVert,
-									contentDescription = null,
+									contentDescription = stringResource(R.string.more_actions),
 								)
 							}
 
@@ -265,12 +258,13 @@ fun ShoppingListDetailContent(
 						progress = { animatedProgress },
 						modifier = Modifier
 							.fillMaxWidth()
+                            .padding(horizontal = AppSpace.screen)
 							.height(6.dp),
 					)
 					Row(
 						modifier = Modifier
 							.fillMaxWidth()
-							.padding(horizontal = 16.dp, vertical = 6.dp),
+							.padding(horizontal = AppSpace.screen, vertical = 6.dp),
 						horizontalArrangement = Arrangement.SpaceBetween,
 						verticalAlignment = Alignment.CenterVertically,
 					) {
@@ -345,128 +339,16 @@ fun ShoppingListDetailContent(
 				.fillMaxSize()
 				.padding(innerPadding),
 		) {
-			if (listWithItems.items.isEmpty()) {
-				Box(
-					modifier = Modifier.fillMaxSize(),
-					contentAlignment = Alignment.Center,
-				) {
-					EmptyShoppingListItemsState()
-				}
-			} else {
-				LazyColumn(
-					modifier = Modifier.fillMaxSize(),
-					contentPadding = PaddingValues(
-						start = 16.dp,
-						end = 16.dp,
-						top = 12.dp,
-						bottom = 88.dp,
-					),
-					verticalArrangement = Arrangement.spacedBy(8.dp),
-				) {
-					// Completion Card Animation
-					if (isAllCompleted) {
-						item {
-							CompletedListCard(
-								onDeleteClick = { showCompletedDeleteConfirmDialog = true },
-							)
-						}
-					}
-
-					// Section 1: Da acquistare (To Buy)
-					if (pendingItems.isNotEmpty()) {
-						item {
-							SectionHeader(
-								title = stringResource(R.string.to_buy),
-								count = pendingItems.size,
-							)
-						}
-
-						items(
-							items = pendingItems,
-							key = { it.item.id },
-						) { itemWithDays ->
-							Box(modifier = Modifier.animateItem()) {
-								if (itemWithDays.item.isFresh && itemWithDays.days.isNotEmpty()) {
-									FreshShoppingListItemCard(
-										itemWithDays = itemWithDays,
-										onToggleItem = { onToggleItem(itemWithDays.item) },
-										onToggleDay = onToggleDay,
-										onEdit = { editingItem = itemWithDays.item },
-										onDelete = { onDeleteItem(itemWithDays.item.id) },
-									)
-								} else {
-									ShoppingListItemRow(
-										item = itemWithDays.item,
-										onToggle = { onToggleItem(itemWithDays.item) },
-										onEdit = { editingItem = itemWithDays.item },
-										onDelete = { onDeleteItem(itemWithDays.item.id) },
-									)
-								}
-							}
-						}
-					}
-
-					// Section 2: Acquistati (Purchased - Collapsible, default collapsed)
-					if (boughtItems.isNotEmpty()) {
-						item {
-							Spacer(modifier = Modifier.height(8.dp))
-							Row(
-								modifier = Modifier
-									.fillMaxWidth()
-									.clip(MaterialTheme.shapes.medium)
-									.clickable { purchasedExpanded = !purchasedExpanded }
-									.padding(vertical = 4.dp),
-								verticalAlignment = Alignment.CenterVertically,
-							) {
-								SectionHeader(
-									title = stringResource(R.string.purchased),
-									count = boughtItems.size,
-								)
-								Spacer(modifier = Modifier.weight(1f))
-								Icon(
-									imageVector = Icons.Rounded.KeyboardArrowDown,
-									contentDescription = null,
-									modifier = Modifier.graphicsLayer { rotationZ = purchasedChevronRotation },
-									tint = MaterialTheme.colorScheme.onSurfaceVariant,
-								)
-							}
-						}
-
-						if (purchasedExpanded) {
-							items(
-								items = boughtItems,
-								key = { it.item.id },
-							) { itemWithDays ->
-								Box(modifier = Modifier.animateItem()) {
-									if (itemWithDays.item.isFresh && itemWithDays.days.isNotEmpty()) {
-										FreshShoppingListItemCard(
-											itemWithDays = itemWithDays,
-											onToggleItem = { onToggleItem(itemWithDays.item) },
-											onToggleDay = onToggleDay,
-											onEdit = { editingItem = itemWithDays.item },
-											onDelete = { onDeleteItem(itemWithDays.item.id) },
-										)
-									} else {
-										ShoppingListItemRow(
-											item = itemWithDays.item,
-											onToggle = { onToggleItem(itemWithDays.item) },
-											onEdit = { editingItem = itemWithDays.item },
-											onDelete = { onDeleteItem(itemWithDays.item.id) },
-										)
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+            ShoppingReminderControls(listWithItems.list, onReminders)
+            ShoppingDayPlanner(listWithItems, onToggleItem, onToggleDay, { editingItem = it }, onUpdateItem, onMovePurchase, onDeleteItem, Modifier.weight(1f), onCompletedDelete = { showCompletedDeleteConfirmDialog = true }, onAllocation = onAllocation)
+        }
+    }
 
 	if (editingItem != null) {
 		val current = editingItem!!
 		EditShoppingListItemDialog(
 			title = stringResource(R.string.edit_item),
+            showQuantity = listWithItems.items.find { it.item.id == current.id }?.days.isNullOrEmpty(),
 			initialName = current.name,
 			initialAmount = current.amount,
 			initialUnit = current.unit,
@@ -533,201 +415,7 @@ fun ShoppingListDetailContent(
 }
 
 @Composable
-private fun FreshShoppingListItemCard(
-	itemWithDays: ShoppingListItemWithDays,
-	onToggleItem: () -> Unit,
-	onToggleDay: (dayId: Long, isBought: Boolean) -> Unit,
-	onEdit: () -> Unit,
-	onDelete: () -> Unit,
-) {
-	val isOffline = LocalOfflineMode.current
-	var expanded by remember { mutableStateOf(false) }
-	var showMenu by remember { mutableStateOf(false) }
-
-	val totalDays = itemWithDays.days.size
-	val boughtDays = itemWithDays.boughtDaysCount
-	val isAllBought = itemWithDays.isAllDaysBought
-
-	val chevronRotation by animateFloatAsState(
-		targetValue = if (expanded) 180f else 0f,
-		animationSpec = spring(dampingRatio = 0.7f, stiffness = 500f),
-		label = "fresh_chevron_rotation",
-	)
-
-	OutlinedCard(
-		modifier = Modifier.fillMaxWidth(),
-		shape = MaterialTheme.shapes.medium,
-	) {
-		Column(
-			modifier = Modifier.fillMaxWidth(),
-		) {
-			Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.clickable { expanded = !expanded }
-					.padding(horizontal = 12.dp, vertical = 8.dp),
-				verticalAlignment = Alignment.CenterVertically,
-			) {
-				Checkbox(
-					checked = isAllBought,
-					onCheckedChange = { onToggleItem() },
-					enabled = !isOffline,
-				)
-
-				Spacer(modifier = Modifier.width(8.dp))
-
-				Column(
-					modifier = Modifier.weight(1f),
-				) {
-					Row(
-						verticalAlignment = Alignment.CenterVertically,
-					) {
-						Text(
-							text = itemWithDays.item.name,
-							style = MaterialTheme.typography.bodyLarge,
-							fontWeight = if (isAllBought) FontWeight.Normal else FontWeight.SemiBold,
-							textDecoration = if (isAllBought) TextDecoration.LineThrough else TextDecoration.None,
-							color = if (isAllBought) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
-							modifier = Modifier.weight(1f, fill = false),
-							maxLines = 1,
-							overflow = TextOverflow.Ellipsis,
-						)
-
-						Spacer(modifier = Modifier.width(6.dp))
-
-						Box(
-							modifier = Modifier
-								.clip(MaterialTheme.shapes.extraSmall)
-								.background(MaterialTheme.colorScheme.tertiaryContainer)
-								.padding(horizontal = 6.dp, vertical = 2.dp),
-						) {
-							Text(
-								text = stringResource(R.string.type_fresh_daily),
-								style = MaterialTheme.typography.labelSmall,
-								fontWeight = FontWeight.Bold,
-								color = MaterialTheme.colorScheme.onTertiaryContainer,
-								maxLines = 1,
-							)
-						}
-					}
-
-					Text(
-						text = "$boughtDays/$totalDays " + stringResource(R.string.days_purchased),
-						style = MaterialTheme.typography.bodySmall,
-						color = if (isAllBought) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurfaceVariant,
-					)
-				}
-
-				Icon(
-					imageVector = Icons.Rounded.KeyboardArrowDown,
-					contentDescription = null,
-					modifier = Modifier.graphicsLayer { rotationZ = chevronRotation },
-					tint = MaterialTheme.colorScheme.onSurfaceVariant,
-				)
-
-				Box {
-					IconButton(onClick = { showMenu = true }, enabled = !isOffline) {
-						Icon(
-							imageVector = Icons.Rounded.MoreVert,
-							contentDescription = null,
-							tint = MaterialTheme.colorScheme.onSurfaceVariant,
-						)
-					}
-
-					DropdownMenu(
-						expanded = showMenu,
-						onDismissRequest = { showMenu = false },
-					) {
-						DropdownMenuItem(
-							text = { Text(stringResource(R.string.edit_item)) },
-							onClick = {
-								showMenu = false
-								onEdit()
-							},
-							enabled = !isOffline,
-							leadingIcon = {
-								Icon(Icons.Rounded.Edit, contentDescription = null)
-							},
-						)
-						DropdownMenuItem(
-							text = { Text(stringResource(R.string.delete)) },
-							onClick = {
-								showMenu = false
-								onDelete()
-							},
-							enabled = !isOffline,
-							leadingIcon = {
-								Icon(
-									Icons.Rounded.Delete,
-									contentDescription = null,
-									tint = MaterialTheme.colorScheme.error,
-								)
-							},
-						)
-					}
-				}
-			}
-
-			AnimatedVisibility(visible = expanded) {
-				Column(
-					modifier = Modifier.fillMaxWidth(),
-				) {
-					HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-
-					itemWithDays.days.forEachIndexed { index, day ->
-						val dayName = day.dayOfWeek.getDisplayName(
-							TextStyle.FULL,
-							LocalLocale.current.platformLocale,
-						).replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-
-						Row(
-							modifier = Modifier
-								.fillMaxWidth()
-								.clickable(enabled = !isOffline) { onToggleDay(day.id, !day.isBought) }
-								.padding(horizontal = 24.dp, vertical = 6.dp),
-							verticalAlignment = Alignment.CenterVertically,
-						) {
-							Checkbox(
-								checked = day.isBought,
-								onCheckedChange = { onToggleDay(day.id, !day.isBought) },
-								enabled = !isOffline,
-							)
-
-							Spacer(modifier = Modifier.width(8.dp))
-
-							Text(
-								text = dayName,
-								style = MaterialTheme.typography.bodyMedium,
-								fontWeight = FontWeight.SemiBold,
-								textDecoration = if (day.isBought) TextDecoration.LineThrough else TextDecoration.None,
-								color = if (day.isBought) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
-								modifier = Modifier.weight(1f),
-							)
-
-							Text(
-								text = day.displayQuantity,
-								style = MaterialTheme.typography.bodySmall,
-								fontWeight = FontWeight.Bold,
-								textDecoration = if (day.isBought) TextDecoration.LineThrough else TextDecoration.None,
-								color = if (day.isBought) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary,
-							)
-						}
-
-						if (index < itemWithDays.days.lastIndex) {
-							HorizontalDivider(
-								modifier = Modifier.padding(horizontal = 24.dp),
-								color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-							)
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-@Composable
-private fun CompletedListCard(
+internal fun CompletedListCard(
 	onDeleteClick: () -> Unit,
 ) {
 	val scale by animateFloatAsState(
@@ -736,7 +424,7 @@ private fun CompletedListCard(
 		label = "completion_scale",
 	)
 
-	OutlinedCard(
+	AppCard(
 		modifier = Modifier
 			.fillMaxWidth()
 			.scale(scale)
@@ -746,9 +434,9 @@ private fun CompletedListCard(
 		Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(20.dp),
+				.padding(AppSpace.card),
 			horizontalAlignment = Alignment.CenterHorizontally,
-			verticalArrangement = Arrangement.spacedBy(12.dp),
+			verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 		) {
 			Icon(
 				imageVector = Icons.Rounded.CheckCircle,
@@ -790,136 +478,10 @@ private fun CompletedListCard(
 }
 
 @Composable
-private fun SectionHeader(title: String, count: Int) {
-	Row(
-		modifier = Modifier.padding(vertical = 4.dp),
-		verticalAlignment = Alignment.CenterVertically,
-	) {
-		Text(
-			text = title,
-			style = MaterialTheme.typography.titleSmall,
-			fontWeight = FontWeight.Bold,
-			color = MaterialTheme.colorScheme.primary,
-		)
-
-		Spacer(modifier = Modifier.width(8.dp))
-
-		Box(
-			modifier = Modifier
-				.clip(MaterialTheme.shapes.extraSmall)
-				.background(MaterialTheme.colorScheme.primaryContainer)
-				.padding(horizontal = 6.dp, vertical = 2.dp),
-		) {
-			Text(
-				text = count.toString(),
-				style = MaterialTheme.typography.labelSmall,
-				fontWeight = FontWeight.Bold,
-				color = MaterialTheme.colorScheme.onPrimaryContainer,
-			)
-		}
-	}
-}
-
-@Composable
-private fun ShoppingListItemRow(
-	item: ShoppingListItem,
-	onToggle: () -> Unit,
-	onEdit: () -> Unit,
-	onDelete: () -> Unit,
-) {
-	val isOffline = LocalOfflineMode.current
-	var showMenu by remember { mutableStateOf(false) }
-
-	OutlinedCard(
-		modifier = Modifier.fillMaxWidth(),
-		shape = MaterialTheme.shapes.medium,
-	) {
-		Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.clickable(enabled = !isOffline, onClick = onToggle)
-				.padding(horizontal = 12.dp, vertical = 8.dp),
-			verticalAlignment = Alignment.CenterVertically,
-		) {
-			Checkbox(
-				checked = item.isBought,
-				onCheckedChange = { onToggle() },
-				enabled = !isOffline,
-				modifier = Modifier.testTag("shopping-item-checkbox"),
-			)
-
-			Spacer(modifier = Modifier.width(8.dp))
-
-			Column(
-				modifier = Modifier.weight(1f),
-			) {
-				Text(
-					text = item.name,
-					style = MaterialTheme.typography.bodyLarge,
-					fontWeight = if (item.isBought) FontWeight.Normal else FontWeight.SemiBold,
-					textDecoration = if (item.isBought) TextDecoration.LineThrough else TextDecoration.None,
-					color = if (item.isBought) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
-				)
-
-				if (item.displayQuantity.isNotBlank()) {
-					Text(
-						text = item.displayQuantity,
-						style = MaterialTheme.typography.bodySmall,
-						textDecoration = if (item.isBought) TextDecoration.LineThrough else TextDecoration.None,
-						color = if (item.isBought) MaterialTheme.colorScheme.outline.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant,
-					)
-				}
-			}
-
-			Box {
-				IconButton(onClick = { showMenu = true }, enabled = !isOffline) {
-					Icon(
-						imageVector = Icons.Rounded.MoreVert,
-						contentDescription = null,
-						tint = MaterialTheme.colorScheme.onSurfaceVariant,
-					)
-				}
-
-				DropdownMenu(
-					expanded = showMenu,
-					onDismissRequest = { showMenu = false },
-				) {
-					DropdownMenuItem(
-						text = { Text(stringResource(R.string.edit_item)) },
-						onClick = {
-							showMenu = false
-							onEdit()
-						},
-						enabled = !isOffline,
-						leadingIcon = {
-							Icon(Icons.Rounded.Edit, contentDescription = null)
-						},
-					)
-					DropdownMenuItem(
-						text = { Text(stringResource(R.string.delete)) },
-						onClick = {
-							showMenu = false
-							onDelete()
-						},
-						enabled = !isOffline,
-						leadingIcon = {
-							Icon(
-								Icons.Rounded.Delete,
-								contentDescription = null,
-								tint = MaterialTheme.colorScheme.error,
-							)
-						},
-					)
-				}
-			}
-		}
-	}
-}
-
-@Composable
 private fun EditShoppingListItemDialog(
 	title: String,
 	initialName: String,
+    showQuantity: Boolean = true,
 	initialAmount: String = "",
 	initialUnit: QuantityUnit = QuantityUnit.GRAMS,
 	onDismiss: () -> Unit,
@@ -934,9 +496,10 @@ private fun EditShoppingListItemDialog(
 		title = { Text(title) },
 		text = {
 			Column(
-				verticalArrangement = Arrangement.spacedBy(12.dp),
+				verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 			) {
 				OutlinedTextField(
+                shape = androidx.compose.material3.MaterialTheme.shapes.medium,
 					value = name,
 					onValueChange = { name = it },
 					label = { Text(stringResource(R.string.item_name)) },
@@ -944,7 +507,7 @@ private fun EditShoppingListItemDialog(
 					modifier = Modifier.fillMaxWidth(),
 				)
 
-				QuantityInputRow(
+                if (showQuantity) QuantityInputRow(
 					amount = amount,
 					selectedUnit = selectedUnit,
 					onAmountChange = { amount = it },
@@ -986,6 +549,7 @@ private fun RenameShoppingListDialog(
 		title = { Text(stringResource(R.string.rename_list)) },
 		text = {
 			OutlinedTextField(
+                shape = androidx.compose.material3.MaterialTheme.shapes.medium,
 				value = name,
 				onValueChange = { name = it },
 				label = { Text(stringResource(R.string.list_name)) },
@@ -1011,30 +575,6 @@ private fun RenameShoppingListDialog(
 			}
 		},
 	)
-}
-
-@Composable
-private fun EmptyShoppingListItemsState() {
-	Column(
-		modifier = Modifier
-			.fillMaxWidth()
-			.padding(horizontal = 32.dp, vertical = 48.dp),
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.spacedBy(12.dp),
-	) {
-		IconContainer(
-			icon = Icons.Rounded.ShoppingCart,
-			size = 64.dp,
-			iconSize = 32.dp,
-		)
-
-		Text(
-			text = stringResource(R.string.no_items_in_list),
-			style = MaterialTheme.typography.titleMedium,
-			fontWeight = FontWeight.SemiBold,
-			color = MaterialTheme.colorScheme.onSurface,
-		)
-	}
 }
 
 @Preview(showBackground = true)

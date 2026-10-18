@@ -1,12 +1,7 @@
 package it.matato.dietreminder.ui.navigation
 
 import androidx.annotation.StringRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CalendarMonth
-import androidx.compose.material.icons.rounded.Restaurant
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.ShoppingCart
-import androidx.compose.material.icons.rounded.WaterDrop
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.ui.graphics.vector.ImageVector
 import it.matato.dietreminder.R
 
@@ -26,10 +21,6 @@ enum class RootDestination(
 		icon = Icons.Rounded.ShoppingCart,
 		labelRes = R.string.nav_shopping_lists,
 	),
-	HYDRATION(
-		icon = Icons.Rounded.WaterDrop,
-		labelRes = R.string.hydration_title,
-	),
 	SETTINGS(
 		icon = Icons.Rounded.Settings,
 		labelRes = R.string.settings,
@@ -40,7 +31,6 @@ enum class RootDestination(
 			WEEK -> WeekRoute()
 			DIETS -> DietsRoute
 			SHOPPING_LISTS -> ShoppingListsRoute
-			HYDRATION -> HydrationRoute
 			SETTINGS -> SettingsRoute
 		}
 	}
@@ -52,8 +42,7 @@ enum class RootDestination(
 			SHOPPING_LISTS -> (route?.contains("ShoppingListsRoute") == true) || (route?.contains("ShoppingListDetailRoute") == true) || (route?.contains(
 				"ImportDietFoodsRoute") == true) || (route?.contains("IngredientsRoute") == true)
 
-			HYDRATION -> route?.contains("HydrationRoute") == true
-			SETTINGS -> route?.contains("SettingsRoute") == true
+			SETTINGS -> route?.contains("SettingsRoute") == true || route?.contains("SettingsDetailRoute") == true
 		}
 	}
 }

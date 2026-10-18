@@ -10,4 +10,6 @@ data class ShoppingList(
 	val name: String,
 	val createdAt: Long = System.currentTimeMillis(),
 	val dietId: Long? = null,
+    @androidx.room.ColumnInfo(defaultValue = "0") val remindersEnabled: Boolean = false,
+    @androidx.room.ColumnInfo(defaultValue = "1080") val reminderTimeMinutes: Int = 1080,
 )

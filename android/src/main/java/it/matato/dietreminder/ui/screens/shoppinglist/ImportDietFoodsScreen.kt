@@ -1,5 +1,11 @@
 package it.matato.dietreminder.ui.screens.shoppinglist
 
+
+import androidx.compose.material3.FilledTonalIconButton
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppTopBar
+import it.matato.dietreminder.ui.components.AppScaffold
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,11 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Restaurant
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,11 +31,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -143,9 +142,9 @@ fun ImportDietFoodsContent(
 
 	val selectedCount = selectedState.values.count { it }
 
-	Scaffold(
+	AppScaffold(
 		topBar = {
-			TopAppBar(
+			AppTopBar(
 				title = {
 					Text(
 						text = stringResource(R.string.import_diet_foods_title),
@@ -153,7 +152,7 @@ fun ImportDietFoodsContent(
 					)
 				},
 				navigationIcon = {
-					IconButton(onClick = onBack) {
+					FilledTonalIconButton(onClick = onBack) {
 						Icon(
 							imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
 							contentDescription = stringResource(R.string.back),
@@ -168,7 +167,7 @@ fun ImportDietFoodsContent(
 					modifier = Modifier
 						.fillMaxWidth()
 						.background(MaterialTheme.colorScheme.surface)
-						.padding(16.dp),
+						.padding(AppSpace.card),
 				) {
 					Button(
 						onClick = {
@@ -214,12 +213,12 @@ fun ImportDietFoodsContent(
 					.fillMaxSize()
 					.padding(innerPadding),
 				contentPadding = PaddingValues(
-					start = 16.dp,
-					end = 16.dp,
+					start = AppSpace.screen,
+					end = AppSpace.screen,
 					top = 12.dp,
 					bottom = 80.dp,
 				),
-				verticalArrangement = Arrangement.spacedBy(12.dp),
+				verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 			) {
 				item {
 					ImportInfoCard()
@@ -286,7 +285,7 @@ fun ImportDietFoodsContent(
 
 @Composable
 private fun ImportInfoCard() {
-	OutlinedCard(
+	AppCard(
 		modifier = Modifier.fillMaxWidth(),
 		shape = MaterialTheme.shapes.medium,
 	) {
@@ -345,7 +344,7 @@ private fun IngredientImportCard(
 		QuantityAggregator.sumOccurrences(ingredient.occurrences)
 	}
 
-	OutlinedCard(
+	AppCard(
 		modifier = Modifier.fillMaxWidth(),
 		shape = MaterialTheme.shapes.medium,
 	) {
@@ -465,7 +464,7 @@ private fun EmptyDietFoodsState() {
 			.fillMaxWidth()
 			.padding(horizontal = 32.dp, vertical = 48.dp),
 		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.spacedBy(12.dp),
+		verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 	) {
 		IconContainer(
 			icon = Icons.Rounded.Restaurant,

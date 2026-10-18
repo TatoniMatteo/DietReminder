@@ -1,16 +1,13 @@
 package it.matato.dietreminder.ui.screens.settings
 
+import it.matato.dietreminder.ui.theme.AppSpace
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Brightness4
-import androidx.compose.material.icons.rounded.ColorLens
-import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.Tune
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -36,8 +33,10 @@ fun SettingsAppearanceSection(
 	SettingsSection(
 		title = stringResource(R.string.appearance_personalization),
 		icon = Icons.Rounded.Tune,
-	) {
-		SettingsListItem(
+    ) {
+        SettingsLayoutItem()
+        SettingsDivider()
+        SettingsListItem(
 			title = stringResource(R.string.theme),
 			subtitle = when (currentTheme) {
 				"light" -> stringResource(R.string.theme_light)
@@ -111,7 +110,7 @@ fun SettingsAppearanceSection(
 @Composable
 private fun SettingsAppearanceSectionPreview() {
 	DietTheme {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(AppSpace.card)) {
 			SettingsAppearanceSection(
 				currentTheme = "system",
 				dynamicEnabled = true,

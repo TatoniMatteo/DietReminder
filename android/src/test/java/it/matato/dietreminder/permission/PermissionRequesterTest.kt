@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import it.matato.dietreminder.TestDietApplication
 import it.matato.dietreminder.ui.theme.DietTheme
+import it.matato.dietreminder.util.permission.rememberPermissionRequester
 import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
@@ -16,24 +17,24 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34], application = TestDietApplication::class)
 class PermissionRequesterTest {
 
-	@get:Rule
-	val composeTestRule = createComposeRule()
+    @get:Rule
+    val composeTestRule = createComposeRule()
 
-	@Test
-	fun testPermissionRequester_CanBeInvoked() {
-		val context = ApplicationProvider.getApplicationContext<Application>()
-		var requesterLambda: (() -> Unit)? = null
+    @Test
+    fun testPermissionRequester_CanBeInvoked() {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        var requesterLambda: (() -> Unit)? = null
 
-		composeTestRule.setContent {
-			DietTheme {
-				requesterLambda = rememberPermissionRequester(
-					context = context,
-					onCompleted = {}
-				)
-			}
-		}
+        composeTestRule.setContent {
+            DietTheme {
+                requesterLambda = rememberPermissionRequester(
+                    context = context,
+                    onCompleted = {}
+                )
+            }
+        }
 
-		assertNotNull(requesterLambda)
-		requesterLambda?.invoke()
-	}
+        assertNotNull(requesterLambda)
+        requesterLambda?.invoke()
+    }
 }

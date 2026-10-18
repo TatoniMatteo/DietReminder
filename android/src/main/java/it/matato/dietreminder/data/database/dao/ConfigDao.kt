@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ConfigDao {
+    @Query("SELECT * FROM app_config WHERE `key` = :key")
+    suspend fun getConfig(key: String): AppConfig?
+
 
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	suspend fun insertDefaultTime(time: MealDefaultTime)

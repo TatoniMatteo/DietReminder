@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MealDao {
+    @Query("SELECT * FROM meals ORDER BY id")
+    suspend fun getAllForSync(): List<Meal>
+
 
 	@Transaction
 	@Query(

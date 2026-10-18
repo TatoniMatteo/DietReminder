@@ -1,14 +1,14 @@
 package it.matato.dietreminder.ui.dialog
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Language
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -34,19 +34,19 @@ fun LanguagePickerDialog(
 	BasicAlertDialog(
 		onDismissRequest = onDismiss,
 	) {
-		ElevatedCard(
+		AppCard(
 			shape = MaterialTheme.shapes.extraLarge,
 		) {
 			Column(
-				modifier = Modifier.padding(vertical = 12.dp),
+				modifier = Modifier.padding(vertical = AppSpace.item),
 			) {
 				Text(
 					text = stringResource(R.string.select_language),
 					style = MaterialTheme.typography.headlineSmall,
 					fontWeight = FontWeight.Bold,
 					modifier = Modifier.padding(
-						horizontal = 24.dp,
-						vertical = 16.dp,
+						horizontal = AppSpace.screen,
+						vertical = AppSpace.group,
 					),
 				)
 
@@ -86,7 +86,7 @@ fun LanguagePickerDialog(
 					onClick = onDismiss,
 					modifier = Modifier
 						.align(Alignment.End)
-						.padding(horizontal = 16.dp),
+						.padding(horizontal = AppSpace.group),
 				) {
 					Text(stringResource(R.string.cancel))
 				}

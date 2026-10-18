@@ -1,5 +1,6 @@
 package it.matato.dietreminder.ui.screens.update
 
+import it.matato.dietreminder.ui.components.AppStatusPage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,8 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CloudOff
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,66 +28,9 @@ fun OfflineScreen(
 	onRetryClick: () -> Unit,
 	onContinueClick: () -> Unit,
 ) {
-	Surface(
-		modifier = Modifier.fillMaxSize(),
-		color = MaterialTheme.colorScheme.background,
-	) {
-		Column(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(32.dp),
-			verticalArrangement = Arrangement.Center,
-			horizontalAlignment = Alignment.CenterHorizontally,
-		) {
-			Icon(
-				imageVector = Icons.Rounded.CloudOff,
-				contentDescription = null,
-				modifier = Modifier.size(80.dp),
-				tint = MaterialTheme.colorScheme.primary,
-			)
-
-			Spacer(Modifier.height(24.dp))
-
-			Text(
-				text = stringResource(R.string.offline_title),
-				style = MaterialTheme.typography.headlineMedium,
-				fontWeight = FontWeight.Bold,
-				color = MaterialTheme.colorScheme.onBackground,
-				textAlign = TextAlign.Center,
-			)
-
-			Spacer(Modifier.height(12.dp))
-
-			Text(
-				text = stringResource(R.string.offline_message),
-				style = MaterialTheme.typography.bodyLarge,
-				color = MaterialTheme.colorScheme.onSurfaceVariant,
-				textAlign = TextAlign.Center,
-			)
-
-			Spacer(Modifier.height(32.dp))
-
-			Button(
-				onClick = onRetryClick,
-				modifier = Modifier.height(50.dp),
-			) {
-				Text(
-					text = stringResource(R.string.retry),
-					style = MaterialTheme.typography.titleMedium,
-				)
-			}
-
-			Spacer(Modifier.height(12.dp))
-
-			Button(
-				onClick = onContinueClick,
-				modifier = Modifier.height(50.dp),
-			) {
-				Text(
-					text = stringResource(R.string.continue_offline),
-					style = MaterialTheme.typography.titleMedium,
-				)
-			}
-		}
-	}
+    AppStatusPage(
+        icon = Icons.Rounded.CloudOff, title = stringResource(R.string.offline_title), message = stringResource(R.string.offline_message),
+        primaryLabel = stringResource(R.string.retry), onPrimary = onRetryClick,
+        secondaryLabel = stringResource(R.string.continue_offline), onSecondary = onContinueClick,
+    )
 }

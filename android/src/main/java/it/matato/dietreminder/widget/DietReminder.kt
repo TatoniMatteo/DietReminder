@@ -1,442 +1,117 @@
 package it.matato.dietreminder.widget
 
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
-import androidx.glance.GlanceId
-import androidx.glance.GlanceModifier
-import androidx.glance.GlanceTheme
-import androidx.glance.Image
-import androidx.glance.ImageProvider
-import androidx.glance.LocalSize
-import androidx.glance.action.clickable
-import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.action.actionStartActivity
-import androidx.glance.appwidget.cornerRadius
-import androidx.glance.appwidget.provideContent
-import androidx.glance.appwidget.updateAll
-import androidx.glance.background
-import androidx.glance.layout.Alignment
-import androidx.glance.layout.Box
-import androidx.glance.layout.Column
-import androidx.glance.layout.Row
-import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.fillMaxWidth
-import androidx.glance.layout.height
-import androidx.glance.layout.padding
-import androidx.glance.layout.size
-import androidx.glance.layout.width
-import androidx.glance.text.FontWeight
-import androidx.glance.text.Text
-import androidx.glance.text.TextStyle
+import androidx.datastore.preferences.core.*
+import androidx.glance.*
+import androidx.glance.action.*
+import androidx.glance.appwidget.*
+import androidx.glance.appwidget.action.*
+import androidx.glance.appwidget.lazy.LazyColumn
+import androidx.glance.appwidget.state.*
+import androidx.glance.layout.*
+import androidx.glance.state.PreferencesGlanceStateDefinition
+import androidx.glance.text.*
+import androidx.glance.unit.ColorProvider
 import it.matato.dietreminder.DietApplication
 import it.matato.dietreminder.R
-import it.matato.dietreminder.data.model.MealType
-import it.matato.dietreminder.domain.NextMeal
-import it.matato.dietreminder.domain.nextMeal
+import it.matato.dietreminder.data.model.resId
 import java.time.LocalDateTime
 import kotlinx.coroutines.flow.first
 
+internal object MealWidgetKeys {
+    val id = longPreferencesKey("meal")
+    val scope = stringPreferencesKey("scope")
+    val date = stringPreferencesKey("date")
+    val at = longPreferencesKey("selectedAt")
+    val direction = ActionParameters.Key<Int>("direction")
+    val expectedScope = ActionParameters.Key<String>("scope")
+}
 class DietReminder : GlanceAppWidget() {
+    override val stateDefinition = PreferencesGlanceStateDefinition
+    override val sizeMode = SizeMode.Responsive(setOf(DpSize(180.dp, 160.dp), DpSize(280.dp, 250.dp)))
+    companion object { suspend fun updateAll(context: Context) { DietReminder().updateAll(context) } }
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val app = context.applicationContext as DietApplication
+        val scope = app.currentAccountScope()
+        val repos = app.accountRepositories.forScope(scope)
+        val diet = repos.diets.active.first()
+        val meals = diet?.let { repos.diets.getMeals(it.id) }.orEmpty()
+        val prefs = getAppWidgetState<Preferences>(context, id)
+        val selection = prefs[MealWidgetKeys.id]?.let { MealWidgetSelection(it, prefs[MealWidgetKeys.scope].orEmpty(), prefs[MealWidgetKeys.at] ?: 0L, prefs[MealWidgetKeys.date].orEmpty()) }
+        val now = LocalDateTime.now()
+        val model = mealWidgetModel(meals, now, diet?.nextMealWindowMinutes ?: 0, scope, selection)
+        val scheme = widgetScheme(context, app)
+        provideContent {
+            val current = scope == app.currentAccountScope()
+            val shown = model.takeIf { current } ?: MealWidgetModel(null, emptyList(), false)
+            MealWidgetContent(context, shown, if (current) diet?.name ?: context.getString(R.string.no_diet) else context.getString(R.string.no_diet), scheme, scope, now)
 
-	companion object {
-		private val SMALL_SQUARE = DpSize(64.dp, 64.dp)
-		private val HORIZONTAL_RECTANGLE = DpSize(180.dp, 64.dp)
-		private val BIG_SQUARE = DpSize(180.dp, 180.dp)
-
-		suspend fun updateAll(context: Context) {
-			DietReminder().updateAll(context)
-		}
-	}
-
-	override val sizeMode = SizeMode.Responsive(
-		setOf(
-			SMALL_SQUARE,
-			HORIZONTAL_RECTANGLE,
-			BIG_SQUARE
-		)
-	)
-
-	override suspend fun provideGlance(
-		context: Context,
-		id: GlanceId
-	) {
-		val app = context.applicationContext as DietApplication
-		val diet = app.dietRepository.active.first()
-		val meals = diet?.let { app.dietRepository.getMeals(it.id) }.orEmpty()
-		val next = diet?.let {
-			nextMeal(
-				meals = meals,
-				now = LocalDateTime.now(),
-				windowMinutes = it.nextMealWindowMinutes
-			)
-		}
-
-		val intent = Intent(
-			Intent.ACTION_VIEW,
-			"dietreminder://week".toUri()
-		).apply {
-			setPackage(context.packageName)
-			addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-		}
-
-		provideContent {
-			val size = LocalSize.current
-
-			GlanceTheme {
-				Box(
-					modifier = GlanceModifier
-						.fillMaxSize()
-						.background(GlanceTheme.colors.surface)
-						.cornerRadius(24.dp)
-						.clickable(actionStartActivity(intent))
-				) {
-					when {
-						size.width <= 100.dp && size.height <= 100.dp -> {
-							SmallContent(
-								context = context,
-								next = next
-							)
-						}
-
-						size.height <= 100.dp -> {
-							HorizontalContent(
-								context = context,
-								next = next
-							)
-						}
-
-						else -> {
-							BigContent(
-								context = context,
-								name = diet?.name ?: context.getString(R.string.no_diet),
-								next = next
-							)
-						}
-					}
-				}
-			}
-		}
-	}
-
-	@Composable
-	private fun SmallContent(
-		context: Context,
-		next: NextMeal?
-	) {
-		val mealIcon = getMealIcon(next)
-
-		Box(
-			modifier = GlanceModifier
-				.fillMaxSize()
-				.padding(7.dp)
-				.background(GlanceTheme.colors.primaryContainer)
-				.cornerRadius(18.dp),
-			contentAlignment = Alignment.Center
-		) {
-			if (next != null) {
-				Column(
-					horizontalAlignment = Alignment.CenterHorizontally,
-					verticalAlignment = Alignment.CenterVertically
-				) {
-					Image(
-						provider = ImageProvider(mealIcon),
-						contentDescription = null,
-						modifier = GlanceModifier.size(24.dp)
-					)
-
-					Spacer(GlanceModifier.height(2.dp))
-
-					Text(
-						text = getMealShortLabel(context, next),
-						style = TextStyle(
-							fontSize = 11.sp,
-							fontWeight = FontWeight.Bold,
-							color = GlanceTheme.colors.onPrimaryContainer
-						),
-						maxLines = 1
-					)
-
-					Text(
-						text = formatTime(next),
-						style = TextStyle(
-							fontSize = 10.sp,
-							fontWeight = FontWeight.Medium,
-							color = GlanceTheme.colors.onPrimaryContainer
-						)
-					)
-				}
-			} else {
-				Image(
-					provider = ImageProvider(R.drawable.ic_no_meal),
-					contentDescription = null,
-					modifier = GlanceModifier.size(24.dp)
-				)
-			}
-		}
-	}
-
-	@Composable
-	private fun HorizontalContent(
-		context: Context,
-		next: NextMeal?
-	) {
-		Row(
-			modifier = GlanceModifier
-				.fillMaxSize()
-				.padding(horizontal = 12.dp, vertical = 8.dp),
-			verticalAlignment = Alignment.CenterVertically
-		) {
-			Box(
-				modifier = GlanceModifier
-					.size(44.dp)
-					.background(GlanceTheme.colors.primaryContainer)
-					.cornerRadius(14.dp),
-				contentAlignment = Alignment.Center
-			) {
-				Image(
-					provider = ImageProvider(getMealIcon(next)),
-					contentDescription = null,
-					modifier = GlanceModifier.size(24.dp)
-				)
-			}
-
-			Spacer(GlanceModifier.width(10.dp))
-
-			Column(
-				modifier = GlanceModifier.defaultWeight(),
-				verticalAlignment = Alignment.CenterVertically
-			) {
-				Text(
-					text = context.getString(R.string.next_meal),
-					style = TextStyle(
-						fontSize = 10.sp,
-						fontWeight = FontWeight.Medium,
-						color = GlanceTheme.colors.onSurfaceVariant
-					),
-					maxLines = 1
-				)
-
-				Text(
-					text = getMealLabel(context, next),
-					style = TextStyle(
-						fontSize = 17.sp,
-						fontWeight = FontWeight.Bold,
-						color = GlanceTheme.colors.onSurface
-					),
-					maxLines = 1
-				)
-			}
-
-			if (next != null) {
-				Text(
-					text = formatTime(next),
-					style = TextStyle(
-						fontSize = 15.sp,
-						fontWeight = FontWeight.Bold,
-						color = GlanceTheme.colors.primary
-					),
-					maxLines = 1
-				)
-			}
-		}
-	}
-
-	@Composable
-	private fun BigContent(
-		context: Context,
-		name: String,
-		next: NextMeal?
-	) {
-		Column(
-			modifier = GlanceModifier
-				.fillMaxSize()
-				.padding(16.dp),
-			verticalAlignment = Alignment.Top
-		) {
-			Row(
-				modifier = GlanceModifier.fillMaxWidth(),
-				verticalAlignment = Alignment.CenterVertically
-			) {
-				Box(
-					modifier = GlanceModifier
-						.size(42.dp)
-						.background(GlanceTheme.colors.primaryContainer)
-						.cornerRadius(13.dp),
-					contentAlignment = Alignment.Center
-				) {
-					Image(
-						provider = ImageProvider(getMealIcon(next)),
-						contentDescription = null,
-						modifier = GlanceModifier.size(24.dp)
-					)
-				}
-
-				Spacer(GlanceModifier.width(10.dp))
-
-				Column(
-					modifier = GlanceModifier.defaultWeight(),
-					verticalAlignment = Alignment.CenterVertically
-				) {
-					Text(
-						text = context.getString(R.string.next_meal),
-						style = TextStyle(
-							fontSize = 10.sp,
-							fontWeight = FontWeight.Medium,
-							color = GlanceTheme.colors.onSurfaceVariant
-						),
-						maxLines = 1
-					)
-
-					Text(
-						text = getMealLabel(context, next),
-						style = TextStyle(
-							fontSize = 20.sp,
-							fontWeight = FontWeight.Bold,
-							color = GlanceTheme.colors.onSurface
-						),
-						maxLines = 1
-					)
-				}
-
-				if (next != null) {
-					Text(
-						text = formatTime(next),
-						style = TextStyle(
-							fontSize = 15.sp,
-							fontWeight = FontWeight.Bold,
-							color = GlanceTheme.colors.primary
-						),
-						maxLines = 1
-					)
-				}
-			}
-
-			Spacer(GlanceModifier.height(12.dp))
-
-			Box(
-				modifier = GlanceModifier
-					.fillMaxWidth()
-					.background(GlanceTheme.colors.secondaryContainer)
-					.cornerRadius(12.dp)
-					.padding(horizontal = 10.dp, vertical = 6.dp)
-			) {
-				Text(
-					text = name,
-					style = TextStyle(
-						fontSize = 10.sp,
-						fontWeight = FontWeight.Bold,
-						color = GlanceTheme.colors.onSecondaryContainer
-					),
-					maxLines = 1
-				)
-			}
-
-			if (next != null && next.meal.courses.isNotEmpty()) {
-				Spacer(GlanceModifier.height(12.dp))
-
-				next.meal.courses.take(4).forEach { course ->
-					Row(
-						modifier = GlanceModifier
-							.fillMaxWidth()
-							.padding(vertical = 2.dp),
-						verticalAlignment = Alignment.CenterVertically
-					) {
-						Box(
-							modifier = GlanceModifier
-								.size(5.dp)
-								.background(GlanceTheme.colors.primary)
-								.cornerRadius(3.dp)
-						) {}
-
-						Spacer(GlanceModifier.width(8.dp))
-
-						Text(
-							text = course.course.name,
-							style = TextStyle(
-								fontSize = 12.sp,
-								color = GlanceTheme.colors.onSurfaceVariant
-							),
-							maxLines = 1
-						)
-					}
-				}
-
-				if (next.meal.courses.size > 4) {
-					Text(
-						text = "...",
-						style = TextStyle(
-							fontSize = 12.sp,
-							color = GlanceTheme.colors.onSurfaceVariant
-						),
-						modifier = GlanceModifier.padding(start = 13.dp)
-					)
-				}
-			}
-		}
-	}
-
-	private fun getMealLabel(
-		context: Context,
-		next: NextMeal?
-	): String {
-		return next?.meal?.meal?.customTypeLabel
-			?: next?.meal?.meal?.type?.let { type ->
-				val resId = when (type) {
-					MealType.BREAKFAST -> R.string.meal_breakfast
-					MealType.MORNING_SNACK -> R.string.meal_morning_snack
-					MealType.LUNCH -> R.string.meal_lunch
-					MealType.AFTERNOON_SNACK -> R.string.meal_afternoon_snack
-					MealType.DINNER -> R.string.meal_dinner
-					MealType.OTHER -> R.string.meal_other
-				}
-
-				context.getString(resId)
-			}
-			?: context.getString(R.string.configure_diet)
-	}
-
-	private fun getMealShortLabel(
-		context: Context,
-		next: NextMeal?
-	): String {
-		return when (next?.meal?.meal?.type) {
-			MealType.BREAKFAST -> context.getString(R.string.meal_breakfast_short)
-			MealType.MORNING_SNACK -> context.getString(R.string.meal_morning_snack_short)
-			MealType.LUNCH -> context.getString(R.string.meal_lunch_short)
-			MealType.AFTERNOON_SNACK -> context.getString(R.string.meal_afternoon_snack_short)
-			MealType.DINNER -> context.getString(R.string.meal_dinner_short)
-			else -> context.getString(R.string.meal_other_short)
-		}
-	}
-
-	private fun getMealIcon(next: NextMeal?): Int {
-		return when (next?.meal?.meal?.type) {
-			MealType.BREAKFAST -> R.drawable.ic_breakfast
-			MealType.MORNING_SNACK -> R.drawable.ic_morning_snack
-			MealType.LUNCH -> R.drawable.ic_lunch
-			MealType.AFTERNOON_SNACK -> R.drawable.ic_afternoon_snack
-			MealType.DINNER -> R.drawable.ic_dinner
-			MealType.OTHER -> R.drawable.ic_other_meal
-			else -> R.drawable.ic_no_meal
-		}
-	}
-
-	private fun formatTime(next: NextMeal): String {
-		val hour = next.meal.meal.timeMinutes / 60
-		val minute = next.meal.meal.timeMinutes % 60
-
-		return "%02d:%02d".format(hour, minute)
-	}
+        }
+    }
+}
+@Composable
+internal fun MealWidgetContent(context: Context, shown: MealWidgetModel, dietName: String, scheme: androidx.compose.material3.ColorScheme, scope: String, now: LocalDateTime) {
+            val meal = shown.selected?.meal
+            val open = widgetOpen(context, meal?.let { "week?mealId=${it.meal.id}&dayName=${it.meal.dayOfWeek.name}" } ?: "week")
+            Column(GlanceModifier.widgetSurface(scheme)) {
+                WidgetBrand(context, context.getString(if (shown.browsing) R.string.widget_today_meals else R.string.next_meal), dietName, scheme, open)
+                Spacer(GlanceModifier.height(8.dp))
+                Column(GlanceModifier.fillMaxWidth().defaultWeight().clickable(open)) {
+                    Text(meal?.meal?.customTypeLabel?.takeIf { it.isNotBlank() } ?: meal?.meal?.type?.let { context.getString(it.resId) } ?: context.getString(R.string.widget_no_meals), style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold, color = ColorProvider(scheme.onSurface)), maxLines = 1)
+                    shown.selected?.let { selected ->
+                        val tomorrow = selected.dateTime.toLocalDate() != now.toLocalDate()
+                        Text((if (tomorrow) context.getString(R.string.widget_tomorrow) + " · " else "") + "%02d:%02d".format(meal!!.meal.timeMinutes / 60, meal.meal.timeMinutes % 60), style = TextStyle(fontSize = 16.sp, color = ColorProvider(scheme.primary), fontWeight = FontWeight.Bold), maxLines = 1)
+                    }
+                    if (LocalSize.current.height >= 250.dp) {
+                        Spacer(GlanceModifier.height(8.dp))
+                        LazyColumn(GlanceModifier.fillMaxWidth().defaultWeight()) {
+                            meal?.courses?.forEach { course ->
+                                item { Text(course.course.name, style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = ColorProvider(scheme.onSurfaceVariant)), maxLines = 1) }
+                                course.items.forEach { food -> item { Text("${food.name}  ${food.displayQuantity}", style = TextStyle(fontSize = 12.sp, color = ColorProvider(scheme.onSurfaceVariant)), maxLines = 1) } }
+                            }
+                        }
+                    }
+                }
+                Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    if (shown.today.isNotEmpty()) {
+                        WidgetAction(context.getString(R.string.widget_previous_meal), scheme, mealAction(-1, scope), R.drawable.widget_previous)
+                        Spacer(GlanceModifier.defaultWeight())
+                        WidgetAction(context.getString(R.string.widget_next_default), scheme, mealAction(0, scope))
+                        Spacer(GlanceModifier.defaultWeight())
+                        WidgetAction(context.getString(R.string.widget_next_meal), scheme, mealAction(1, scope), R.drawable.widget_next)
+                    } else WidgetAction(context.getString(R.string.widget_open_app), scheme, open)
+                }
+            }
 }
 
-class DietReminderReceiver : GlanceAppWidgetReceiver() {
-	override val glanceAppWidget: GlanceAppWidget = DietReminder()
+private fun mealAction(direction: Int, scope: String) = actionRunCallback<BrowseMealsAction>(actionParametersOf(MealWidgetKeys.direction to direction, MealWidgetKeys.expectedScope to scope))
+class BrowseMealsAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        val app = context.applicationContext as DietApplication
+        val scope = app.currentAccountScope()
+        if (parameters[MealWidgetKeys.expectedScope] != scope || scope == "locked") { DietReminder().update(context, glanceId); return }
+        val direction = parameters[MealWidgetKeys.direction] ?: return
+        if (direction !in -1..1) return
+        val repo = app.accountRepositories.forScope(scope).diets
+        val diet = repo.active.first()
+        val meals = diet?.let { repo.getMeals(it.id) }.orEmpty()
+        val now = LocalDateTime.now()
+        updateAppWidgetState(context, glanceId) { prefs ->
+            if (scope != app.currentAccountScope()) return@updateAppWidgetState
+            val selection = prefs[MealWidgetKeys.id]?.let { MealWidgetSelection(it, prefs[MealWidgetKeys.scope].orEmpty(), prefs[MealWidgetKeys.at] ?: 0L, prefs[MealWidgetKeys.date].orEmpty()) }
+            val selected = mealWidgetModel(meals, now, diet?.nextMealWindowMinutes ?: 0, scope, selection).adjacent(direction)
+            if (direction == 0 || selected == null) prefs.clear() else {
+                prefs[MealWidgetKeys.id] = selected.meal.id
+                prefs[MealWidgetKeys.scope] = scope
+                prefs[MealWidgetKeys.date] = now.toLocalDate().toString()
+                prefs[MealWidgetKeys.at] = System.currentTimeMillis()
+            }
+        }
+        DietReminder().update(context, glanceId)
+    }
 }
+class DietReminderReceiver : GlanceAppWidgetReceiver() { override val glanceAppWidget: GlanceAppWidget = DietReminder() }

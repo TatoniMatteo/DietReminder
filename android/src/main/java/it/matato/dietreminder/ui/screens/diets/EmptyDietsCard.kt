@@ -1,5 +1,7 @@
 package it.matato.dietreminder.ui.screens.diets
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppCard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,9 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Restaurant
-import androidx.compose.material3.ElevatedCard
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,16 +27,16 @@ import it.matato.dietreminder.ui.theme.DietTheme
 
 @Composable
 fun EmptyDietsCard() {
-	ElevatedCard(
+	AppCard(
 		modifier = Modifier.fillMaxWidth(),
 		shape = MaterialTheme.shapes.large,
 	) {
 		Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(28.dp),
+				.padding(AppSpace.section),
 			horizontalAlignment = Alignment.CenterHorizontally,
-			verticalArrangement = Arrangement.spacedBy(12.dp),
+			verticalArrangement = Arrangement.spacedBy(AppSpace.item),
 		) {
 			Box(
 				modifier = Modifier

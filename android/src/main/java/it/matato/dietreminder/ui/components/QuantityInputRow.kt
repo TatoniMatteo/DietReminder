@@ -1,5 +1,6 @@
 package it.matato.dietreminder.ui.components
 
+import it.matato.dietreminder.data.model.labelRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth

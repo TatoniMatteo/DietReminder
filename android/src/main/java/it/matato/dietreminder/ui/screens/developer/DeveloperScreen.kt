@@ -1,18 +1,19 @@
 package it.matato.dietreminder.ui.screens.developer
 
+import androidx.compose.material3.FilledTonalIconButton
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppTopBar
+import it.matato.dietreminder.ui.components.AppScaffold
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
 import it.matato.dietreminder.data.model.ScheduledAlarm
-import it.matato.dietreminder.permission.rememberPermissionRequester
+import it.matato.dietreminder.util.permission.rememberPermissionRequester
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.util.AppLog
 import it.matato.dietreminder.util.LogEntry
@@ -94,14 +95,14 @@ fun DeveloperContent(
 		logs.filter { it.level.priority >= selectedLevel.priority }
 	}
 
-	Scaffold(
+	AppScaffold(
 		topBar = {
-			TopAppBar(
+			AppTopBar(
 				title = {
 					Text(stringResource(R.string.developer_settings))
 				},
 				navigationIcon = {
-					IconButton(onClick = onBack) {
+					FilledTonalIconButton(onClick = onBack) {
 						Icon(
 							imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
 							contentDescription = stringResource(R.string.back),
@@ -116,7 +117,7 @@ fun DeveloperContent(
 				.fillMaxSize()
 				.padding(padding),
 			contentPadding = PaddingValues(20.dp),
-			verticalArrangement = Arrangement.spacedBy(20.dp),
+			verticalArrangement = Arrangement.spacedBy(AppSpace.section),
 		) {
 			item {
 				DeveloperPermissionsSection(

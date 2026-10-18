@@ -1,6 +1,7 @@
 package it.matato.dietreminder.ui.screens.diets
 
-import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
@@ -8,11 +9,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 
 fun dietsRobot(
-	composeTestRule: SemanticsNodeInteractionsProvider,
+	composeTestRule: ComposeContentTestRule,
 	block: DietsScreenRobot.() -> Unit
 ) = DietsScreenRobot(composeTestRule).apply(block)
 
-class DietsScreenRobot(private val composeTestRule: SemanticsNodeInteractionsProvider) {
+class DietsScreenRobot(private val composeTestRule: ComposeContentTestRule) {
 
 	fun clickAddDiet() {
 		composeTestRule.onNode(hasContentDescription("New diet") or hasContentDescription("Nuova dieta"))
@@ -54,7 +55,9 @@ class DietsScreenRobot(private val composeTestRule: SemanticsNodeInteractionsPro
 	}
 
 	fun verifyDietCountHeader(count: Int) {
-		composeTestRule.onNode(hasText(count.toString()), useUnmergedTree = true)
-			.assertIsDisplayed()
+		composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodes(hasTestTag("dietsCount") and hasText(count.toString()), useUnmergedTree = true).fetchSemanticsNodes().size == 1
+        }
+        composeTestRule.onNodeWithTag("dietsCount", useUnmergedTree = true).assertTextEquals(count.toString()).assertIsDisplayed()
 	}
 }

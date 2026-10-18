@@ -44,6 +44,11 @@ class CompositeDietRepository(
 	override suspend fun importJson(json: String, overwrite: Boolean) =
 		dietRepository.importJson(json, overwrite)
 
+    override suspend fun updateShoppingAllocation(day: it.matato.dietreminder.data.database.entity.ShoppingListItemDay) { shoppingListRepository.updateShoppingAllocation(day) }
+    override suspend fun updateShoppingReminders(listId: Long, enabled: Boolean, timeMinutes: Int) { shoppingListRepository.updateShoppingReminders(listId, enabled, timeMinutes) }
+
+    override suspend fun moveShoppingPurchase(itemId: Long, dayId: Long?, purchaseDay: java.time.DayOfWeek?) { shoppingListRepository.moveShoppingPurchase(itemId, dayId, purchaseDay) }
+
 	override val allShoppingLists: Flow<List<ShoppingListWithItems>>
 		get() = shoppingListRepository.allShoppingLists
 

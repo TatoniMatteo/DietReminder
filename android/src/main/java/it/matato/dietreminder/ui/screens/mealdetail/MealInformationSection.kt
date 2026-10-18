@@ -1,16 +1,19 @@
 package it.matato.dietreminder.ui.screens.mealdetail
 
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppCard
+import it.matato.dietreminder.data.model.resId
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.NotificationsOff
-import androidx.compose.material.icons.rounded.Restaurant
-import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.ui.graphics.Color
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -18,7 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,13 +53,15 @@ fun MealInformationSection(
 	val isOffline = LocalOfflineMode.current
 	var typeMenuExpanded by remember { mutableStateOf(false) }
 
-	OutlinedCard(
+	AppCard(
 		modifier = Modifier.fillMaxWidth(),
 		shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
 	) {
 		Column {
 			// Row 1: Time
 			ListItem(
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
 				headlineContent = {
 					Text(
 						text = stringResource(R.string.meal_time),
@@ -82,12 +86,14 @@ fun MealInformationSection(
 			)
 
 			HorizontalDivider(
-				modifier = Modifier.fillMaxWidth(),
+				modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpace.screen),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
 			)
 
 			// Row 2: Meal Type
 			Box {
 				ListItem(
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
 					modifier = Modifier.clickable(enabled = !isOffline) {
 						typeMenuExpanded = true
 					},
@@ -130,11 +136,13 @@ fun MealInformationSection(
 			}
 
 			HorizontalDivider(
-				modifier = Modifier.fillMaxWidth(),
+				modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpace.screen),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
 			)
 
 			// Row 3: Meal Notifications
 			ListItem(
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
 				headlineContent = {
 					Text(
 						text = stringResource(R.string.meal_notifications),

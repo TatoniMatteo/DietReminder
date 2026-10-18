@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.DietReminder" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowSplashScreenBackground">#101116</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/app_icon</item>
+    </style>
+</resources>
