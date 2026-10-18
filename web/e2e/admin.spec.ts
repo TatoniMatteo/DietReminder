@@ -134,11 +134,11 @@ test('release metadata is code-owned and the administrator has no update editor'
   expect(response.status()).toBe(200)
   const policy = await response.json()
   expect(policy).toMatchObject({
-    deprecatedVersionCode: 4,
-    latestVersionCode: 4,
-    latestVersionName: '1.3.0',
+    deprecatedVersionCode: 5,
+    latestVersionCode: 5,
+    latestVersionName: '2.0.0',
   })
-  expect([1, 2, 3].every((code) => code < policy.deprecatedVersionCode)).toBe(true)
+  expect([1, 2, 3, 4].every((code) => code < policy.deprecatedVersionCode)).toBe(true)
   const me = await session(admin)
   const removed = await admin.request.put('/api/admin/version-policy', {
     headers: { 'X-CSRF-Token': me.csrfToken, 'X-DietReminder-Web': '1' },

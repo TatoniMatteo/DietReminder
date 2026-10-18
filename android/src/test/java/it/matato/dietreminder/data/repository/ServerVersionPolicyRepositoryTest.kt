@@ -61,9 +61,9 @@ class ServerVersionPolicyRepositoryTest {
 		val (policy, isFromCache) = repository.fetchPolicy()
 
 		assertNotNull(policy)
-		assertEquals(4, policy.latestVersionCode)
-		assertEquals(4, policy.deprecatedVersionCode)
-		assertEquals("1.3.0", policy.latestVersionName)
+		assertEquals(5, policy.latestVersionCode)
+		assertEquals(5, policy.deprecatedVersionCode)
+		assertEquals("2.0.0", policy.latestVersionName)
 		assertEquals(true, isFromCache)
 	}
     @Test
@@ -81,10 +81,10 @@ class ServerVersionPolicyRepositoryTest {
     fun testCorruptOrExpiredCacheFallsBackToBundledPolicy() = runTest {
         File(context.cacheDir, "version_policy_cache.json").writeText("corrupt")
         File(context.cacheDir, "version_policy_timestamp.txt").writeText(System.currentTimeMillis().toString())
-        assertEquals(4, repository.fetchPolicy().first.latestVersionCode)
+        assertEquals(5, repository.fetchPolicy().first.latestVersionCode)
         File(context.cacheDir, "version_policy_cache.json").writeText("""{"latestVersionCode":100,"latestVersionName":"9.0.0"}""")
         File(context.cacheDir, "version_policy_timestamp.txt").writeText("1")
-        assertEquals(4, repository.fetchPolicy().first.latestVersionCode)
+        assertEquals(5, repository.fetchPolicy().first.latestVersionCode)
     }
 
 }

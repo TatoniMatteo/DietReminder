@@ -67,7 +67,7 @@ jobs:
               raise SystemExit("Release policy has inconsistent bounds")
           if policy["latestVersionCode"] != version_code or policy["latestVersionName"] != version_name:
               raise SystemExit("Release policy must match the release version")
-          if policy["deprecatedVersionCode"] < 4:
+          if policy["deprecatedVersionCode"] < 5:
               raise SystemExit("Clients predating server support must remain deprecated")
           PY
 
