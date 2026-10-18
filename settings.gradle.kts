@@ -15,4 +15,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "DietReminder"
-include(":app")
+include(":android")

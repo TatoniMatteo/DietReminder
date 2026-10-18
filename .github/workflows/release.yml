@@ -125,8 +125,8 @@ jobs:
         env:
           TAG_NAME: ${{ github.ref_name }}
         run: |
-          APK_PATH="app/build/outputs/apk/release/app-release.apk"
-          AAB_PATH="app/build/outputs/bundle/release/app-release.aab"
+          APK_PATH="android/build/outputs/apk/release/app-release.apk"
+          AAB_PATH="android/build/outputs/bundle/release/app-release.aab"
           
           if [ ! -f "$APK_PATH" ]; then
             echo "::error::Release APK was not generated."
