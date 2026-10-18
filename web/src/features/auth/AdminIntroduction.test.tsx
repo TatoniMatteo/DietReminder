@@ -30,13 +30,13 @@ afterEach(async () => {
   container.remove()
   vi.unstubAllGlobals()
 })
-it('explains powers and duties and persists acknowledgement before refreshing the account', async () => {
+it('explains account management and persists acknowledgement before refreshing the account', async () => {
   const refresh = vi.fn(async () => {})
   fetchMock.mockResolvedValue(new Response('{}'))
   await act(async () => root.render(<AdminIntroduction refresh={refresh} />))
-  expect(container.textContent).toContain('I tuoi poteri')
-  expect(container.textContent).toContain('Le tue responsabilità')
-  expect(container.textContent).toContain('almeno un amministratore attivo')
+  expect(container.textContent).toContain('puoi aiutare le altre persone')
+  expect(container.textContent).toContain('Puoi cambiare questi permessi anche in seguito')
+  expect(container.querySelectorAll('.admin-introduction-point svg')).toHaveLength(3)
   await act(async () =>
     [...container.querySelectorAll('button')]
       .find((x) => x.textContent === 'Ho capito, continua')!

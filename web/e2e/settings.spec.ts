@@ -1,3 +1,4 @@
+import { selectOption } from './helpers/select'
 import { completeEnrollment } from './helpers/enrollment'
 import { test, expect } from '@playwright/test'
 import { writeFile } from 'node:fs/promises'
@@ -9,7 +10,7 @@ test('settings language, appearance, fixed footer and inline password change wor
   const oldPassword = 'Browser-e2e-password-2026'
   const newPassword = 'Una nuova password!'
   await page.goto('/')
-  await page.getByLabel('Lingua', { exact: true }).selectOption('en')
+  await selectOption(page.getByLabel('Lingua', { exact: true }), 'en')
   await expect(page.getByRole('heading', { name: 'Welcome back.' })).toBeVisible()
   await page.getByRole('button', { name: 'Create account', exact: true }).click()
   await page.getByLabel('What’s your name?').fill('Settings E2E')
@@ -78,6 +79,6 @@ test('settings language, appearance, fixed footer and inline password change wor
   await page.getByRole('button', { name: 'Enter your space' }).click()
   await expect(page.getByRole('link', { name: 'Settings', exact: true })).toBeVisible()
   await page.getByRole('link', { name: 'Settings', exact: true }).click()
-  await page.getByLabel('Language', { exact: true }).selectOption('it')
+  await selectOption(page.getByLabel('Language', { exact: true }), 'it')
   await expect(page.getByRole('link', { name: 'Impostazioni', exact: true })).toBeVisible()
 })

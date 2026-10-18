@@ -61,9 +61,6 @@ const messages: Record<string, string> = {
   get WORKSPACE_CONFLICT() {
     return t('I dati sono cambiati su un altro dispositivo. Ricarica prima di riprovare.')
   },
-  get RELEASE_POLICY_CONFLICT() {
-    return t('Un altro amministratore ha modificato questi dati. Ricarica la pagina.')
-  },
   get DRIVE_RECONNECT_REQUIRED() {
     return t('Ricollega Google Drive per continuare.')
   },
@@ -72,9 +69,6 @@ const messages: Record<string, string> = {
   },
   get RATE_LIMITED() {
     return t('Troppi tentativi. Attendi qualche minuto.')
-  },
-  get INVALID_RELEASE_POLICY() {
-    return t('Controlla i limiti delle versioni e inserisci un indirizzo HTTPS valido.')
   },
   get ADMIN_PROTECTED() {
     return t('Gli account amministratore sono protetti.')

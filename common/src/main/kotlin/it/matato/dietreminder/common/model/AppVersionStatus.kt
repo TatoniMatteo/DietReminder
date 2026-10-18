@@ -14,9 +14,9 @@ enum class AppVersionState {
 @Serializable
 data class VersionPolicy(
 	val minSupportedVersionCode: Int = 1,
-	val deprecatedVersionCode: Int = 1,
-	val latestVersionCode: Int = 1,
-	val latestVersionName: String = "1.1.0",
+	val deprecatedVersionCode: Int = 4,
+	val latestVersionCode: Int = 4,
+	val latestVersionName: String = "1.3.0",
 	val minSupportedMajor: Int = 1,
 	val updateUrl: String = "https://github.com/TatoniMatteo/DietReminder/releases/latest"
 )

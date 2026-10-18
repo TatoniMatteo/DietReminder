@@ -490,5 +490,11 @@
   "{0} sospesi": "{0} suspended",
   "“{0}” e tutti i suoi pasti e ingredienti verranno rimossi anche dagli altri dispositivi. Le liste della spesa saranno conservate.": "“{0}” and all its meals and ingredients will be removed from your other devices too. Shopping lists will be kept.",
   "Sei il primo a registrarti!": "You’re the first to register!",
-  "Crea il primo account: diventerai l’amministratore di questa installazione. Potrai approvare gli utenti e assegnare i loro permessi.": "Create the first account to become this installation’s administrator. You will be able to approve users and assign their permissions."
+  "Crea il primo account: diventerai l’amministratore di questa installazione. Potrai approvare gli utenti e assegnare i loro permessi.": "Create the first account to become this installation’s administrator. You will be able to approve users and assign their permissions.",
+  "Hai creato il primo account di questo spazio: puoi aiutare le altre persone a iniziare a usare Diet Reminder.": "You created the first account in this space, so you can help other people get started with Diet Reminder.",
+  "Quando qualcuno si registra e verifica la sua email, trovi la richiesta in Amministrazione. Da lì puoi approvarla oppure lasciare un messaggio per spiegare perché non è stata accolta.": "When someone signs up and verifies their email, their request appears in Administration. You can approve it there, or leave a message explaining why it was declined.",
+  "Per ogni persona scegli cosa può consultare o modificare. Puoi cambiare questi permessi anche in seguito, quando serve.": "Choose what each person can view or edit. You can change these permissions later whenever you need to.",
+  "Nello stesso pannello trovi gli account e le operazioni recenti. Se serve, puoi sospendere un accesso o chiudere le sessioni aperte, senza cancellare i dati.": "The same panel shows accounts and recent activity. If needed, you can suspend access or sign out open sessions without deleting any data.",
+  "Per ora è tutto. Puoi tornare al pannello Amministrazione in qualsiasi momento.": "That’s all for now. You can return to Administration at any time.",
+  "Benvenuto in Diet Reminder": "Welcome to Diet Reminder"
 }

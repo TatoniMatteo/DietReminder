@@ -1,6 +1,5 @@
 import { secondaryContextOptions } from './helpers/integration'
 import { test, expect, seed, workspace, session, login } from './helpers/integration'
-import type { ManagedPolicy } from '../src/lib/types'
 
 async function findUser(admin: import('@playwright/test').Page, email: string) {
   await admin.getByRole('button', { name: 'Utenti', exact: true }).click()
@@ -127,70 +126,25 @@ test('changing real user permissions disables writes in the UI and rejects direc
   expect((await workspace(page.request)).snapshot).toEqual(saved)
 })
 
-test('release policy rejects invalid bounds, publishes to the public endpoint and detects concurrent edits', async ({
+test('release metadata is code-owned and the administrator has no update editor', async ({
   admin,
-  browser,
-  baseURL,
 }) => {
-  const response = await admin.request.get('/api/admin/version-policy')
+  await expect(admin.getByRole('button', { name: 'Aggiornamenti', exact: true })).toHaveCount(0)
+  const response = await admin.request.get('/api/app/version-policy')
   expect(response.status()).toBe(200)
-  const before: ManagedPolicy = await response.json()
-  await admin.getByRole('button', { name: 'Aggiornamenti', exact: true }).click()
-  await admin
-    .getByLabel('Codice minimo supportato')
-    .fill(String(before.policy.latestVersionCode + 10))
-  await admin.getByRole('button', { name: 'Pubblica informazioni', exact: true }).click()
-  await expect(admin.getByRole('alert')).toContainText('Controlla i limiti')
-  expect(await (await admin.request.get('/api/admin/version-policy')).json()).toEqual(before)
-  await admin
-    .getByLabel('Codice minimo supportato')
-    .fill(String(before.policy.minSupportedVersionCode))
-  const other = await browser.newContext({ baseURL, ...secondaryContextOptions() })
-  try {
-    const second = await other.newPage()
-    await login(second, {
-      email: process.env.E2E_ADMIN_EMAIL!,
-      password: process.env.E2E_ADMIN_PASSWORD!,
-    })
-    await second.getByRole('link', { name: 'Amministrazione', exact: true }).click()
-    await second.getByRole('button', { name: 'Aggiornamenti', exact: true }).click()
-    await expect(second.getByLabel('Ultima versione', { exact: true })).toBeVisible()
-    await admin.getByLabel('Ultima versione', { exact: true }).fill('9.0.0')
-    await admin
-      .getByLabel('Codice ultima versione', { exact: true })
-      .fill(String(before.policy.latestVersionCode + 1))
-    await admin
-      .getByLabel('Indirizzo aggiornamento', { exact: true })
-      .fill('https://example.invalid/local-test-only')
-    await admin.getByRole('button', { name: 'Pubblica informazioni', exact: true }).click()
-    await expect(admin.getByRole('status')).toContainText('Informazioni pubblicate')
-    const published: ManagedPolicy = await (
-      await admin.request.get('/api/admin/version-policy')
-    ).json()
-    expect(published.revision).toBe(before.revision + 1)
-    expect(published.policy.latestVersionName).toBe('9.0.0')
-    expect(await (await admin.request.get('/api/app/version-policy')).json()).toEqual(
-      published.policy,
-    )
-    await second.getByLabel('Ultima versione', { exact: true }).fill('10.0.0')
-    await second.getByRole('button', { name: 'Pubblica informazioni', exact: true }).click()
-    await expect(second.getByRole('alert')).toContainText('Un altro amministratore')
-    expect(await (await second.request.get('/api/admin/version-policy')).json()).toEqual(published)
-    await admin.getByRole('button', { name: 'Panoramica', exact: true }).click()
-    await expect(
-      admin.getByText('Aggiornamento Android pubblicato', { exact: true }).first(),
-    ).toBeVisible()
-  } finally {
-    // Restore the server policy using its current revision, including on assertion failure.
-    const current: ManagedPolicy = await (
-      await admin.request.get('/api/admin/version-policy')
-    ).json()
-    const me = await session(admin)
-    const restore = await admin.request.put('/api/admin/version-policy', {
-      headers: { 'X-CSRF-Token': me.csrfToken, 'X-DietReminder-Web': '1' },
-      data: { policy: before.policy, revision: current.revision },
-    })
-    expect(restore.status()).toBe(200)
-    await other.close()
-  }
+  const policy = await response.json()
+  expect(policy).toMatchObject({
+    deprecatedVersionCode: 4,
+    latestVersionCode: 4,
+    latestVersionName: '1.3.0',
+  })
+  expect([1, 2, 3].every((code) => code < policy.deprecatedVersionCode)).toBe(true)
+  const me = await session(admin)
+  const removed = await admin.request.put('/api/admin/version-policy', {
+    headers: { 'X-CSRF-Token': me.csrfToken, 'X-DietReminder-Web': '1' },
+    data: { revision: 1, policy: { ...policy, latestVersionCode: 100 } },
+  })
+  expect(removed.status()).toBe(401)
+  expect((await admin.request.get('/api/web/auth/me')).status()).toBe(200)
+  expect(await (await admin.request.get('/api/app/version-policy')).json()).toEqual(policy)
 })

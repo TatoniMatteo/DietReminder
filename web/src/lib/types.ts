@@ -181,19 +181,6 @@ export interface Audit {
   targetId: string
   createdAt: number
 }
-export interface VersionPolicy {
-  minSupportedVersionCode: number
-  deprecatedVersionCode: number
-  latestVersionCode: number
-  latestVersionName: string
-  minSupportedMajor: number
-  updateUrl: string
-}
-export interface ManagedPolicy {
-  policy: VersionPolicy
-  revision: number
-}
-
 export interface Enrollment {
   account: Account
   history: { id: number; status: string; message: string; createdAt: number }[]

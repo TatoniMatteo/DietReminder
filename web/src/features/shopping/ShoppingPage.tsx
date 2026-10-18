@@ -1,3 +1,4 @@
+import { Select } from '../../components/Select'
 import { usePermission } from '../../lib/access'
 import { t } from '../../lib/i18n'
 import { useEffect, useState, useRef, type FormEvent } from 'react'
@@ -169,13 +170,17 @@ export function ShoppingPage() {
             </label>
             <label>
               {t('Unità')}
-              <select name="unit" defaultValue={editing.day?.unit ?? editing.item.unit}>
+              <Select
+                aria-label={t('Unità')}
+                name="unit"
+                defaultValue={editing.day?.unit ?? editing.item.unit}
+              >
                 {Object.entries(unitNames).map(([key, value]) => (
                   <option key={key} value={key}>
                     {value || t('Altro')}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
           </div>
           <label>
@@ -469,13 +474,13 @@ export function ShoppingPage() {
                 </label>
                 <label>
                   {t('Unità')}
-                  <select name="unit" aria-label={t('Unità')}>
+                  <Select name="unit" aria-label={t('Unità')}>
                     {Object.entries(unitNames).map(([key, value]) => (
                       <option key={key} value={key}>
                         {value || t('Altro')}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </label>
               </div>
               <div className="form-row">
@@ -536,14 +541,14 @@ export function ShoppingPage() {
             </label>
             <label>
               {t('Piano associato')}
-              <select name="dietId">
+              <Select name="dietId" aria-label={t('Piano associato')}>
                 <option value="">{t('Nessun piano')}</option>
                 {s.diets.map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
             <Actions saving={saving} close={() => setCreating(false)} label={t('Crea lista')} />
           </form>
@@ -651,14 +656,14 @@ function DaySelect({
   return (
     <label>
       {label}
-      <select name={name} aria-label={label} defaultValue={value ?? ''}>
+      <Select name={name} aria-label={label} defaultValue={value ?? ''}>
         <option value="">{fallback}</option>
         {dayNames.map((day, i) => (
           <option key={day} value={i + 1}>
             {day}
           </option>
         ))}
-      </select>
+      </Select>
     </label>
   )
 }

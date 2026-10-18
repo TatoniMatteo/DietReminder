@@ -1,9 +1,10 @@
+import { selectOption } from './helpers/select'
 import { secondaryContextOptions } from './helpers/integration'
 import { test, expect } from '@playwright/test'
 import { writeFile } from 'node:fs/promises'
 import { administratorToken, verifyFromInbox } from './helpers/enrollment'
 
-test('verified administrator sees its responsibilities once and reviews an applicant with selected permissions', async ({
+test('verified administrator sees its welcome once and reviews an applicant with selected permissions', async ({
   page,
   browser,
 }, info) => {
@@ -17,9 +18,9 @@ test('verified administrator sees its responsibilities once and reviews an appli
     await expect(admin.getByRole('link', { name: 'Amministrazione', exact: true })).toBeVisible()
     const session = await (await admin.request.get('/api/web/auth/me')).json()
     if (session.account.adminIntroductionPending) {
-      await expect(admin.getByRole('dialog', { name: 'Sei l’amministratore' })).toBeVisible()
-      await expect(admin.getByText('I tuoi poteri', { exact: true })).toBeVisible()
-      await expect(admin.getByText('Le tue responsabilità', { exact: true })).toBeVisible()
+      await expect(admin.getByRole('dialog', { name: 'Benvenuto in Diet Reminder' })).toBeVisible()
+      await expect(admin.getByText(/puoi aiutare le altre persone/)).toBeVisible()
+      await expect(admin.locator('.admin-introduction-point')).toHaveCount(3)
       await admin.getByRole('button', { name: 'Ho capito, continua' }).click()
       await expect(admin.getByRole('dialog')).toHaveCount(0)
       await admin.reload()
@@ -49,9 +50,10 @@ test('verified administrator sees its responsibilities once and reviews an appli
     await expect(page.getByRole('link', { name: 'La settimana', exact: true })).toHaveCount(0)
     await admin.getByRole('link', { name: 'Amministrazione', exact: true }).click()
     await admin.getByRole('button', { name: 'Utenti', exact: true }).click()
-    await admin
-      .getByLabel('Stato della richiesta', { exact: true })
-      .selectOption('PENDING_APPROVAL')
+    await selectOption(
+      admin.getByLabel('Stato della richiesta', { exact: true }),
+      'PENDING_APPROVAL',
+    )
     await admin.getByLabel('Cerca utenti').fill(email)
     await admin.getByRole('button', { name: 'Valuta richiesta', exact: true }).click()
     await admin.getByLabel('Modificare piani e pasti').uncheck()

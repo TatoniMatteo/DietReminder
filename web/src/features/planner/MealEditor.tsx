@@ -1,3 +1,4 @@
+import { Select } from '../../components/Select'
 import { t } from '../../lib/i18n'
 import { useRef, useState, type FormEvent } from 'react'
 import { Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
@@ -115,17 +116,17 @@ export function MealEditor({
         <div className="form-row">
           <label>
             {t('Pasto')}
-            <select
+            <Select
               aria-label={t('Pasto')}
               value={type}
-              onChange={(e) => setType(e.target.value as MealType)}
+              onValueChange={(value) => setType(value as MealType)}
             >
               {Object.entries(mealNames).map(([key, label]) => (
                 <option key={key} value={key}>
                   {label}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <label>
             {t('Orario')}
@@ -258,14 +259,12 @@ export function MealEditor({
                         )
                       }
                     />
-                    <select
+                    <Select
                       aria-label={t('Unità {0}', { '0': index + 1 })}
                       value={food.unit}
-                      onChange={(e) =>
+                      onValueChange={(value) =>
                         setFoods(
-                          foods.map((x) =>
-                            x.id === food.id ? { ...x, unit: e.target.value as Unit } : x,
-                          ),
+                          foods.map((x) => (x.id === food.id ? { ...x, unit: value as Unit } : x)),
                         )
                       }
                     >
@@ -274,7 +273,7 @@ export function MealEditor({
                           {label || t('Personalizzata')}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                     <button
                       type="button"
                       className="icon-button"

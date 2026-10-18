@@ -60,12 +60,15 @@ jobs:
                   f"Tag {tag} does not match versionName {version_name!r}"
               )
 
-          # Release metadata is now published through the administrator dashboard.
-          # The bundled asset is an offline fallback and may describe an older release.
-          with Path("android/src/main/assets/version-policy.json").open(encoding="utf-8") as policy_file:
+          # The backend and Android fallback use the same code-owned release policy.
+          with Path("common/src/main/resources/version-policy.json").open(encoding="utf-8") as policy_file:
               policy = json.load(policy_file)
           if not 1 <= policy["minSupportedVersionCode"] <= policy["deprecatedVersionCode"] <= policy["latestVersionCode"] <= version_code:
-              raise SystemExit("Bundled offline version policy has inconsistent bounds")
+              raise SystemExit("Release policy has inconsistent bounds")
+          if policy["latestVersionCode"] != version_code or policy["latestVersionName"] != version_name:
+              raise SystemExit("Release policy must match the release version")
+          if policy["deprecatedVersionCode"] < 4:
+              raise SystemExit("Clients predating server support must remain deprecated")
           PY
 
       - name: Validate Release Secrets

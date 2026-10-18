@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { UserCheck, SlidersHorizontal, History } from 'lucide-react'
 import { api } from '../../lib/api'
 import { t } from '../../lib/i18n'
 import { Modal, ErrorNotice, Spinner } from '../../components/ui'
@@ -20,41 +21,45 @@ export function AdminIntroduction({ refresh }: { refresh: () => Promise<void> })
   }
   return (
     <Modal
-      title={t('Sei l’amministratore')}
+      title={t('Benvenuto in Diet Reminder')}
       onClose={() => {
         void acknowledge()
       }}
     >
-      <p>
-        {t(
-          'La tua email è verificata. Il tuo account amministra questa installazione di Diet Reminder.',
-        )}
-      </p>
-      <h3>{t('I tuoi poteri')}</h3>
-      <ul>
-        <li>{t('Approva o rifiuta le richieste dopo la verifica dell’email.')}</li>
-        <li>{t('Assegna i permessi di lettura, modifica e backup secondo le necessità.')}</li>
-        <li>
+      <div className="admin-introduction">
+        <p>
           {t(
-            'Gestisci sospensioni, sessioni e aggiornamenti Android dal pannello Amministrazione.',
+            'Hai creato il primo account di questo spazio: puoi aiutare le altre persone a iniziare a usare Diet Reminder.',
           )}
-        </li>
-      </ul>
-      <h3>{t('Le tue responsabilità')}</h3>
-      <ul>
-        <li>{t('Verifica le richieste e assegna solo i permessi necessari.')}</li>
-        <li>
-          {t(
-            'Proteggi le credenziali, rispetta la riservatezza e controlla il registro delle operazioni.',
-          )}
-        </li>
-        <li>
-          {t(
-            'Mantieni almeno un amministratore attivo. Il sistema protegge l’ultimo amministratore.',
-          )}
-        </li>
-      </ul>
-      <p>{t('Questa conferma viene salvata nell’account e vale su tutti i dispositivi.')}</p>
+        </p>
+        <div className="admin-introduction-point">
+          <UserCheck size={22} aria-hidden="true" />
+          <p>
+            {t(
+              'Quando qualcuno si registra e verifica la sua email, trovi la richiesta in Amministrazione. Da lì puoi approvarla oppure lasciare un messaggio per spiegare perché non è stata accolta.',
+            )}
+          </p>
+        </div>
+        <div className="admin-introduction-point">
+          <SlidersHorizontal size={22} aria-hidden="true" />
+          <p>
+            {t(
+              'Per ogni persona scegli cosa può consultare o modificare. Puoi cambiare questi permessi anche in seguito, quando serve.',
+            )}
+          </p>
+        </div>
+        <div className="admin-introduction-point">
+          <History size={22} aria-hidden="true" />
+          <p>
+            {t(
+              'Nello stesso pannello trovi gli account e le operazioni recenti. Se serve, puoi sospendere un accesso o chiudere le sessioni aperte, senza cancellare i dati.',
+            )}
+          </p>
+        </div>
+        <p className="muted small">
+          {t('Per ora è tutto. Puoi tornare al pannello Amministrazione in qualsiasi momento.')}
+        </p>
+      </div>
       {error && <ErrorNotice message={error} />}
       <button
         className="button primary"

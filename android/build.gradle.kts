@@ -55,6 +55,8 @@ android {
 		}
 	}
 
+    sourceSets.getByName("main").assets.srcDir(rootProject.file("common/src/main/resources"))
+
 	buildFeatures {
 		compose = true
 		buildConfig = true

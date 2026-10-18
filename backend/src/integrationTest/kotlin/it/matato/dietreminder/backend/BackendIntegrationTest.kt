@@ -520,23 +520,19 @@ class BackendIntegrationTest {
         assertEquals("Bob", profiles.findByUserId(bobSession.account.userId)!!.username)
     }
     @Test
-    fun `release metadata is public and only an administrator can publish validated revisions`() {
+    fun `release metadata is bundled public and cannot be edited by an administrator`() {
         val current = http("/api/app/version-policy")
-        assertEquals(200, current.statusCode()); assertTrue(tree(current.body()).has("latestVersionCode"))
-        assertEquals(403, http("/api/admin/version-policy", "PUT", "{}", bobSession.token).statusCode())
+        assertEquals(200, current.statusCode())
+        val policy = tree(current.body())
+        assertEquals(4, policy.path("deprecatedVersionCode").asInt())
+        assertEquals(4, policy.path("latestVersionCode").asInt())
+        assertEquals("1.3.0", policy.path("latestVersionName").asText())
         makeAdmin()
-        val managed = tree(http("/api/admin/version-policy", token = aliceSession.token).body())
-        val updated = managed.deepCopy<com.fasterxml.jackson.databind.node.ObjectNode>()
-        (updated.path("policy") as com.fasterxml.jackson.databind.node.ObjectNode).put("latestVersionCode", 100).put("latestVersionName", "9.0.0")
-        val saved = http("/api/admin/version-policy", "PUT", updated.toString(), aliceSession.token)
-        assertEquals(200, saved.statusCode())
-        assertEquals(100, tree(http("/api/app/version-policy").body()).path("latestVersionCode").asInt())
-        assertEquals(409, http("/api/admin/version-policy", "PUT", updated.toString(), aliceSession.token).statusCode())
-        val invalid = tree(saved.body()).deepCopy<com.fasterxml.jackson.databind.node.ObjectNode>()
-        (invalid.path("policy") as com.fasterxml.jackson.databind.node.ObjectNode).put("updateUrl", "javascript:alert(1)")
-        assertEquals(400, http("/api/admin/version-policy", "PUT", invalid.toString(), aliceSession.token).statusCode())
-        (managed as com.fasterxml.jackson.databind.node.ObjectNode).put("revision", tree(saved.body()).path("revision").asLong())
-        assertEquals(200, http("/api/admin/version-policy", "PUT", managed.toString(), aliceSession.token).statusCode())
+        assertEquals(401, http("/api/admin/version-policy", token = aliceSession.token).statusCode())
+        assertEquals(401, http("/api/admin/version-policy", "PUT", "{}", aliceSession.token).statusCode())
+        assertFalse(tree(http("/v3/api-docs").body()).path("paths").has("/api/admin/version-policy"))
+        assertEquals(policy, tree(http("/api/app/version-policy").body()))
+        assertFalse(jdbc.queryForObject("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'app_release_policy')", Boolean::class.java)!!)
     }
     @Test
     fun `Drive authorization validates state identity and granted scope and encrypts refresh tokens`() = runBlocking {

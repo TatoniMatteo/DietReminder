@@ -1,5 +1,6 @@
+import { Select } from '../../components/Select'
 import { t, locale } from '../../lib/i18n'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Users,
   UserCheck,
@@ -13,20 +14,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Activity,
-  Save,
-  Smartphone,
 } from 'lucide-react'
 import { permissions, type Permission } from '../../lib/access'
 import { enrollmentLabels } from '../auth/EnrollmentPage'
 import { api } from '../../lib/api'
-import type {
-  AdminUser,
-  Audit,
-  ManagedPolicy,
-  Overview,
-  UserPage,
-  VersionPolicy,
-} from '../../lib/types'
+import type { AdminUser, Audit, Overview, UserPage } from '../../lib/types'
 import { ConfirmDialog, ErrorNotice, Spinner } from '../../components/ui'
 const permissionLabels: Record<Permission, string> = {
   WORKSPACE_READ: 'Consultare piani e spesa',
@@ -36,11 +28,10 @@ const permissionLabels: Record<Permission, string> = {
   BACKUP_MANAGE: 'Gestire i backup Google Drive',
 }
 export function AdminPage() {
-  const [tab, setTab] = useState<'overview' | 'users' | 'releases'>('overview')
+  const [tab, setTab] = useState<'overview' | 'users'>('overview')
   const [overview, setOverview] = useState<Overview | null>(null)
   const [users, setUsers] = useState<UserPage | null>(null)
   const [audit, setAudit] = useState<Audit[]>([])
-  const [policy, setPolicy] = useState<ManagedPolicy | null>(null)
   const [enrollmentFilter, setEnrollmentFilter] = useState('')
   const [reviewing, setReviewing] = useState<AdminUser | null>(null)
   const [grants, setGrants] = useState<Permission[]>([])
@@ -53,14 +44,12 @@ export function AdminPage() {
   const [action, setAction] = useState<{ kind: 'status' | 'revoke'; user: AdminUser } | null>(null)
   async function load() {
     try {
-      const [o, a, p] = await Promise.all([
+      const [o, a] = await Promise.all([
         api<Overview>('/api/admin/overview'),
         api<Audit[]>('/api/admin/audit'),
-        api<ManagedPolicy>('/api/admin/version-policy'),
       ])
       setOverview(o)
       setAudit(a)
-      setPolicy(p)
     } catch (e) {
       setError((e as Error).message)
     }
@@ -132,47 +121,12 @@ export function AdminPage() {
       setBusy(false)
     }
   }
-  async function publish(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (!policy) return
-    const form = new FormData(e.currentTarget)
-    const updated: VersionPolicy = { ...policy.policy }
-    for (const key of [
-      'minSupportedVersionCode',
-      'deprecatedVersionCode',
-      'latestVersionCode',
-      'minSupportedMajor',
-    ] as const)
-      updated[key] = Number(form.get(key))
-    updated.latestVersionName = String(form.get('latestVersionName'))
-    updated.updateUrl = String(form.get('updateUrl'))
-    setBusy(true)
-    setError('')
-    setNotice('')
-    try {
-      setPolicy(
-        await api<ManagedPolicy>('/api/admin/version-policy', 'PUT', {
-          policy: updated,
-          revision: policy.revision,
-        }),
-      )
-      setNotice(
-        t('Informazioni pubblicate. Android le riceverà al prossimo controllo aggiornamenti.'),
-      )
-      setAudit(await api<Audit[]>('/api/admin/audit'))
-    } catch (e) {
-      setError((e as Error).message)
-    } finally {
-      setBusy(false)
-    }
-  }
   const actionNames: Record<string, string> = {
     ACCOUNT_APPROVED: t('Richiesta approvata'),
     ACCOUNT_REJECTED: t('Richiesta rifiutata'),
     USER_ENABLED: t('Utente riattivato'),
     USER_SUSPENDED: t('Utente sospeso'),
     SESSIONS_REVOKED: t('Sessioni revocate'),
-    RELEASE_POLICY_UPDATED: t('Aggiornamento Android pubblicato'),
   }
   return (
     <>
@@ -201,10 +155,6 @@ export function AdminPage() {
         <button className={tab === 'users' ? 'selected' : ''} onClick={() => setTab('users')}>
           <Users size={17} />
           {t('Utenti')}
-        </button>
-        <button className={tab === 'releases' ? 'selected' : ''} onClick={() => setTab('releases')}>
-          <Smartphone size={17} />
-          {t('Aggiornamenti')}
         </button>
       </div>
       {error && (
@@ -322,11 +272,11 @@ export function AdminPage() {
           </div>
           <label>
             {t('Stato della richiesta')}
-            <select
+            <Select
               aria-label={t('Stato della richiesta')}
               value={enrollmentFilter}
-              onChange={(e) => {
-                setEnrollmentFilter(e.target.value)
+              onValueChange={(value) => {
+                setEnrollmentFilter(value)
                 setPage(0)
               }}
             >
@@ -336,7 +286,7 @@ export function AdminPage() {
                   {t(label)}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           {reviewing && (
             <section className="app-card" aria-label={t('Valuta richiesta')}>
@@ -503,99 +453,6 @@ export function AdminPage() {
               <ChevronRight size={20} />
             </button>
           </div>
-        </section>
-      )}
-      {tab === 'releases' && policy && (
-        <section className="surface settings-card release-settings">
-          <div className="section-heading">
-            <h2>
-              <Smartphone size={21} />
-              {t('Aggiornamenti Android')}
-            </h2>
-            <span className="tag">
-              {t('Revisione')} {policy.revision}
-            </span>
-          </div>
-          <p className="muted">
-            {t(
-              'Queste informazioni sono distribuite dal server. Il collegamento può puntare alla release APK su GitHub o al tuo servizio di download.',
-            )}
-          </p>
-          <form
-            key={policy.revision}
-            onSubmit={(e) => {
-              void publish(e)
-            }}
-          >
-            <div className="form-row">
-              <label>
-                {t('Ultima versione')}
-                <input
-                  name="latestVersionName"
-                  required
-                  defaultValue={policy.policy.latestVersionName}
-                  placeholder="1.3.0"
-                />
-              </label>
-              <label>
-                {t('Codice ultima versione')}
-                <input
-                  name="latestVersionCode"
-                  type="number"
-                  required
-                  min={1}
-                  defaultValue={policy.policy.latestVersionCode}
-                />
-              </label>
-            </div>
-            <div className="form-row">
-              <label>
-                {t('Codice minimo supportato')}
-                <input
-                  name="minSupportedVersionCode"
-                  type="number"
-                  min={1}
-                  required
-                  defaultValue={policy.policy.minSupportedVersionCode}
-                />
-                <small>{t('Le versioni inferiori saranno considerate obsolete.')}</small>
-              </label>
-              <label>
-                {t('Codice sotto cui avvisare')}
-                <input
-                  name="deprecatedVersionCode"
-                  type="number"
-                  min={1}
-                  required
-                  defaultValue={policy.policy.deprecatedVersionCode}
-                />
-                <small>{t('Tra minimo supportato e ultima versione.')}</small>
-              </label>
-            </div>
-            <label>
-              {t('Major minima supportata')}
-              <input
-                name="minSupportedMajor"
-                type="number"
-                min={1}
-                required
-                defaultValue={policy.policy.minSupportedMajor}
-              />
-            </label>
-            <label>
-              {t('Indirizzo aggiornamento')}
-              <input type="url" name="updateUrl" required defaultValue={policy.policy.updateUrl} />
-            </label>
-            <p className="notice">
-              {t(
-                'Pubblica soltanto versioni già scaricabili. Alzare la versione minima può bloccare le modifiche nelle vecchie app.',
-              )}
-            </p>
-            <button className="button primary" disabled={busy}>
-              {busy ? <Spinner /> : <Save size={18} />}
-              {t('Pubblica informazioni')}
-            </button>
-          </form>
         </section>
       )}
       {action && (

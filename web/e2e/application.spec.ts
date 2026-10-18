@@ -1,3 +1,4 @@
+import { selectOption } from './helpers/select'
 import { completeEnrollment } from './helpers/enrollment'
 import { test, expect } from '@playwright/test'
 import { writeFile } from 'node:fs/promises'
@@ -28,7 +29,7 @@ test('real account, workspace edits, shopping, session persistence and responsiv
   await page.getByRole('link', { name: 'La settimana', exact: true }).click()
   await page.getByRole('button', { name: 'Lunedì', exact: true }).click()
   await page.getByRole('button', { name: 'Aggiungi pasto', exact: true }).click()
-  await page.getByLabel('Pasto', { exact: true }).selectOption('LUNCH')
+  await selectOption(page.getByLabel('Pasto', { exact: true }), 'LUNCH')
   await page.getByLabel('Orario').fill('12:30')
   await page.getByLabel('Una nota per te').fill('Un pranzo semplice, dal web')
   await page.getByRole('button', { name: 'Aggiungi', exact: true }).click()
@@ -104,7 +105,7 @@ test('real account, workspace edits, shopping, session persistence and responsiv
   await page.getByRole('button', { name: 'Crea lista' }).click()
   await page.getByLabel('Nuovo ingrediente').fill('Mele')
   await page.getByLabel('Quantità', { exact: true }).fill('2')
-  await page.getByLabel('Unità', { exact: true }).selectOption('PIECES')
+  await selectOption(page.getByLabel('Unità', { exact: true }), 'PIECES')
   await page.getByRole('button', { name: 'Aggiungi ingrediente', exact: true }).click()
   await page.getByRole('button', { name: 'Acquistato: Mele' }).click()
   await expect(page.getByRole('button', { name: 'Da acquistare: Mele' })).toHaveAttribute(
@@ -145,10 +146,12 @@ test('real account, workspace edits, shopping, session persistence and responsiv
   await page.reload()
   await page.getByRole('button', { name: 'Organizza Insalata fresca, Lunedì', exact: true }).click()
   await page.getByLabel('Categoria', { exact: true }).fill('Orto e mercato')
-  await page
-    .getByRole('region', { name: 'Organizza alimento' })
-    .getByLabel('Giorno d’acquisto', { exact: true })
-    .selectOption('7')
+  await selectOption(
+    page
+      .getByRole('region', { name: 'Organizza alimento' })
+      .getByLabel('Giorno d’acquisto', { exact: true }),
+    '7',
+  )
   await page
     .getByRole('region', { name: 'Organizza alimento' })
     .getByLabel('Quantità', { exact: true })

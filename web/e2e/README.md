@@ -19,8 +19,8 @@ Default local ports are 18088 (web), 18080 (backend), 15432 (PostgreSQL) and
 18025 (Mailpit). Override them with `E2E_WEB_PORT`, `E2E_BACKEND_PORT`,
 `E2E_DB_PORT` and `E2E_MAIL_PORT` if needed.
 
-The 33 scenarios run on Chromium desktop, Firefox desktop and Chromium with a
-393×852 mobile viewport (99 executions). Every API response comes from the real
+The 35 scenarios run on Chromium desktop, Firefox desktop and Chromium with a
+393×852 mobile viewport (105 executions). Every API response comes from the real
 backend. API calls provision independent accounts and graphs, and verify the
 state actually persisted by browser actions; no route returns simulated JSON.
 The connection-loss scenario temporarily takes its browser context offline.
@@ -35,10 +35,10 @@ Coverage includes:
   purchase versus usage day, categories, bought/unbought state and reminders.
 - Separate accounts and browser sessions, revision conflicts, retained drafts,
   reconnection, logout and revoked sessions, HttpOnly cookies and CSRF rejection.
-- Real admin search, suspension/reactivation, permissions, audit history, release
-  policy validation, publication and concurrent edits. Policy changes stay local.
+- Real admin search, suspension/reactivation, permissions, audit history, code-owned
+  release metadata and rejection of removed administration endpoints.
 - Profile and password changes, language, appearance persistence, responsive
-  layouts and the actual disabled Google/Drive configuration.
+  layouts, themed dropdowns, keyboard navigation and the actual disabled Google/Drive configuration.
 
 Real Google sign-in and Drive operations require external services and are not
 exercised by this local suite.

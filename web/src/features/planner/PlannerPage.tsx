@@ -1,3 +1,4 @@
+import { Select } from '../../components/Select'
 import { usePermission } from '../../lib/access'
 import { t, locale } from '../../lib/i18n'
 import { useState, useRef } from 'react'
@@ -157,18 +158,18 @@ export function PlannerPage({ navigate }: { navigate: (route: string) => void })
               </span>
             </div>
             {diet && (
-              <select
+              <Select
                 aria-label={t('Piano alimentare')}
                 className="plan-select"
                 value={diet.id}
-                onChange={(e) => setDietId(Number(e.target.value))}
+                onValueChange={(value) => setDietId(Number(value))}
               >
                 {s.diets.map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             )}
           </div>
           {!diet ? (

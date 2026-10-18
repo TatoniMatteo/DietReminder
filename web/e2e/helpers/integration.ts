@@ -1,3 +1,4 @@
+import { selectOption } from './select'
 import { test as base, expect, type APIRequestContext, type Page } from '@playwright/test'
 import { administratorToken, allPermissions, emailCode } from './enrollment'
 import type { Account, Snapshot, WebSession, Workspace } from '../../src/lib/types'
@@ -80,7 +81,7 @@ export async function createList(page: Page, name = 'Spesa integrazione', plan?:
   await page.getByRole('link', { name: 'La spesa', exact: true }).click()
   await page.getByRole('button', { name: 'Nuova lista', exact: true }).click()
   await page.getByLabel('Nome della lista').fill(name)
-  if (plan) await page.getByLabel('Piano associato').selectOption({ label: plan })
+  if (plan) await selectOption(page.getByLabel('Piano associato'), { label: plan })
   await page.getByRole('button', { name: 'Crea lista', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
@@ -88,9 +89,9 @@ export async function createList(page: Page, name = 'Spesa integrazione', plan?:
 export async function addItem(page: Page, name: string, needed = '', purchase = '') {
   await page.getByLabel('Nuovo ingrediente').fill(name)
   await page.getByLabel('Quantità', { exact: true }).fill('2')
-  await page.getByLabel('Unità', { exact: true }).selectOption('PIECES')
-  await page.getByLabel('Giorno di utilizzo', { exact: true }).selectOption(needed)
-  await page.getByLabel('Giorno d’acquisto', { exact: true }).selectOption(purchase)
+  await selectOption(page.getByLabel('Unità', { exact: true }), 'PIECES')
+  await selectOption(page.getByLabel('Giorno di utilizzo', { exact: true }), needed)
+  await selectOption(page.getByLabel('Giorno d’acquisto', { exact: true }), purchase)
   await page.getByRole('button', { name: 'Aggiungi ingrediente', exact: true }).click()
   await expect(page.getByRole('button', { name: `Acquistato: ${name}`, exact: true })).toBeVisible()
 }
@@ -117,9 +118,11 @@ export const test = base.extend<{ user: TestUser; signedIn: Page; admin: Page }>
         email: process.env.E2E_ADMIN_EMAIL!,
         password: process.env.E2E_ADMIN_PASSWORD!,
       })
-      const introduction = page.getByRole('dialog', { name: 'Sei l’amministratore' })
+      const introduction = page.getByRole('dialog', { name: 'Benvenuto in Diet Reminder' })
       if ((await session(page)).account.adminIntroductionPending) {
         await expect(introduction).toBeVisible()
+        await expect(introduction.locator('.admin-introduction-point')).toHaveCount(3)
+        await page.screenshot({ path: test.info().outputPath('admin-welcome.png') })
         await page.getByRole('button', { name: 'Ho capito, continua' }).click()
         await expect(introduction).toHaveCount(0)
       }

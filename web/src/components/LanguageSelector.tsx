@@ -1,3 +1,4 @@
+import { Select } from './Select'
 import { Languages } from 'lucide-react'
 import { t, setLanguage, useLanguage, type Language } from '../lib/i18n'
 export function LanguageSelector() {
@@ -8,14 +9,14 @@ export function LanguageSelector() {
         <Languages size={18} />
         {t('Lingua')}
       </span>
-      <select
+      <Select
         aria-label={t('Lingua')}
         value={language}
-        onChange={(event) => setLanguage(event.target.value as Language)}
+        onValueChange={(value) => setLanguage(value as Language)}
       >
         <option value="it">Italiano</option>
         <option value="en">English</option>
-      </select>
+      </Select>
     </label>
   )
 }

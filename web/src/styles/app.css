@@ -770,7 +770,7 @@ details[open] .chevron {
 }
 
 .ingredient-editor input,
-.ingredient-editor select {
+.ingredient-editor .select {
   font-size: 12px;
   padding: 9px;
 }
@@ -972,7 +972,7 @@ details[open] .chevron {
 }
 
 .shopping-add input,
-.shopping-add select {
+.shopping-add .select {
   font-size: 11px;
   padding: 11px;
 }
@@ -1020,7 +1020,10 @@ details[open] .chevron {
 }
 
 .preference-label {
-  margin-top: 25px;
+  display: block;
+  margin: 28px 0 12px;
+  font-size: 12px;
+  font-weight: 550;
 }
 
 .preference-row,
@@ -1836,7 +1839,7 @@ td .tag {
   }
 
   .shopping-add input,
-  .shopping-add select {
+  .shopping-add .select {
     font-size: 10px;
     padding: 10px 7px;
   }
@@ -1940,7 +1943,7 @@ td .tag {
   }
 
   .ingredient-editor input,
-  .ingredient-editor select {
+  .ingredient-editor .select {
     font-size: 11px;
     padding: 8px 6px;
   }
@@ -2360,7 +2363,7 @@ td .tag {
   gap: 8px;
   align-items: center;
 }
-.language-selector select {
+.language-selector .select {
   max-width: 170px;
 }
 
@@ -2424,5 +2427,36 @@ td .tag {
 @media (max-width: 720px) {
   .mobile-logout {
     display: inline-flex;
+  }
+}
+
+.admin-introduction {
+  display: grid;
+  gap: 20px;
+  line-height: 1.7;
+}
+.admin-introduction p {
+  margin: 0;
+}
+.admin-introduction-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.admin-introduction-point > svg {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  color: var(--primary);
+}
+.admin-introduction + .button {
+  margin-top: 24px;
+}
+
+.day-heading > .select {
+  width: min(220px, 55%);
+}
+@media (max-width: 720px) {
+  .day-heading > .select {
+    max-width: 155px;
   }
 }

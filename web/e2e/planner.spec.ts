@@ -1,3 +1,4 @@
+import { selectOption } from './helpers/select'
 import { test, expect, createPlan, monday, seed, workspace } from './helpers/integration'
 import type { MealType } from '../src/lib/types'
 
@@ -40,8 +41,8 @@ test('plans can be renamed, switched, and deletion can be cancelled', async ({
     ['Piano rinominato', true],
   ])
   await monday(page)
-  await expect(page.getByLabel('Piano alimentare')).toHaveValue(
-    String(saved.diets.find((d) => d.isActive)!.id),
+  await expect(page.getByRole('combobox', { name: 'Piano alimentare' })).toHaveText(
+    'Piano rinominato',
   )
 })
 
@@ -59,7 +60,7 @@ for (const [type, title] of [
     await createPlan(page)
     await monday(page)
     await page.getByRole('button', { name: 'Aggiungi pasto', exact: true }).click()
-    await page.getByLabel('Pasto', { exact: true }).selectOption(type)
+    await selectOption(page.getByLabel('Pasto', { exact: true }), type)
     if (type === 'OTHER') await page.getByLabel('Nome del pasto', { exact: true }).fill(title)
     await page.getByLabel('Orario', { exact: true }).fill('09:45')
     await page.getByLabel('Una nota per te').fill('Nota persistente')
@@ -67,7 +68,7 @@ for (const [type, title] of [
     await page.getByRole('button', { name: 'Aggiungi', exact: true }).click()
     await page.getByLabel('Ingrediente 1', { exact: true }).fill('Latte')
     await page.getByLabel('Quantità 1', { exact: true }).fill('125.5')
-    await page.getByLabel('Unità 1', { exact: true }).selectOption('MILLILITERS')
+    await selectOption(page.getByLabel('Unità 1', { exact: true }), 'MILLILITERS')
     await page.getByRole('button', { name: 'Salva pasto', exact: true }).click()
     await expect(page.getByRole('region', { name: 'Editor pasto' })).toHaveCount(0)
     await page.reload()
