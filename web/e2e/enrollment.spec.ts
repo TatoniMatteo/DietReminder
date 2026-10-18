@@ -1,3 +1,4 @@
+import { secondaryContextOptions } from './helpers/integration'
 import { test, expect } from '@playwright/test'
 import { writeFile } from 'node:fs/promises'
 import { administratorToken, verifyFromInbox } from './helpers/enrollment'
@@ -6,7 +7,7 @@ test('verified administrator sees its responsibilities once and reviews an appli
   page,
   browser,
 }, info) => {
-  const owner = await browser.newContext()
+  const owner = await browser.newContext(secondaryContextOptions())
   const admin = await owner.newPage()
   try {
     await admin.goto(process.env.WEB_TEST_URL ?? 'http://127.0.0.1:8088')
@@ -66,7 +67,10 @@ test('verified administrator sees its responsibilities once and reviews an appli
     const account = (await (await page.request.get('/api/web/auth/me')).json()).account
     expect(account.permissions).toEqual(['WORKSPACE_READ', 'SHOPPING_WRITE'])
     expect((await page.request.get('/api/backups/google')).status()).toBe(403)
-    await page.screenshot({ path: '/tmp/dietreminder-approved-readonly.png', fullPage: true })
+    await page.screenshot({
+      path: test.info().outputPath('dietreminder-approved-readonly.png'),
+      fullPage: true,
+    })
   } finally {
     await owner.close()
   }

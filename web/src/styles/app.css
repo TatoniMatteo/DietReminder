@@ -2416,3 +2416,13 @@ td .tag {
 .enrollment-card section li + li {
   margin-top: 16px;
 }
+
+.mobile-logout {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .mobile-logout {
+    display: inline-flex;
+  }
+}

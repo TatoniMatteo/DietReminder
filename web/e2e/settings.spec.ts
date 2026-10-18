@@ -53,7 +53,7 @@ test('settings language, appearance, fixed footer and inline password change wor
       await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
     ).toBeTruthy()
     await page.screenshot({
-      path: `/tmp/dietreminder-settings-${viewport.width}.png`,
+      path: test.info().outputPath(`settings-${viewport.width}.png`),
       animations: 'disabled',
     })
   }

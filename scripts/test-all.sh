@@ -8,7 +8,4 @@ npm --prefix web run build
 if [[ "${1:-}" == "--device" ]]; then
   ./gradlew :android:connectedDebugAndroidTest :android:createDebugAndroidTestCoverageReport
 fi
-# Browser tests require the local Docker distribution to be running.
-python3 scripts/cleanup-test-accounts.py
-trap 'python3 scripts/cleanup-test-accounts.py' EXIT
-npm --prefix web run test:e2e
+npm --prefix web run test:e2e:integration

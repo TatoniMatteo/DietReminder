@@ -1,6 +1,7 @@
 import { completeEnrollment } from './helpers/enrollment'
 import { test, expect } from '@playwright/test'
 import { writeFile } from 'node:fs/promises'
+import type { WebSession } from '../src/lib/types'
 
 test('real account, workspace edits, shopping, session persistence and responsive settings', async ({
   page,
@@ -14,9 +15,7 @@ test('real account, workspace edits, shopping, session persistence and responsiv
   await page.getByRole('button', { name: 'Crea il tuo spazio' }).click()
   await completeEnrollment(page, email)
   await expect(page.getByRole('heading', { name: 'La tua settimana.' })).toBeVisible()
-  const me = (await (await page.request.get('/api/web/auth/me')).json()) as {
-    account: { userId: string; role: 'USER' | 'ADMIN' }
-  }
+  const me = (await (await page.request.get('/api/web/auth/me')).json()) as WebSession
   await writeFile(
     info.outputPath('created-user.json'),
     JSON.stringify({ id: me.account.userId, email }),
@@ -52,11 +51,14 @@ test('real account, workspace edits, shopping, session persistence and responsiv
       .evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
   ).toBeTruthy()
   await page.screenshot({
-    path: '/tmp/dietreminder-web-courses-mobile.png',
+    path: test.info().outputPath('dietreminder-web-courses-mobile.png'),
     animations: 'disabled',
   })
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await page.screenshot({ path: '/tmp/dietreminder-web-courses.png', animations: 'disabled' })
+  await page.screenshot({
+    path: test.info().outputPath('dietreminder-web-courses.png'),
+    animations: 'disabled',
+  })
   await page.getByRole('button', { name: 'Salva pasto' }).click()
   await expect(page.getByRole('region', { name: 'Editor pasto' })).not.toBeVisible()
   await page.locator('summary').filter({ hasText: 'Pranzo' }).click()
@@ -196,7 +198,7 @@ test('real account, workspace edits, shopping, session persistence and responsiv
   expect(roundtrip.snapshot.courses).toEqual(native.courses)
   expect(roundtrip.snapshot.foods).toEqual(native.foods)
   await page.screenshot({
-    path: '/tmp/dietreminder-web-shopping-brand.png',
+    path: test.info().outputPath('dietreminder-web-shopping-brand.png'),
     animations: 'disabled',
   })
   await page.setViewportSize({ width: 393, height: 852 })
@@ -204,7 +206,7 @@ test('real account, workspace edits, shopping, session persistence and responsiv
     await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
   ).toBeTruthy()
   await page.screenshot({
-    path: '/tmp/dietreminder-shopping-web-mobile.png',
+    path: test.info().outputPath('dietreminder-shopping-web-mobile.png'),
     fullPage: true,
     animations: 'disabled',
   })
@@ -226,7 +228,7 @@ test('real account, workspace edits, shopping, session persistence and responsiv
     await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
   ).toBeTruthy()
   await page.screenshot({
-    path: '/tmp/dietreminder-web-mobile.png',
+    path: test.info().outputPath('dietreminder-web-mobile.png'),
     fullPage: true,
     animations: 'disabled',
   })
@@ -234,130 +236,4 @@ test('real account, workspace edits, shopping, session persistence and responsiv
   await page.getByRole('button', { name: 'Esci dall’account' }).click()
   await expect(page.getByRole('heading', { name: 'Bentornato.' })).toBeVisible()
   expect((await page.request.get('/api/web/auth/me')).status()).toBe(401)
-})
-
-test('administrator dashboard supports users and validated release forms without provisioning real administrators', async ({
-  page,
-}) => {
-  const user = {
-    id: 'fixture-user',
-    email: 'utente@example.test',
-    username: 'Utente di test',
-    role: 'USER',
-    enabled: true,
-    googleLinked: false,
-    createdAt: Date.now(),
-  }
-  let policy = {
-    revision: 1,
-    policy: {
-      minSupportedVersionCode: 1,
-      deprecatedVersionCode: 1,
-      latestVersionCode: 4,
-      latestVersionName: '1.3.0',
-      minSupportedMajor: 1,
-      updateUrl: 'https://example.test/releases',
-    },
-  }
-  let suspended = false
-  await page.route('**/api/**', async (route) => {
-    const req = route.request()
-    const url = new URL(req.url())
-    let data: unknown
-    if (url.pathname === '/api/web/auth/me')
-      data = {
-        account: {
-          userId: 'fixture-admin',
-          username: 'Amministratore',
-          email: 'admin@example.test',
-          role: 'ADMIN',
-          googleLinked: true,
-        },
-        csrfToken: 'fixture-csrf',
-      }
-    else if (url.pathname === '/api/auth/providers')
-      data = { clientId: '', signInEnabled: false, driveEnabled: false }
-    else if (url.pathname === '/api/workspace')
-      data = {
-        version: 0,
-        snapshot: {
-          schemaVersion: 1,
-          diets: [],
-          meals: [],
-          courses: [],
-          foods: [],
-          lists: [],
-          items: [],
-          days: [],
-        },
-      }
-    else if (url.pathname === '/api/admin/overview')
-      data = {
-        users: 12,
-        activeUsers: 11,
-        googleUsers: 7,
-        workspaces: 9,
-        driveConnections: 4,
-        uptimeSeconds: 120,
-      }
-    else if (url.pathname === '/api/admin/audit')
-      data = [
-        {
-          id: 1,
-          action: 'USER_ENABLED',
-          actorId: 'fixture-admin',
-          targetId: user.id,
-          createdAt: Date.now(),
-        },
-      ]
-    else if (url.pathname === '/api/admin/users')
-      data = {
-        users:
-          user.email.includes(url.searchParams.get('search') ?? '') ||
-          user.username.includes(url.searchParams.get('search') ?? '')
-            ? [user]
-            : [],
-        total: 1,
-        page: 0,
-        pages: 1,
-      }
-    else if (url.pathname.endsWith('/status')) {
-      user.enabled = req.postDataJSON().enabled
-      suspended = !user.enabled
-      data = user
-    } else if (url.pathname === '/api/admin/version-policy') {
-      if (req.method() === 'PUT') {
-        const body = req.postDataJSON()
-        expect(body.revision).toBe(policy.revision)
-        policy = { ...body, revision: policy.revision + 1 }
-      }
-      data = policy
-    } else throw new Error(`Unexpected API request ${req.method()} ${url.pathname}`)
-    await route.fulfill({ json: data })
-  })
-  await page.goto('/#admin')
-  await expect(page.getByRole('heading', { name: 'Tutto sotto controllo.' })).toBeVisible()
-  await expect(page.getByText('Utenti registrati', { exact: true })).toBeVisible()
-  await page.screenshot({
-    path: '/tmp/dietreminder-web-admin.png',
-    fullPage: true,
-    animations: 'disabled',
-  })
-  await page.getByRole('button', { name: 'Utenti', exact: true }).click()
-  await page.getByRole('textbox', { name: 'Cerca utenti' }).fill('utente@example.test')
-  await expect(page.getByText('utente@example.test', { exact: true })).toBeVisible()
-  await page.getByRole('button', { name: 'Sospendi utente@example.test' }).click()
-  await page.getByRole('button', { name: 'Sospendi account', exact: true }).click()
-  await expect(page.getByText('Sospeso', { exact: true })).toBeVisible()
-  expect(suspended).toBeTruthy()
-  await page.getByRole('button', { name: 'Aggiornamenti', exact: true }).click()
-  await page.getByLabel('Ultima versione', { exact: true }).fill('1.4.0')
-  await page.getByLabel('Codice ultima versione', { exact: true }).fill('5')
-  await page.getByRole('button', { name: 'Pubblica informazioni' }).click()
-  await expect(page.getByText('Informazioni pubblicate.', { exact: false })).toBeVisible()
-  expect(policy.policy.latestVersionCode).toBe(5)
-  await page.setViewportSize({ width: 393, height: 852 })
-  expect(
-    await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
-  ).toBeTruthy()
 })

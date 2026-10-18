@@ -42,6 +42,7 @@ export function SettingsPage({
           username: form.get('username'),
         }),
       )
+      await refreshAccount()
       setNotice(t('Profilo aggiornato.'))
     } catch (e) {
       setError((e as Error).message)

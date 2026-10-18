@@ -3,6 +3,15 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { emailCode } from './helpers/enrollment'
 export default async function setup(config: FullConfig) {
+  // Check before launching a browser or sending even the first API request.
+  for (const value of [
+    config.projects[0].use.baseURL,
+    process.env.MAILPIT_TEST_URL ?? 'http://127.0.0.1:8025',
+  ]) {
+    const url = new URL(value ?? '')
+    if (url.protocol !== 'http:' || !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))
+      throw new Error('Integration tests only allow local HTTP servers on loopback addresses')
+  }
   const api = await request.newContext({ baseURL: config.projects[0].use.baseURL })
   try {
     if (!process.env.E2E_ADMIN_EMAIL || !process.env.E2E_ADMIN_PASSWORD) {
@@ -10,6 +19,7 @@ export default async function setup(config: FullConfig) {
       const password = `Owner-${crypto.randomUUID()}!`
       const configuration = await (await api.get('/api/auth/providers')).json()
       if (configuration.firstRegistrationRequired) {
+        await mkdir(join(config.projects[0].outputDir, 'bootstrap'), { recursive: true })
         const browser = await chromium.launch()
         try {
           const page = await browser.newPage({ locale: 'it-IT' })
@@ -22,7 +32,7 @@ export default async function setup(config: FullConfig) {
           await expect(page.getByRole('button', { name: 'Password dimenticata?' })).toHaveCount(0)
           await expect(page.getByRole('button', { name: 'Crea il tuo spazio' })).toBeVisible()
           await page.screenshot({
-            path: '/tmp/dietreminder-first-registration.png',
+            path: join(config.projects[0].outputDir, 'bootstrap', 'first-registration.png'),
             fullPage: true,
           })
         } finally {

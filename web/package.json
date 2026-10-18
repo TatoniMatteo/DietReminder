@@ -11,7 +11,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run src",
-    "test:e2e": "playwright test",
+    "test:e2e": "tsc --project tsconfig.e2e.json && playwright test",
+    "test:e2e:integration": "bash ../scripts/test-web-e2e.sh",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:coverage": "vitest run --coverage"

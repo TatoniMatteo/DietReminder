@@ -30,7 +30,8 @@ import retrofit2.HttpException
 
 @SpringBootTest(
     classes = [DietBackendApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = ["auth.attempt-limit=1000", "google.client-id=test-client", "google.client-secret=test-secret",
+    // Delivery is invoked explicitly in outbox tests; the scheduler must not race DB resets.
+    properties = ["auth.notifications.poll-ms=3600000", "auth.attempt-limit=1000", "google.client-id=test-client", "google.client-secret=test-secret",
         "google.drive-redirect-uri=http://localhost/callback", "google.token-encryption-key=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", "web.secure-cookies=false"]
 )
 @Import(PostgresTestConfiguration::class)
@@ -120,7 +121,7 @@ class BackendIntegrationTest {
         flyway.validate()
         assertEquals(0, flyway.migrate().migrationsExecuted)
         assertEquals(profile, alice.getProfile())
-        assertEquals(aliceSession.account, alice.me())
+        assertEquals(aliceSession.account.copy(username = "Persisted"), alice.me())
         assertTrue(jdbc.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE success = true", Int::class.java)!! >= 1)
     }
 

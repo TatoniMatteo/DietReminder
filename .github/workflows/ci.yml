@@ -61,7 +61,7 @@ jobs:
             android/build/outputs/androidTest-results/
 
   backend:
-    name: Backend and Client
+    name: Backend, Client and Web
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -88,20 +88,10 @@ jobs:
           npm --prefix web run format:check
           npm --prefix web run test:coverage
           npm --prefix web run build
-      - name: Build and start the Docker distribution
-        run: |
-          cp .env.example .env
-          docker compose up --build --wait --wait-timeout 180
-          curl --fail http://localhost:8080/actuator/health/readiness
-          curl --fail --output /dev/null http://localhost:8080/v3/api-docs
-          curl --fail http://localhost:8088/api/app/version-policy
-      - name: Browser tests
-        run: |
-          npx --prefix web playwright install --with-deps chromium
-          npm --prefix web run test:e2e
-      - name: Container logs
-        if: failure()
-        run: docker compose logs --no-color
+      - name: Install browsers
+        run: npx --prefix web playwright install --with-deps chromium firefox
+      - name: Browser integration tests with backend, PostgreSQL and SMTP
+        run: npm --prefix web run test:e2e:integration
       - name: Server and web test reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -113,6 +103,4 @@ jobs:
             backend/build/reports/
             web/coverage/
             web/test-results/
-      - name: Stop containers
-        if: always()
-        run: docker compose down
+            web/playwright-report/

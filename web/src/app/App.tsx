@@ -296,6 +296,16 @@ function Shell({
               <RefreshCw size={18} className={loading ? 'spin' : ''} />
             </button>
             <span className="avatar small">{account.username.slice(0, 1).toUpperCase()}</span>
+            <button
+              className="icon-button mobile-logout"
+              onClick={() => {
+                void logout()
+              }}
+              aria-label={t('Esci dall’account')}
+              title={t('Esci')}
+            >
+              <LogOut size={18} />
+            </button>
           </div>
         </header>
         <main id="main" className="main-content">
