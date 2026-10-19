@@ -88,7 +88,7 @@ test('lists are isolated; deleting one cascades its items but preserves the othe
   await page.getByRole('dialog').getByRole('button', { name: 'Rimuovi lista', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Dispensa', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Dispensa', exact: true, level: 2 })).toBeVisible()
   const saved = (await workspace(page.request)).snapshot
   expect(saved.lists).toHaveLength(1)
   expect(saved.lists[0]).toMatchObject({ name: 'Dispensa', dietId: 1 })
