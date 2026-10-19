@@ -1,0 +1,22 @@
+<resources>
+    <string name="widget_meals">Pasti</string>
+    <string name="widget_shopping">Lista della spesa</string>
+    <string name="widget_meals_description">Il prossimo pasto e tutti i pasti di oggi, da sfogliare.</string>
+    <string name="widget_shopping_description">Scorri le liste e segna gli alimenti acquistati dalla schermata Home.</string>
+    <string name="widget_today_meals">I pasti di oggi</string>
+    <string name="widget_next_default">Prossimo</string>
+    <string name="widget_previous_meal">Pasto precedente</string>
+    <string name="widget_next_meal">Pasto successivo</string>
+    <string name="widget_previous_list">Lista precedente</string>
+    <string name="widget_next_list">Lista successiva</string>
+    <string name="widget_open_app">Apri Diet Reminder</string>
+    <string name="widget_open_list">Apri lista</string>
+    <string name="widget_no_meals">Nessun pasto in programma</string>
+    <string name="widget_tomorrow">Domani</string>
+    <string name="widget_shopping_remaining">%1$d da acquistare</string>
+    <string name="widget_no_lists">Crea la tua prima lista nell’app</string>
+    <string name="widget_empty_list">La lista è vuota</string>
+    <string name="widget_mark_bought">Segna acquistato: %1$s</string>
+    <string name="widget_mark_pending">Segna da acquistare: %1$s</string>
+    <string name="widget_write_failed">Acquisto non salvato. Riprova o apri l’app.</string>
+<string name="widget_preview_food">Mele</string><string name="widget_preview_meal_detail">12:30 · Pasta e verdure</string><string name="widget_preview_shopping_detail">Frutta e verdura · 2 da acquistare</string><string name="widget_loading">Caricamento…</string></resources>

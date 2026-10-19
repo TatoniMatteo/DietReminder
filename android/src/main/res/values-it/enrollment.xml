@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="enrollment_verify_title">Verifica la tua email</string>
+    <string name="enrollment_pending_title">In attesa di approvazione</string>
+    <string name="enrollment_rejected_title">Richiesta rifiutata</string>
+    <string name="enrollment_approved_title">Richiesta approvata</string>
+    <string name="enrollment_steps">1. Conferma email → 2. Approvazione → 3. Accesso</string>
+    <string name="enrollment_verify_help">Inserisci il codice ricevuto via email. È valido per 24 ore.</string>
+    <string name="enrollment_first_admin">Sei il primo utente: dopo la verifica potrai amministrare l’app.</string>
+    <string name="enrollment_code">Codice di verifica</string>
+    <string name="enrollment_verify_action">Conferma email</string>
+    <string name="enrollment_resend">Invia un nuovo codice</string>
+    <string name="enrollment_refresh">Controlla stato</string>
+    <string name="enrollment_history">Stato della richiesta</string>
+    <string name="enrollment_pending_help">Email confermata. Un amministratore valuterà la richiesta e assegnerà i permessi. Riceverai una notifica via email.</string>
+    <string name="enrollment_rejected_help">La richiesta non è stata approvata. Contatta l’amministratore per informazioni.</string>
+    <string name="enrollment_sent">Ti abbiamo inviato un nuovo codice.</string>
+    <string name="enrollment_invalid_code">Il codice non è valido o è scaduto.</string>
+    <string name="account_permission_denied">I tuoi permessi non consentono questa operazione.</string>
+    <string name="admin_introduction_title">Sei l’amministratore</string>
+    <string name="admin_introduction_welcome">La tua email è verificata. Il tuo account amministra questa installazione di Diet Reminder.</string>
+    <string name="admin_introduction_powers_title">I tuoi poteri</string>
+    <string name="admin_introduction_powers">• Approvare o rifiutare le richieste dopo la verifica email.\n• Assegnare permessi di lettura, modifica e backup.\n• Gestire utenti, sessioni e aggiornamenti Android dal pannello web Amministrazione.</string>
+    <string name="admin_introduction_duties_title">Le tue responsabilità</string>
+    <string name="admin_introduction_duties">• Verificare le richieste e assegnare solo i permessi necessari.\n• Proteggere le credenziali e la riservatezza degli utenti.\n• Controllare il registro delle operazioni.\n• Mantenere almeno un amministratore attivo: il sistema protegge l’ultimo.</string>
+    <string name="admin_introduction_saved">La conferma viene salvata nel tuo account e vale su tutti i dispositivi.</string>
+    <string name="admin_introduction_confirm">Ho capito, continua</string>
+    <string name="account_first_registration_title">Sei il primo a registrarti!</string>
+    <string name="account_first_registration_description">Crea il primo account: diventerai l’amministratore di questa installazione. Potrai approvare gli utenti e assegnare i loro permessi.</string>
+</resources>

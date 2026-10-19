@@ -29,3 +29,20 @@ Thumbs.db
 *.swp
 *.swo
 *~
+# Legacy local database and local backups
+**/data/*.db
+
+backup*.sql
+*.dump
+
+# Web development and test output
+**/node_modules/
+web/dist/
+web/test-results/
+web/playwright-report/
+
+# Generated coverage reports
+web/coverage/
+
+# Python helper cache
+**/__pycache__/

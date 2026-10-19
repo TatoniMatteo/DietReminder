@@ -15,4 +15,7 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "DietReminder"
-include(":app")
+include(":common", ":client", ":backend")
+if (!providers.gradleProperty("backendOnly").map { it.isEmpty() || it.toBoolean() }.getOrElse(false)) {
+    include(":android")
+}

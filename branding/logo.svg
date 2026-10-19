@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">DietReminder</title>
+  <desc id="desc">Mela verde con lancette di orologio nere, in stile Material, su sfondo trasparente.</desc>
+  <defs>
+    <linearGradient id="apple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#D6FF32"/>
+      <stop offset=".38" stop-color="#7CE13D"/>
+      <stop offset=".7" stop-color="#16C46D"/>
+      <stop offset="1" stop-color="#008E75"/>
+    </linearGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#61E25C"/>
+      <stop offset=".55" stop-color="#11B87A"/>
+      <stop offset="1" stop-color="#007B72"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#C6FC39"/>
+      <stop offset="1" stop-color="#31CF69"/>
+    </linearGradient>
+    <linearGradient id="stem" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#119B70"/>
+      <stop offset="1" stop-color="#006650"/>
+    </linearGradient>
+    <linearGradient id="hands" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#343B45"/>
+      <stop offset="1" stop-color="#1C252F"/>
+    </linearGradient>
+    <clipPath id="appleClip">
+      <path
+          d="M256 163 C220 163 205 134 146 143 C70 153 45 225 61 314 C76 403 139 463 197 455 C221 452 237 439 256 439 C275 439 291 452 315 455 C373 463 436 403 451 314 C467 225 442 153 366 143 C307 134 292 163 256 163Z"/>
+    </clipPath>
+  </defs>
+  <!-- Stelo e foglia -->
+  <path d="M250 155 C245 123 230 99 212 83" fill="none" stroke="url(#stem)" stroke-width="24" stroke-linecap="round"/>
+  <path d="M277 145 C276 76 339 32 438 28 C438 94 390 141 277 145Z" fill="url(#leaf)"/>
+  <path d="M277 145 C330 91 390 78 438 28 C438 94 390 141 277 145Z" fill="url(#shade)"/>
+  <!-- Corpo pieno della mela -->
+  <path
+      d="M256 163 C220 163 205 134 146 143 C70 153 45 225 61 314 C76 403 139 463 197 455 C221 452 237 439 256 439 C275 439 291 452 315 455 C373 463 436 403 451 314 C467 225 442 153 366 143 C307 134 292 163 256 163Z"
+      fill="url(#apple)"/>
+  <g clip-path="url(#appleClip)">
+    <path d="M-5 310 C85 418 201 446 292 397 C381 350 420 226 486 176 L490 510 L0 510Z" fill="url(#shade)"
+          opacity=".52"/>
+    <path d="M297 195 C349 149 405 149 459 186 C442 260 398 367 322 406 C368 337 396 242 297 195Z" fill="#009F76"
+          opacity=".28"/>
+    <path d="M91 244 C97 200 131 170 180 166 C193 165 195 175 181 187 C144 214 124 247 105 266 C93 278 86 265 91 244Z"
+          fill="#F1FF83" opacity=".44"/>
+  </g>
+  <!-- Indicatori delle ore -->
+  <g fill="#F4FFE9">
+    <rect x="248" y="186" width="16" height="34" rx="8"/>
+    <rect x="248" y="372" width="16" height="34" rx="8"/>
+    <rect x="121" y="288" width="36" height="16" rx="8"/>
+    <rect x="355" y="288" width="36" height="16" rx="8"/>
+  </g>
+  <!-- Lancetta delle ore: verticale, verso le 12 -->
+  <path d="M256 299 L256 243" fill="none" stroke="#202832" stroke-width="24" stroke-linecap="round"/>
+  <!-- Lancetta dei minuti: diagonale, verso le 4 -->
+  <path d="M256 299 L329 351" fill="none" stroke="#202832" stroke-width="24" stroke-linecap="round"/>
+  <!-- Perno centrale -->
+  <circle cx="256" cy="299" r="19" fill="#202832"/>
+</svg>

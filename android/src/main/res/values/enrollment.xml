@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="enrollment_verify_title">Verify your email</string>
+    <string name="enrollment_pending_title">Awaiting approval</string>
+    <string name="enrollment_rejected_title">Application rejected</string>
+    <string name="enrollment_approved_title">Application approved</string>
+    <string name="enrollment_steps">1. Verify email → 2. Approval → 3. Access</string>
+    <string name="enrollment_verify_help">Enter the code sent to your email. It is valid for 24 hours.</string>
+    <string name="enrollment_first_admin">You are the first user: after verification you can administer the app.</string>
+    <string name="enrollment_code">Verification code</string>
+    <string name="enrollment_verify_action">Verify email</string>
+    <string name="enrollment_resend">Send a new code</string>
+    <string name="enrollment_refresh">Check status</string>
+    <string name="enrollment_history">Application status</string>
+    <string name="enrollment_pending_help">Email verified. An administrator will review your application and assign permissions. You will be notified by email.</string>
+    <string name="enrollment_rejected_help">Your application was not approved. Contact the administrator for details.</string>
+    <string name="enrollment_sent">A new code has been sent.</string>
+    <string name="enrollment_invalid_code">The code is invalid or expired.</string>
+    <string name="account_permission_denied">Your permissions do not allow this action.</string>
+    <string name="admin_introduction_title">You are the administrator</string>
+    <string name="admin_introduction_welcome">Your email is verified. Your account administers this Diet Reminder installation.</string>
+    <string name="admin_introduction_powers_title">Your powers</string>
+    <string name="admin_introduction_powers">• Approve or reject applications after email verification.\n• Assign read, edit and backup permissions.\n• Manage users, sessions and Android updates in the web Administration panel.</string>
+    <string name="admin_introduction_duties_title">Your responsibilities</string>
+    <string name="admin_introduction_duties">• Review applications and grant only necessary permissions.\n• Protect credentials and user privacy.\n• Review the audit log.\n• Keep at least one active administrator: the system protects the last one.</string>
+    <string name="admin_introduction_saved">Your acknowledgement is saved in your account and applies to all devices.</string>
+    <string name="admin_introduction_confirm">I understand, continue</string>
+    <string name="account_first_registration_title">You’re the first to register!</string>
+    <string name="account_first_registration_description">Create the first account to become this installation’s administrator. You will be able to approve users and assign their permissions.</string>
+</resources>

@@ -1,0 +1,6 @@
+# Used only by scripts/test-web-e2e.sh with a unique Compose project and fresh DB.
+services:
+  backend:
+    environment:
+      # A full browser matrix creates many independent accounts from the same IP.
+      AUTH_ATTEMPT_LIMIT: 1000

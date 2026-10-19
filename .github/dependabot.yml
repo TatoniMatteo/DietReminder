@@ -1,0 +1,88 @@
+version: 2
+
+# At most three open version-update PRs: one per ecosystem.
+# Major upgrades are grouped separately and share the same one-PR limit.
+# Security updates have their own groups and GitHub's separate PR limit.
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    # Boot 4 / Springdoc 3 require a coordinated application migration.
+    ignore:
+      - dependency-name: "org.springframework.boot"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.springdoc:*"
+        update-types: ["version-update:semver-major"]
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Rome
+    open-pull-requests-limit: 1
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "[DEPS]"
+    groups:
+      gradle-minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+      gradle-major:
+        patterns: ["*"]
+        update-types: [major]
+      gradle-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    # v6 introduces proprietary caching terms; review that migration explicitly.
+    ignore:
+      - dependency-name: "gradle/actions"
+        versions: [">=6"]
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Rome
+    open-pull-requests-limit: 1
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "[ACTIONS]"
+    groups:
+      actions-minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+      actions-major:
+        patterns: ["*"]
+        update-types: [major]
+      actions-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /web
+    # Match the Node.js 24 runtime used by CI and the web Docker image.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Rome
+    open-pull-requests-limit: 1
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "[DEPS]"
+    groups:
+      web-minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+      web-major:
+        patterns: ["*"]
+        update-types: [major]
+      web-security:
+        applies-to: security-updates
+        patterns: ["*"]

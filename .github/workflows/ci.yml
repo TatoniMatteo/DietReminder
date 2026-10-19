@@ -1,18 +1,25 @@
-name: Android CI
+name: Build and Test
 
 on:
   pull_request:
     branches:
       - master
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
-    name: Build & Test
+    name: Android
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
@@ -21,10 +28,79 @@ jobs:
           java-version: '21'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew :android:testDebugUnitTest :android:localCoverageReport
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew :android:assembleDebug :android:assembleDebugAndroidTest :android:lintDebug
+
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Functional tests and widget previews on Android
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: ./gradlew :android:connectedDebugAndroidTest :android:createDebugAndroidTestCoverageReport
+      - name: Android test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-test-reports
+          path: |
+            android/build/reports/tests/
+            android/build/reports/androidTests/
+            android/build/reports/coverage/
+            android/build/outputs/androidTest-results/
+
+  backend:
+    name: Backend, Client and Web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+      - name: Test HTTP APIs and build server without Android
+        run: ./gradlew -PbackendOnly :common:check :client:check :backend:check :backend:bootJar
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Test and build React and TypeScript
+        run: |
+          npm --prefix web ci
+          npm --prefix web run format:check
+          npm --prefix web run test:coverage
+          npm --prefix web run build
+      - name: Install browsers
+        run: npx --prefix web playwright install --with-deps chromium firefox
+      - name: Browser integration tests with backend, PostgreSQL and SMTP
+        run: npm --prefix web run test:e2e:integration
+      - name: Server and web test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: server-web-test-reports
+          path: |
+            common/build/reports/
+            client/build/reports/
+            backend/build/reports/
+            web/coverage/
+            web/test-results/
+            web/playwright-report/

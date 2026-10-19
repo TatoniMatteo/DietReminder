@@ -1,0 +1,135 @@
+package it.matato.dietreminder.ui.screens.diets
+
+import it.matato.dietreminder.ui.theme.AppSpace
+import it.matato.dietreminder.ui.components.AppScaffold
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import it.matato.dietreminder.ui.components.AppCard
+import androidx.compose.foundation.layout.fillMaxWidth
+import it.matato.dietreminder.ui.icons.AppIcons as Icons
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import it.matato.dietreminder.R
+import it.matato.dietreminder.data.database.entity.Diet
+import it.matato.dietreminder.ui.LocalOfflineMode
+import it.matato.dietreminder.ui.OfflineAwareFloatingActionButton
+import it.matato.dietreminder.ui.theme.DietTheme
+import it.matato.dietreminder.viewmodel.DietViewModel
+
+@Composable
+fun DietsScreen(
+	vm: DietViewModel,
+	onConfigDiet: (Long) -> Unit,
+	onNavigateToImportDiet: () -> Unit,
+) {
+	val diets by vm.diets.collectAsState()
+	var create by rememberSaveable { mutableStateOf(false) }
+
+	DietsContent(
+		diets = diets,
+		onCreateClick = { create = true },
+		onImportClick = onNavigateToImportDiet,
+		onActivate = { vm.activate(it.id) },
+		onDuplicate = { vm.duplicate(it.id) },
+		onDelete = { vm.deleteDiet(it.id) },
+		onConfigure = { onConfigDiet(it.id) },
+	)
+
+	if (create) {
+		NewDietDialog(
+			onDismiss = { create = false },
+			onCreate = { name, window ->
+				vm.create(name, window)
+				create = false
+			},
+		)
+	}
+}
+
+@Composable
+fun DietsContent(
+	diets: List<Diet>,
+	onCreateClick: () -> Unit,
+	onImportClick: () -> Unit,
+	onActivate: (Diet) -> Unit,
+	onDuplicate: (Diet) -> Unit,
+	onDelete: (Diet) -> Unit,
+	onConfigure: (Diet) -> Unit,
+) {
+	val isOffline = LocalOfflineMode.current
+	AppScaffold(
+		floatingActionButton = {
+			OfflineAwareFloatingActionButton(
+				onClick = onCreateClick,
+				containerColor = MaterialTheme.colorScheme.primary,
+				contentColor = MaterialTheme.colorScheme.onPrimary,
+			) {
+				Icon(
+					imageVector = Icons.Rounded.Add,
+					contentDescription = stringResource(R.string.new_diet),
+				)
+			}
+		},
+	) { innerPadding ->
+		LazyColumn(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(innerPadding),
+			verticalArrangement = Arrangement.spacedBy(AppSpace.group),
+			contentPadding = PaddingValues(start = AppSpace.screen, end = AppSpace.screen, top = AppSpace.group, bottom = 96.dp),
+		) {
+			item {
+				DietsHeader(
+					count = diets.size,
+					onImportClick = onImportClick,
+					isOffline = isOffline,
+				)
+			}
+
+            if (diets.isEmpty()) {
+                item(key = "empty") { EmptyDietsCard() }
+            } else {
+                items(diets, key = { it.id }) { diet ->
+                    AppCard(Modifier.fillMaxWidth().animateItem()) {
+                        DietsListItem(diet, onActivate = { onActivate(diet) },
+                            onDuplicate = { onDuplicate(diet) }, onDelete = { onDelete(diet) },
+                            onConfigure = { onConfigure(diet) }, isOffline = isOffline)
+                    }
+                }
+            }
+		}
+	}
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DietsContentPreview() {
+	DietTheme {
+		DietsContent(
+			diets = listOf(
+				Diet(id = 1, name = "Summer Diet", nextMealWindowMinutes = 90, isActive = true),
+				Diet(id = 2, name = "Winter Diet", nextMealWindowMinutes = 60, isActive = false),
+			),
+			onCreateClick = {},
+			onImportClick = {},
+			onActivate = {},
+			onDuplicate = {},
+			onDelete = {},
+			onConfigure = {},
+		)
+	}
+}
