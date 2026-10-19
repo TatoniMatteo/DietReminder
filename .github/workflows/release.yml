@@ -142,6 +142,20 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew :android:testDebugUnitTest :backend:check
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Test web and production deployment
+        run: |
+          npm --prefix web ci
+          npm --prefix web run test
+          npm --prefix web run build
+          bash scripts/test-production.sh
+
       - name: Build Release Artifacts
         env:
           KEYSTORE_FILE: ${{ runner.temp }}/keystore.jks
@@ -168,12 +182,14 @@ jobs:
           fi
           
           mkdir -p artifacts
+          cp compose.production.yaml artifacts/compose.yaml
+          sed "s/^RELEASE_TAG=.*/RELEASE_TAG=${TAG_NAME#v}/" .env.production.example > artifacts/production.env.example
           
           cp "$APK_PATH" "artifacts/DietReminder-${TAG_NAME}.apk"
           cp "$AAB_PATH" "artifacts/DietReminder-${TAG_NAME}.aab"
           
           cd artifacts
-          sha256sum *.apk *.aab > SHA256SUMS.txt
+          sha256sum *.apk *.aab compose.yaml production.env.example > SHA256SUMS.txt
           
           echo "=== Release artifacts ==="
           ls -lh

@@ -8,9 +8,9 @@ retrofit = "3.0.0"
 retrofitSerialization = "1.0.0"
 okhttp = "5.5.0"
 #noinspection UnusedVersionCatalogEntry
-versionCode = "5"
+versionCode = "6"
 #noinspection UnusedVersionCatalogEntry
-versionName = "2.0.0"
+versionName = "2.0.1"
 #noinspection UnusedVersionCatalogEntry
 compileSdk = "37"
 #noinspection UnusedVersionCatalogEntry

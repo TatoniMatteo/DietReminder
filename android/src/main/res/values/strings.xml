@@ -473,4 +473,14 @@
   <string name="password_uppercase">At least one uppercase letter</string>
   <string name="password_lowercase">At least one lowercase letter</string>
   <string name="password_special">At least one special character</string>
+
+    <string name="server_configure">Configure your server</string>
+    <string name="server_change">Change server</string>
+    <string name="server_not_configured">No server configured</string>
+    <string name="server_description">Enter the address provided by your administrator to sign in and synchronize. You can also use the app locally without an account.</string>
+    <string name="server_address">Server address</string>
+    <string name="server_address_help">Use the HTTPS website address, without /api or login paths.</string>
+    <string name="server_invalid">Enter a valid HTTPS address without credentials, paths, query parameters or fragments.</string>
+    <string name="server_continue">Save and continue</string>
+    <string name="server_change_warning">Changing server signs you out. Cached data stays on this device and remains separate for each server. Synchronize pending changes before switching.</string>
 </resources>

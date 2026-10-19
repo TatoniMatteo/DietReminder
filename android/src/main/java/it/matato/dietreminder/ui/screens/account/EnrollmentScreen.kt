@@ -34,6 +34,7 @@ fun EnrollmentScreen(vm: AccountViewModel) {
                 else -> R.string.enrollment_approved_title
             }), style = MaterialTheme.typography.headlineMedium)
             Text(account.email)
+            TextButton(onClick = vm::openServerConfiguration, enabled = !busy) { Text(stringResource(R.string.server_change)) }
             Text(stringResource(R.string.enrollment_steps))
             if (account.enrollmentStatus == EnrollmentStatus.PENDING_EMAIL) {
                 Text(stringResource(R.string.enrollment_verify_help))

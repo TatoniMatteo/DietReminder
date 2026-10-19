@@ -135,8 +135,8 @@ test('release metadata is code-owned and the administrator has no update editor'
   const policy = await response.json()
   expect(policy).toMatchObject({
     deprecatedVersionCode: 5,
-    latestVersionCode: 5,
-    latestVersionName: '2.0.0',
+    latestVersionCode: 6,
+    latestVersionName: '2.0.1',
   })
   expect([1, 2, 3, 4].every((code) => code < policy.deprecatedVersionCode)).toBe(true)
   const me = await session(admin)

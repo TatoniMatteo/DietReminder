@@ -446,4 +446,14 @@
   <string name="password_uppercase">Almeno una maiuscola</string>
   <string name="password_lowercase">Almeno una minuscola</string>
   <string name="password_special">Almeno un carattere speciale</string>
+
+    <string name="server_configure">Configura il server</string>
+    <string name="server_change">Cambia server</string>
+    <string name="server_not_configured">Nessun server configurato</string>
+    <string name="server_description">Inserisci l’indirizzo fornito dall’amministratore per accedere e sincronizzare. Puoi anche usare l’app in locale senza account.</string>
+    <string name="server_address">Indirizzo del server</string>
+    <string name="server_address_help">Usa l’indirizzo HTTPS del sito, senza percorsi /api o di accesso.</string>
+    <string name="server_invalid">Inserisci un indirizzo HTTPS valido senza credenziali, percorsi, parametri o frammenti.</string>
+    <string name="server_continue">Salva e continua</string>
+    <string name="server_change_warning">Cambiando server verrà richiesto un nuovo accesso. I dati memorizzati restano sul dispositivo, separati per ogni server. Sincronizza le modifiche in sospeso prima di cambiare.</string>
 </resources>

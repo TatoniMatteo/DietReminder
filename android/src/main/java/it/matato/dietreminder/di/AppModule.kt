@@ -6,8 +6,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import it.matato.dietreminder.BuildConfig
-import it.matato.dietreminder.client.BackendClient
 import it.matato.dietreminder.client.UserService
 import it.matato.dietreminder.data.auth.*
 import it.matato.dietreminder.data.repository.contracts.*
@@ -40,7 +38,5 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDietBackendApiService(sessions: AccountSessionStore): UserService = BackendClient.create(
-        BuildConfig.BACKEND_BASE_URL, tokenProvider = sessions::token, onUnauthorized = sessions::unauthorized
-    )
+    fun provideDietBackendApiService(service: ConfiguredUserService): UserService = service
 }

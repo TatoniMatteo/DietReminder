@@ -16,15 +16,35 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AccountViewModel @Inject constructor(private val sessions: AccountSessionStore, private val api: UserService, private val sync: it.matato.dietreminder.data.sync.CloudSyncManager? = null) : ViewModel() {
+    private val mutableServerConfiguration = MutableStateFlow(false)
+    val serverConfiguration = mutableServerConfiguration.asStateFlow()
+    fun openServerConfiguration() { if (!busy.value) mutableServerConfiguration.value = true }
+    fun closeServerConfiguration() { mutableServerConfiguration.value = false }
     val account = sessions.state
+    fun configureServer(url: String) {
+        if (busy.value) return
+        sessions.configureServer(url)
+        if (sessions.state.value.session == null) sessions.enterCloud()
+        closeServerConfiguration()
+        mutableGoogle.value = GoogleProvidersDto()
+        mutableGoogleBackups.value = GoogleBackupState()
+        mutableEnrollment.value = emptyList()
+        clearMessage()
+        loadGoogleConfiguration()
+    }
     private val mutableGoogle = MutableStateFlow(GoogleProvidersDto())
     val googleProviders = mutableGoogle.asStateFlow()
     data class GoogleBackupState(val accountId: String? = null, val status: GoogleDriveStatus? = null, val backups: List<GoogleBackupDto> = emptyList())
     private val mutableGoogleBackups = MutableStateFlow(GoogleBackupState())
     val googleBackupState = mutableGoogleBackups.asStateFlow()
     fun loadGoogleConfiguration() {
+        val server = account.value.serverUrl
+        if (server.isEmpty()) return
         viewModelScope.launch {
-            try { mutableGoogle.value = api.googleProviders() }
+            try {
+                val providers = api.googleProviders()
+                if (account.value.serverUrl == server) mutableGoogle.value = providers
+            }
             catch (ex: CancellationException) { throw ex }
             catch (_: Exception) { /* Other login methods remain available offline. */ }
         }
@@ -90,7 +110,7 @@ class AccountViewModel @Inject constructor(private val sessions: AccountSessionS
     private val mutableMessage = MutableStateFlow<String?>(null)
     val message = mutableMessage.asStateFlow()
     fun enterCloud() { if (!busy.value) sessions.enterCloud() }
-    fun useLocal() { if (!busy.value) sessions.useLocal() }
+    fun useLocal() { if (!busy.value) { sessions.useLocal(); closeServerConfiguration() } }
     private val mutableEnrollment = MutableStateFlow<List<EnrollmentEventDto>>(emptyList())
     val enrollmentHistory = mutableEnrollment.asStateFlow()
     fun refreshEnrollment() = perform {
