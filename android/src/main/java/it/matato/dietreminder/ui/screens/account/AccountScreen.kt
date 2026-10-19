@@ -46,8 +46,10 @@ fun AccountScreen(vm: AccountViewModel) {
     val message by vm.message.collectAsState()
     val google by vm.googleProviders.collectAsState()
     val context = LocalContext.current
-    LaunchedEffect(vm) { vm.loadGoogleConfiguration() }
+    val account by vm.account.collectAsState()
+    LaunchedEffect(vm, account.serverUrl) { vm.loadGoogleConfiguration() }
     AccountAccessContent(
+        onConfigureServer = vm::openServerConfiguration, serverUrl = account.serverUrl,
         busy = busy, message = message, firstRegistrationRequired = google.firstRegistrationRequired,
         onLogin = vm::login, onRegister = vm::register,
         onForgot = vm::forgot, onReset = vm::reset,
@@ -68,6 +70,8 @@ internal fun AccountAccessContent(
     onClearMessage: () -> Unit,
     onGoogle: (() -> Unit)? = null,
     firstRegistrationRequired: Boolean = false,
+    serverUrl: String = "",
+    onConfigureServer: (() -> Unit)? = null,
 ) {
     var selectedMode by rememberSaveable { mutableStateOf("login") }
     val mode = if (firstRegistrationRequired) "register" else selectedMode
@@ -117,6 +121,11 @@ internal fun AccountAccessContent(
                     Column {
                         Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         Text(stringResource(R.string.account_brand_caption), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                    }
+                }
+                if (onConfigureServer != null) {
+                    TextButton(onClick = onConfigureServer, enabled = !busy, modifier = Modifier.testTag("configureServer")) {
+                        Text(stringResource(R.string.server_change) + if (serverUrl.isNotEmpty()) " · $serverUrl" else "")
                     }
                 }
                 Spacer(Modifier.height(AppSpace.section))
@@ -285,6 +294,8 @@ fun AccountSettingsSection() {
     LaunchedEffect(vm) { vm.loadGoogleConfiguration() }
     AppCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(AppSpace.card), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(state.serverUrl.ifEmpty { stringResource(R.string.server_not_configured) })
+            OutlinedButton(enabled = !busy, onClick = vm::openServerConfiguration) { Text(stringResource(R.string.server_configure)) }
             Text(stringResource(R.string.cloud_account), style = MaterialTheme.typography.titleMedium)
             Text(state.session?.account?.email ?: stringResource(R.string.account_local_mode))
             if (state.session != null) {

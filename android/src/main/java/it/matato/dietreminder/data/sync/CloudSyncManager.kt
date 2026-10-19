@@ -3,7 +3,6 @@ package it.matato.dietreminder.data.sync
 import android.content.Context
 import androidx.room.withTransaction
 import dagger.hilt.android.qualifiers.ApplicationContext
-import it.matato.dietreminder.BuildConfig
 import it.matato.dietreminder.client.BackendClient
 import it.matato.dietreminder.data.auth.AccountRepositories
 import it.matato.dietreminder.data.auth.AccountSessionStore
@@ -44,7 +43,7 @@ class CloudSyncManager @Inject constructor(
         val running = activity.getOrPut(scope) { MutableStateFlow(false) }
         val current = { sessions.state.value.scope == scope && sessions.token() == session.token }
         // Pin credentials to this run. A switch to another account cannot redirect a pending upload.
-        val api = BackendClient.create(BuildConfig.BACKEND_BASE_URL, tokenProvider = { session.token }, onUnauthorized = sessions::unauthorized)
+        val api = BackendClient.create(state.serverUrl, tokenProvider = { session.token }, onUnauthorized = { if (sessions.state.value.serverUrl == state.serverUrl) sessions.unauthorized(it) })
         running.value = true
         try {
             WorkspaceSync(journal, api, current).run()
@@ -70,7 +69,7 @@ class CloudSyncManager @Inject constructor(
             check(state.scope == scope)
             val journal = repositories.forScope(scope).journal ?: error("No cloud cache")
             val generation = journal.database.withTransaction { journal.state().generation }
-            val api = BackendClient.create(BuildConfig.BACKEND_BASE_URL, tokenProvider = { session.token }, onUnauthorized = sessions::unauthorized)
+            val api = BackendClient.create(state.serverUrl, tokenProvider = { session.token }, onUnauthorized = { if (sessions.state.value.serverUrl == state.serverUrl) sessions.unauthorized(it) })
             val remote = api.getWorkspace()
             check(sessions.state.value.scope == scope && sessions.token() == session.token)
             if (useServer) {

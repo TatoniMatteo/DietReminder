@@ -38,6 +38,7 @@ class AccountIsolationTest {
         context.getSharedPreferences("auth_session", Context.MODE_PRIVATE).edit().clear().commit()
         context.databaseList().forEach { context.deleteDatabase(it) }
         sessions = AccountSessionStore(context, TestSessionCipher())
+        sessions.configureServer("https://test.example.com/")
         UpdateManagerStatus.isOffline = false
         UpdateManagerStatus.isChecking = false
     }
@@ -102,4 +103,32 @@ class AccountIsolationTest {
         assertFalse(AccountSessionStore.databaseName("../../alice").contains(".."))
         assertNotEquals(AccountSessionStore.databaseName("alice"), AccountSessionStore.databaseName("bob"))
     }
+    @Test
+    fun firstLaunchRequiresSetupAndLocalChoiceIsRemembered() {
+        context.getSharedPreferences("auth_session", Context.MODE_PRIVATE).edit().clear().commit()
+        val fresh = AccountSessionStore(context, TestSessionCipher())
+        assertFalse(fresh.state.value.serverSetupComplete)
+        assertEquals("", fresh.state.value.serverUrl)
+        fresh.useLocal()
+        assertTrue(AccountSessionStore(context, TestSessionCipher()).state.value.serverSetupComplete)
+    }
+
+    @Test
+    fun changingServerClearsCredentialsAndIsolatesTheSameUserId() = runBlocking {
+        val scoped = ScopedAccountRepository(AccountRepositories(context, sessions))
+        sessions.save(session("alice"))
+        scoped.create("First server", 90)
+        val firstScope = sessions.state.value.scope
+        sessions.configureServer("https://other.example.com")
+        assertNull(sessions.token())
+        assertEquals("https://other.example.com/", sessions.state.value.serverUrl)
+        assertEquals("https://other.example.com/", AccountSessionStore(context, TestSessionCipher()).state.value.serverUrl)
+        sessions.save(session("alice"))
+        assertNotEquals(firstScope, sessions.state.value.scope)
+        assertTrue(scoped.all.first().isEmpty())
+        sessions.configureServer("https://test.example.com")
+        sessions.save(session("alice"))
+        assertEquals(listOf("First server"), scoped.all.first().map { it.name })
+    }
+
 }

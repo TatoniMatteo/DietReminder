@@ -88,6 +88,8 @@ jobs:
           npm --prefix web run format:check
           npm --prefix web run test:coverage
           npm --prefix web run build
+      - name: Production stack with a single Nginx entry point
+        run: bash scripts/test-production.sh
       - name: Install browsers
         run: npx --prefix web playwright install --with-deps chromium firefox
       - name: Browser integration tests with backend, PostgreSQL and SMTP

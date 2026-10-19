@@ -33,6 +33,7 @@ class AccountViewModelTest {
         val context = ApplicationProvider.getApplicationContext<Application>()
         context.getSharedPreferences("auth_session", Context.MODE_PRIVATE).edit().clear().commit()
         sessions = AccountSessionStore(context, TestSessionCipher())
+        sessions.configureServer("https://test.example.com/")
         api = TestAuthApi()
         vm = AccountViewModel(sessions, api)
     }

@@ -60,6 +60,7 @@ import it.matato.dietreminder.viewmodel.DietViewModel
 fun App() {
     val auth: it.matato.dietreminder.viewmodel.AccountViewModel = hiltViewModel()
     val account by auth.account.collectAsState()
+    val configuringServer by auth.serverConfiguration.collectAsState()
     LaunchedEffect(account.session?.token) { auth.validateSession() }
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     androidx.compose.runtime.DisposableEffect(lifecycleOwner, auth) {
@@ -71,7 +72,9 @@ fun App() {
     }
     androidx.compose.runtime.CompositionLocalProvider(it.matato.dietreminder.ui.screens.account.LocalAccountViewModel provides auth) {
         androidx.compose.runtime.key(account.scope) {
-            if (account.cloud && account.session == null) {
+            if (configuringServer || (account.serverUrl.isEmpty() && (account.cloud || !account.serverSetupComplete))) {
+                DietTheme { it.matato.dietreminder.ui.screens.account.ServerConfigurationScreen(auth) }
+            } else if (account.cloud && account.session == null) {
                 DietTheme { it.matato.dietreminder.ui.screens.account.AccountScreen(auth) }
             } else if (account.session?.account?.ready == false) {
                 DietTheme { it.matato.dietreminder.ui.screens.account.EnrollmentScreen(auth) }

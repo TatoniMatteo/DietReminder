@@ -17,10 +17,6 @@ android {
 		targetSdk = libs.versions.targetSdk.get().toInt()
 		versionCode = libs.versions.versionCode.get().toInt()
 		versionName = libs.versions.versionName.get()
-        val backendUrl = providers.gradleProperty("backendBaseUrl")
-            .getOrElse("http://10.0.2.2:8080/")
-        require(backendUrl.endsWith("/")) { "backendBaseUrl must end with /" }
-        buildConfigField("String", "BACKEND_BASE_URL", "\"${backendUrl}\"")
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
