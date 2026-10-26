@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import it.matato.dietreminder.R
 import it.matato.dietreminder.ui.components.AppCard
 import it.matato.dietreminder.ui.screens.account.LocalAccountViewModel
@@ -62,8 +63,23 @@ internal fun SettingsHub(developer: Boolean, onOpen: (String) -> Unit) {
 }
 
 @Composable
-internal fun SettingsShoppingNotificationsLink(onOpen: () -> Unit) {
+internal fun SettingsShoppingNotificationsSection(onOpen: () -> Unit, timeMinutes: Int = 1080, onTimeClick: () -> Unit = {}) {
     SettingsSection(stringResource(R.string.settings_shopping_notifications),Icons.Rounded.ShoppingCart) {
+        SettingsListItem(
+            title = stringResource(R.string.shopping_reminder_time),
+            subtitle = stringResource(R.string.shopping_reminder_time_summary),
+            leadingIcon = Icons.Rounded.Schedule,
+            trailingContent = {
+                Text(
+                    text = "%02d:%02d".format(timeMinutes / 60, timeMinutes % 60),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            onClick = onTimeClick,
+        )
+        SettingsDivider()
         SettingsListItem(stringResource(R.string.nav_shopping_lists),stringResource(R.string.settings_shopping_reminder_summary),Icons.Rounded.ShoppingCart,onClick=onOpen)
     }
 }

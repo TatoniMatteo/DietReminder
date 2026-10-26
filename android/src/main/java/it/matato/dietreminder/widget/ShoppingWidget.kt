@@ -1,7 +1,6 @@
 package it.matato.dietreminder.widget
 
 import android.content.Context
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.*
@@ -37,7 +36,7 @@ internal object ShoppingWidgetKeys {
 }
 class ShoppingWidget : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
-    override val sizeMode = SizeMode.Responsive(setOf(DpSize(230.dp, 180.dp), DpSize(280.dp, 300.dp)))
+    override val sizeMode = SizeMode.Exact
     companion object { suspend fun updateAll(context: Context) { ShoppingWidget().updateAll(context) } }
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val app = context.applicationContext as DietApplication
@@ -64,33 +63,31 @@ internal fun ShoppingWidgetContent(context: Context, current: Boolean, selected:
                 WidgetBrand(context, if (current) selected?.list?.name ?: context.getString(R.string.widget_shopping) else context.getString(R.string.widget_shopping), context.getString(R.string.widget_shopping_remaining, rows.count { !it.bought }), scheme, open)
                 if (failed) Text(context.getString(R.string.widget_write_failed), style = TextStyle(fontSize = 11.sp, color = ColorProvider(scheme.error)))
                 Spacer(GlanceModifier.height(8.dp))
-                if (rows.isEmpty()) Box(GlanceModifier.defaultWeight().fillMaxWidth().clickable(open), contentAlignment = Alignment.CenterStart) {
+                if (rows.isEmpty()) Box(GlanceModifier.defaultWeight().fillMaxWidth().clickable(open).padding(16.dp), contentAlignment = Alignment.CenterStart) {
                     Text(context.getString(if (selected == null || !current) R.string.widget_no_lists else R.string.widget_empty_list), style = TextStyle(fontSize = 14.sp, color = ColorProvider(scheme.onSurfaceVariant)))
                 } else LazyColumn(GlanceModifier.fillMaxWidth().defaultWeight()) {
                     rows.forEach { entry ->
                         item(itemId = entry.dayId?.let { -it } ?: entry.itemId) {
-                            Row(GlanceModifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Row(GlanceModifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                                 val action = actionRunCallback<ToggleShoppingAction>(actionParametersOf(ShoppingWidgetKeys.expectedScope to scope, ShoppingWidgetKeys.selectedList to selected!!.list.id, ShoppingWidgetKeys.item to entry.itemId, ShoppingWidgetKeys.day to (entry.dayId ?: 0), ShoppingWidgetKeys.bought to !entry.bought))
-                                if (!UpdateManagerStatus.writesBlocked) WidgetAction(context.getString(if (entry.bought) R.string.widget_mark_pending else R.string.widget_mark_bought, entry.name), scheme, action, if (entry.bought) R.drawable.widget_checked else R.drawable.widget_unchecked)
+                                if (!UpdateManagerStatus.writesBlocked) WidgetAction(context.getString(if (entry.bought) R.string.widget_mark_pending else R.string.widget_mark_bought, entry.name), scheme, action, if (entry.bought) R.drawable.widget_checked else R.drawable.widget_unchecked, tonal = false)
                                 Column(GlanceModifier.defaultWeight().padding(vertical = 3.dp).clickable(open)) {
-                                    Text(entry.name, style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ColorProvider(if (entry.bought) scheme.onSurfaceVariant else scheme.onSurface)), maxLines = 1)
+                                    Text(entry.name, style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ColorProvider(if (entry.bought) scheme.onSurfaceVariant else scheme.onSurface)), maxLines = 2)
                                     val day = entry.purchaseDay?.let { DayOfWeek.of(it).getDisplayName(DayTextStyle.SHORT, context.resources.configuration.locales[0] ?: Locale.ENGLISH) }
-                                    Text(listOfNotNull(entry.quantity.takeIf { it.isNotBlank() }, entry.category, day).joinToString(" · "), style = TextStyle(fontSize = 11.sp, color = ColorProvider(scheme.onSurfaceVariant)), maxLines = 1)
+                                    Text(listOfNotNull(entry.quantity.takeIf { it.isNotBlank() }, entry.category.takeIf { LocalSize.current.height >= 220.dp }, day).joinToString(" · "), style = TextStyle(fontSize = 11.sp, color = ColorProvider(scheme.onSurfaceVariant)), maxLines = 1)
                                 }
                             }
                         }
                     }
                 }
-                Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    if (current && lists.size > 1) {
-                        val index = lists.indexOfFirst { it.list.id == selected?.list?.id }
+                if (current && lists.size > 1) {
+                    val index = lists.indexOfFirst { it.list.id == selected?.list?.id }
+                    Spacer(GlanceModifier.height(8.dp))
+                    Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         WidgetAction(context.getString(R.string.widget_previous_list), scheme, listAction(lists[Math.floorMod(index - 1, lists.size)].list.id, scope), R.drawable.widget_previous)
-                    }
-                    Spacer(GlanceModifier.defaultWeight())
-                    WidgetAction(context.getString(R.string.widget_open_list), scheme, open)
-                    Spacer(GlanceModifier.defaultWeight())
-                    if (current && lists.size > 1) {
-                        val index = lists.indexOfFirst { it.list.id == selected?.list?.id }
+                        Spacer(GlanceModifier.defaultWeight())
+                        WidgetAction(context.getString(R.string.widget_open_list), scheme, open, if (LocalSize.current.width < 240.dp) R.drawable.widget_open else null)
+                        Spacer(GlanceModifier.defaultWeight())
                         WidgetAction(context.getString(R.string.widget_next_list), scheme, listAction(lists[(index + 1) % lists.size].list.id, scope), R.drawable.widget_next)
                     }
                 }

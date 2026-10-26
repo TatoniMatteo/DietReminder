@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import it.matato.dietreminder.data.database.entity.Course
+import it.matato.dietreminder.data.database.relation.CourseWithItems
 import it.matato.dietreminder.data.database.entity.Meal
 import it.matato.dietreminder.data.model.MealType
 import it.matato.dietreminder.data.repository.fake.FakeDietRepository
@@ -51,9 +53,9 @@ class WeekFunctionalTest {
                 dayOfWeek = DayOfWeek.MONDAY,
                 type = MealType.LUNCH,
                 timeMinutes = 13 * 60,
-                description = "Pasta al pomodoro"
+                description = "Note del pranzo"
             )
-            fakeRepository.saveMeal(meal, emptyList())
+            fakeRepository.saveMeal(meal, listOf(CourseWithItems(Course(mealId = meal.id, name = "Pasta al pomodoro"), emptyList())))
         }
 
         composeTestRule.setContent {

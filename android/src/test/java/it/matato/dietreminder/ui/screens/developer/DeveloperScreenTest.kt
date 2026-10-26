@@ -5,6 +5,12 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import it.matato.dietreminder.R
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import it.matato.dietreminder.TestDietApplication
@@ -41,4 +47,17 @@ class DeveloperScreenTest {
 			.onFirst()
 			.assertIsDisplayed()
 	}
+
+    @Test
+    fun toolsHaveSeparatePagesAndBackReturnsToTheHub() {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        val vm = DietViewModel(context, FakeDietRepository())
+        composeTestRule.setContent { DietTheme { DeveloperScreen(vm, onBack = {}) } }
+        composeTestRule.onNodeWithText(context.getString(R.string.run_checker)).assertDoesNotExist()
+        composeTestRule.onNodeWithTag("developerPage_ALARMS").performScrollTo().performClick()
+        composeTestRule.onNodeWithText(context.getString(R.string.run_checker)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(context.getString(R.string.test_scheduler)).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(context.getString(R.string.back)).performClick()
+        composeTestRule.onNodeWithTag("developerPage_PERMISSIONS").performScrollTo().assertIsDisplayed()
+    }
 }

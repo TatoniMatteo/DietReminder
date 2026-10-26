@@ -19,4 +19,4 @@
     <string name="widget_mark_bought">Mark as bought: %1$s</string>
     <string name="widget_mark_pending">Mark as pending: %1$s</string>
     <string name="widget_write_failed">Purchase not saved. Retry or open the app.</string>
-<string name="widget_preview_food">Apples</string><string name="widget_preview_meal_detail">12:30 · Pasta and vegetables</string><string name="widget_preview_shopping_detail">Fruit and vegetables · 2 to buy</string><string name="widget_loading">Loading…</string></resources>
+<string name="widget_preview_food">Apples</string><string name="widget_preview_meal_detail">Pasta with tomato sauce\nSeasonal vegetables</string><string name="widget_preview_shopping_detail">Fruit and vegetables · 2 to buy</string><string name="widget_loading">Loading…</string></resources>

@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -189,6 +190,15 @@ class DietViewModel @Inject constructor(
 			SharingStarted.WhileSubscribed(5000),
 			true,
 		)
+
+	val shoppingReminderTime = configRepository.observeConfig(ConfigKey.SHOPPING_REMINDER_TIME)
+        .map { it?.value?.toIntOrNull()?.takeIf { minutes -> minutes in 0..1439 } ?: 1080 }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1080)
+
+    fun setShoppingReminderTime(timeMinutes: Int) {
+        require(timeMinutes in 0..1439)
+        launchLocalWrite { configRepository.saveConfig(ConfigKey.SHOPPING_REMINDER_TIME, timeMinutes.toString()) }
+    }
 
 	val isDeveloperMode = configRepository.observeConfig(ConfigKey.DEVELOPER_MODE)
 		.map { it?.value == "true" }
@@ -451,8 +461,12 @@ class DietViewModel @Inject constructor(
 
     fun updateShoppingAllocation(day: it.matato.dietreminder.data.database.entity.ShoppingListItemDay) { launchWrite { shoppingListRepository.updateShoppingAllocation(day) } }
 
-    fun updateShoppingReminders(listId: Long, enabled: Boolean, timeMinutes: Int) {
-        launchWrite { shoppingListRepository.updateShoppingReminders(listId, enabled, timeMinutes) }
+    fun updateShoppingReminders(listId: Long, enabled: Boolean) {
+        launchWrite {
+            val time = configRepository.observeConfig(ConfigKey.SHOPPING_REMINDER_TIME).first()
+                ?.value?.toIntOrNull()?.takeIf { it in 0..1439 } ?: 1080
+            shoppingListRepository.updateShoppingReminders(listId, enabled, time)
+        }
     }
     fun moveShoppingPurchase(itemId: Long, dayId: Long?, purchaseDay: java.time.DayOfWeek?) {
         launchWrite { shoppingListRepository.moveShoppingPurchase(itemId, dayId, purchaseDay) }

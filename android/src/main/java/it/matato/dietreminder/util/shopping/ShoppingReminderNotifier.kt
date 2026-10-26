@@ -19,7 +19,7 @@ import kotlinx.coroutines.sync.withLock
 
 object ShoppingReminderNotifier {
     private val lock = Mutex()
-    suspend fun deliver(context: Context, snapshot: WorkspaceSnapshot, scope: String, now: LocalDateTime, isCurrent: () -> Boolean): Int = lock.withLock {
+    suspend fun deliver(context: Context, snapshot: WorkspaceSnapshot, scope: String, now: LocalDateTime, reminderTimeMinutes: Int = 1080, isCurrent: () -> Boolean): Int = lock.withLock {
         val manager = context.getSystemService(NotificationManager::class.java)
         NotificationChannelManager(context).ensureChannel(NotificationChannelConfig(id = ShoppingReminderWorker.CHANNEL, nameResId = R.string.shopping_reminders_channel, descriptionResId = R.string.shopping_reminders_description, importance = NotificationManager.IMPORTANCE_DEFAULT))
         if (!isCurrent() || !NotificationManagerCompat.from(context).areNotificationsEnabled() || manager.getNotificationChannel(ShoppingReminderWorker.CHANNEL)?.importance == NotificationManager.IMPORTANCE_NONE) return@withLock 0
@@ -32,7 +32,7 @@ object ShoppingReminderNotifier {
             val key = "$scope:${list.id}"
             val missing = ShoppingPlanning.pendingTomorrow(snapshot, list.id, now.plusDays(1).dayOfWeek.value)
             if (missing.isEmpty()) { manager.cancel(tag, list.id.hashCode()); continue }
-            if (now.hour * 60 + now.minute < list.reminderTimeMinutes || prefs.getString(key, null) == now.toLocalDate().toString()) continue
+            if (now.hour * 60 + now.minute < reminderTimeMinutes || prefs.getString(key, null) == now.toLocalDate().toString()) continue
             if (!isCurrent()) return@withLock sent
             val intent = Intent(context, MainActivity::class.java).apply {
                 data = android.net.Uri.parse("dietreminder://shoppinglists")

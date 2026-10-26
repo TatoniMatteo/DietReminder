@@ -3,6 +3,8 @@ package it.matato.dietreminder.data.database.entity
 enum class ConfigKey {
 	MEAL_REMINDERS_ENABLED,
 
+	SHOPPING_REMINDER_TIME,
+
 	SCHEDULED_ALARMS_REGISTRY,
 
 	THEME,

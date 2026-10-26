@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import it.matato.dietreminder.R
@@ -37,6 +36,7 @@ import it.matato.dietreminder.ui.dialog.TimePickerDialog
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
 import java.io.OutputStreamWriter
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,6 +63,8 @@ fun SettingsScreen(
 	val currentLanguage by vm.language.collectAsState()
 	val defaultTimes by vm.defaultTimes.collectAsState()
 	val mealRemindersEnabled by vm.mealRemindersEnabled.collectAsState()
+    val shoppingReminderTime by vm.shoppingReminderTime.collectAsState()
+    var showShoppingTimePicker by remember { mutableStateOf(false) }
 
 	val scope = rememberCoroutineScope()
 	val snackBarHostState = remember { SnackbarHostState() }
@@ -73,15 +75,12 @@ fun SettingsScreen(
 	var showLanguagePicker by remember { mutableStateOf(false) }
 
 	var developerClickCount by remember { mutableIntStateOf(0) }
+    var developerSnackbarJob by remember { mutableStateOf<Job?>(null) }
 
 	val exportSuccessMessage = stringResource(R.string.json_exported)
 	val exportFailedMessage = stringResource(R.string.export_failed)
 	val developerModeActivatedMessage = stringResource(R.string.developer_mode_activated)
-	val developerClicksRemaining = pluralStringResource(
-		R.plurals.developer_clicks_remaining,
-		7 - developerClickCount,
-		7 - developerClickCount,
-	)
+
 
 	val exportLauncher = rememberLauncherForActivityResult(
 		ActivityResultContracts.CreateDocument("application/vnd.matato.dietreminder"),
@@ -109,6 +108,11 @@ fun SettingsScreen(
 		dietToExport = null
 	}
 
+    if (page == SettingsPage.DEVELOPER.key) {
+        if (isDeveloperMode) it.matato.dietreminder.ui.screens.developer.DeveloperScreen(vm, onBack = goBack)
+        return
+    }
+
 	SettingsContent(
         page = page, onSelectPage = openPage, onBack = goBack, onShopping = onNavigateToShopping,
 		diets = diets,
@@ -119,6 +123,8 @@ fun SettingsScreen(
 		currentLanguage = currentLanguage,
 		defaultTimes = defaultTimes,
 		mealRemindersEnabled = mealRemindersEnabled,
+        shoppingReminderTime = shoppingReminderTime,
+        onShoppingReminderTimeClick = { showShoppingTimePicker = true },
 		onNavigateToDeveloper = onNavigateToDeveloper,
 		onThemeChange = { theme -> vm.setTheme(theme) },
 		onDynamicColorsChange = { enabled -> vm.setUseDynamicColors(enabled) },
@@ -135,23 +141,32 @@ fun SettingsScreen(
 			if (!isDeveloperMode) {
 				developerClickCount++
 
-				if (developerClickCount >= 7) {
-					vm.setDeveloperMode(true)
-					developerClickCount = 0
-
-					scope.launch {
-						snackBarHostState.showSnackbar(developerModeActivatedMessage)
-					}
-				} else if (developerClickCount >= 3) {
-					scope.launch {
-						snackBarHostState.showSnackbar(developerClicksRemaining)
-					}
-				}
+                if (developerClickCount >= 3) {
+                    developerSnackbarJob?.cancel()
+                    val message = if (developerClickCount >= 7) {
+                        vm.setDeveloperMode(true)
+                        developerClickCount = 0
+                        developerModeActivatedMessage
+                    } else {
+                        val remaining = 7 - developerClickCount
+                        context.resources.getQuantityString(R.plurals.developer_clicks_remaining, remaining, remaining)
+                    }
+                    developerSnackbarJob = scope.launch { snackBarHostState.showSnackbar(message) }
+                }
 			}
 		},
 		snackBarHostState = snackBarHostState,
 		getFallbackTime = { vm.getDefaultFallback(it) },
 	)
+
+    if (showShoppingTimePicker) {
+        TimePickerDialog(
+            title = stringResource(R.string.shopping_reminder_time),
+            initialTimeMinutes = shoppingReminderTime,
+            onDismiss = { showShoppingTimePicker = false },
+            onTimeSelected = { vm.setShoppingReminderTime(it); showShoppingTimePicker = false },
+        )
+    }
 
 	if (showColorPicker) {
 		ColorPickerDialog(
@@ -217,6 +232,8 @@ fun SettingsContent(
     onSelectPage: (String) -> Unit = {},
     onBack: () -> Unit = {},
     onShopping: () -> Unit = {},
+    shoppingReminderTime: Int = 1080,
+    onShoppingReminderTimeClick: () -> Unit = {},
 ) {
     val selected = SettingsPage.entries.find { it.key == page }
     AppScaffold(
@@ -233,7 +250,9 @@ fun SettingsContent(
             if (selected == null) {
                 item { SettingsHeader() }
                 item { SettingsAccountSummary { onSelectPage("account") } }
-                item { SettingsHub(isDeveloperMode, onSelectPage) }
+                item { SettingsHub(isDeveloperMode) { key ->
+                    if (key == SettingsPage.DEVELOPER.key) onNavigateToDeveloper() else onSelectPage(key)
+                } }
             } else when (selected) {
                 SettingsPage.APPEARANCE -> item { SettingsAppearanceSection(currentTheme, dynamicColorsEnabled, seedColorHex, currentLanguage, onThemeChange, onDynamicColorsChange, onColorClick, onLanguageClick) }
                 SettingsPage.ACCOUNT -> {
@@ -243,14 +262,14 @@ fun SettingsContent(
                 SettingsPage.PLANNING -> item { SettingsPlanningSectionContent(defaultTimes, onMealTypeClick, getFallbackTime) }
                 SettingsPage.NOTIFICATIONS -> {
                     item { SettingsNotificationsSection(mealRemindersEnabled, onRemindersEnabledChange) }
-                    item { SettingsShoppingNotificationsLink(onShopping) }
+                    item { SettingsShoppingNotificationsSection(onShopping, shoppingReminderTime, onShoppingReminderTimeClick) }
                 }
                 SettingsPage.BACKUP -> {
                     item { it.matato.dietreminder.ui.screens.account.AccountBackupSettingsSection() }
                     item { SettingsBackupSection(diets, onImportClick, onExportClick) }
                 }
                 SettingsPage.ABOUT -> item { SettingsAboutSection(onVersionClick) }
-                SettingsPage.DEVELOPER -> item { if (isDeveloperMode) SettingsDeveloperSection(onNavigateToDeveloper) }
+                SettingsPage.DEVELOPER -> Unit
             }
         }
     }

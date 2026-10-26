@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.items
 import it.matato.dietreminder.ui.icons.AppIcons as Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
@@ -51,11 +53,13 @@ fun ShoppingDayPlanner(
     onCompletedDelete: () -> Unit = {},
     onAllocation: (ShoppingListItemDay) -> Unit = {},
 ) {
-    var selected by remember { mutableStateOf(-1) }
+    var selected by rememberSaveable(list.list.id) { mutableStateOf(-1) }
+    var purchasedExpanded by rememberSaveable(list.list.id) { mutableStateOf(false) }
     var organizing by remember { mutableStateOf<ShoppingEntry?>(null) }
     val entries = remember(list) { shoppingEntries(list) }
     val disabled = LocalOfflineMode.current
-    val filtered = entries.filter { selected == -1 || (it.purchaseDay?.value ?: 0) == selected }
+    val purchased = entries.filter { it.bought }.sortedBy { it.item.name.lowercase() }
+    val filtered = entries.filter { !it.bought && (selected == -1 || (it.purchaseDay?.value ?: 0) == selected) }
     if (organizing != null) {
         val entry = organizing!!
         androidx.activity.compose.BackHandler { organizing = null }
@@ -77,41 +81,71 @@ fun ShoppingDayPlanner(
             }
         }
         LazyColumn(contentPadding = PaddingValues(start = AppSpace.screen, end = AppSpace.screen, top = 12.dp, bottom = 96.dp), verticalArrangement = Arrangement.spacedBy(AppSpace.item)) {
-            if (entries.isNotEmpty() && entries.all { it.bought }) item { CompletedListCard(onCompletedDelete) }
-            if (filtered.isEmpty()) item { Text("Nessun acquisto per questo giorno.", Modifier.padding(vertical = 24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            if (filtered.isEmpty()) item { Text(stringResource(R.string.shopping_pending_empty), Modifier.padding(vertical = 24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant) }
             filtered.groupBy { it.purchaseDay?.value ?: 0 }.toSortedMap().forEach { (day, dayEntries) ->
                 item("day-$day") {
                     Text(if (day == 0) "Senza giorno · dispensa" else "Acquisti di ${DayOfWeek.of(day).label()}", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 12.dp))
                 }
                 dayEntries.groupBy { FoodCategories.classify(it.item.name, it.item.category) }.toSortedMap().forEach { (category, rows) ->
-                    item("category-$day-$category") { Text("$category · ${rows.count { !it.bought }} da acquistare", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge) }
-                    items(rows.sortedWith(compareBy<ShoppingEntry> { it.bought }.thenBy { it.item.name }), key = { it.key }) { entry ->
-                        AppCard(Modifier.fillMaxWidth().animateItem()) {
-                            Row(Modifier.fillMaxWidth().padding(AppSpace.item), verticalAlignment = Alignment.CenterVertically) {
-                                Checkbox(entry.bought, { if (entry.day != null) onToggleDay(entry.day.id, !entry.bought) else onToggleItem(entry.item) }, enabled = !disabled, modifier = Modifier.testTag("shoppingCheck_${entry.key}"))
-                                Column(Modifier.weight(1f).clickable(enabled = !disabled) { if (entry.day != null) onToggleDay(entry.day.id, !entry.bought) else onToggleItem(entry.item) }) {
-                                    Text(entry.item.name, style = MaterialTheme.typography.titleMedium, color = if (entry.bought) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface)
-                                    val quantity = entry.day?.displayQuantity ?: entry.item.displayQuantity
-                                    if (quantity.isNotEmpty()) Text(quantity, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    entry.neededDay?.let { Text("Serve ${it.label().lowercase()}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                                }
-                                var menu by remember { mutableStateOf(false) }
-                                Box {
-                                    IconButton({ menu = true }, enabled = !disabled, modifier = Modifier.testTag("shoppingOptions_${entry.key}")) { Icon(Icons.Rounded.MoreVert, "Opzioni ${entry.item.name}") }
-                                    DropdownMenu(menu, { menu = false }) {
-                                        DropdownMenuItem({ Text("Giorno e categoria") }, { menu = false; organizing = entry })
-                                        DropdownMenuItem({ Text(stringResource(R.string.edit_item)) }, { menu = false; onEdit(entry.item) })
-                                        DropdownMenuItem({ Text("Rimuovi alimento dalla lista") }, { menu = false; onDelete(entry.item.id) })
-                                    }
-                                }
-                            }
+                    item("category-$day-$category") { Text("$category · ${rows.size} da acquistare", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge) }
+                    items(rows.sortedBy { it.item.name.lowercase() }, key = { it.key }) { entry ->
+                        ShoppingEntryRow(entry, disabled, onToggleItem, onToggleDay, onEdit, onDelete,
+                            onOrganize = { organizing = entry }, modifier = Modifier.animateItem())
+                    }
+                }
+            }
+            if (purchased.isNotEmpty()) {
+                item("purchased-header") {
+                    AppCard(Modifier.fillMaxWidth().clickable { purchasedExpanded = !purchasedExpanded }.testTag("shoppingPurchasedSection")) {
+                        Row(Modifier.fillMaxWidth().padding(AppSpace.card), verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(R.string.shopping_purchased, purchased.size), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                            Icon(if (purchasedExpanded) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
+                                stringResource(if (purchasedExpanded) R.string.collapse else R.string.expand))
                         }
                     }
+                }
+                if (purchasedExpanded) items(purchased, key = { it.key }) { entry ->
+                    ShoppingEntryRow(entry, disabled, onToggleItem, onToggleDay, onEdit, onDelete,
+                        onOrganize = { organizing = entry }, modifier = Modifier.animateItem())
+                }
+            }
+            if (entries.isNotEmpty() && entries.all { it.bought }) item { CompletedListCard(onCompletedDelete) }
+        }
+    }
+
+}
+
+@Composable
+private fun ShoppingEntryRow(
+    entry: ShoppingEntry,
+    disabled: Boolean,
+    onToggleItem: (ShoppingListItem) -> Unit,
+    onToggleDay: (Long, Boolean) -> Unit,
+    onEdit: (ShoppingListItem) -> Unit,
+    onDelete: (Long) -> Unit,
+    onOrganize: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    AppCard(modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth().padding(AppSpace.item), verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(entry.bought, { if (entry.day != null) onToggleDay(entry.day.id, !entry.bought) else onToggleItem(entry.item) }, enabled = !disabled, modifier = Modifier.testTag("shoppingCheck_${entry.key}"))
+            Column(Modifier.weight(1f).clickable(enabled = !disabled) { if (entry.day != null) onToggleDay(entry.day.id, !entry.bought) else onToggleItem(entry.item) }) {
+                Text(entry.item.name, style = MaterialTheme.typography.titleMedium, textDecoration = if (entry.bought) TextDecoration.LineThrough else null, color = if (entry.bought) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface)
+                val quantity = entry.day?.displayQuantity ?: entry.item.displayQuantity
+                if (quantity.isNotEmpty()) Text(quantity, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                entry.neededDay?.let { Text("Serve ${it.label().lowercase()}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            }
+            var menu by remember { mutableStateOf(false) }
+            Box {
+                IconButton({ menu = true }, enabled = !disabled, modifier = Modifier.testTag("shoppingOptions_${entry.key}")) { Icon(Icons.Rounded.MoreVert, "Opzioni ${entry.item.name}") }
+                DropdownMenu(menu, { menu = false }) {
+                    DropdownMenuItem({ Text("Giorno e categoria") }, { menu = false; onOrganize() })
+                    DropdownMenuItem({ Text(stringResource(R.string.edit_item)) }, { menu = false; onEdit(entry.item) })
+                    DropdownMenuItem({ Text("Rimuovi alimento dalla lista") }, { menu = false; onDelete(entry.item.id) })
                 }
             }
         }
     }
-
 }
 
 @Composable

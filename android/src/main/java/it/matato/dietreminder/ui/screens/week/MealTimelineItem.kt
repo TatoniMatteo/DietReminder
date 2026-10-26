@@ -94,9 +94,8 @@ fun MealTimelineItem(
                 }
                 Icon(Icons.Rounded.KeyboardArrowDown, stateLabel, Modifier.rotate(rotation).size(24.dp), tint = secondary)
             }
-            val preview = mealDetails.meal.description.ifBlank {
-                mealDetails.courses.flatMap { it.items }.joinToString(" · ") { it.name }
-            }
+            val preview = if (expanded) mealDetails.meal.description else mealDetails.courses.map { it.course.name.trim() }
+                .filter { it.isNotBlank() }.joinToString(", ")
             if (preview.isNotBlank()) {
                 Text(preview, style = MaterialTheme.typography.bodyMedium, color = secondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }

@@ -426,7 +426,7 @@
     <string name="settings_group_organize">La tua routine</string>
     <string name="settings_group_data">Dati e applicazione</string>
     <string name="settings_shopping_notifications">Promemoria della spesa</string>
-    <string name="settings_shopping_reminder_summary">Scegli promemoria e orari nelle singole liste</string>
+    <string name="settings_shopping_reminder_summary">Attiva o disattiva il promemoria per ciascuna lista</string>
     <string name="settings_backup_login_hint">Accedi da Account e sicurezza per usare i backup Google Drive.</string>
     <string name="settings_security_title">Password e accesso</string>
     <string name="settings_reset_password">Reimposta password</string>
@@ -456,4 +456,27 @@
     <string name="server_invalid">Inserisci un indirizzo HTTPS valido senza credenziali, percorsi, parametri o frammenti.</string>
     <string name="server_continue">Salva e continua</string>
     <string name="server_change_warning">Cambiando server verrà richiesto un nuovo accesso. I dati memorizzati restano sul dispositivo, separati per ogni server. Sincronizza le modifiche in sospeso prima di cambiare.</string>
+  <string name="shopping_reminder_time">Orario promemoria spesa</string>
+  <string name="shopping_reminder_time_summary">Un solo orario per tutte le liste, il giorno prima degli acquisti.</string>
+  <string name="shopping_purchased">Acquistati (%1$d)</string>
+  <string name="shopping_pending_empty">Nessun alimento da acquistare per questo giorno.</string>
+  <string name="developer_permissions">Permessi app</string>
+  <string name="developer_permissions_summary">Verifica i permessi per notifiche e sveglie</string>
+  <string name="developer_alarms_summary">Consulta, sincronizza e annulla le sveglie programmate</string>
+  <string name="developer_logs_summary">Filtra e cancella i messaggi di diagnostica</string>
+  <string name="developer_tests_summary">Programma una notifica di prova</string>
+  <string name="developer_danger_summary">Modalità sviluppatore e gestione dei dati</string>
+  <string name="developer_log_search">Cerca nei messaggi</string>
+  <string name="developer_log_all_levels">Tutti i livelli</string>
+  <string name="developer_log_min_level">Da %1$s in su</string>
+  <string name="developer_log_count">%1$d di %2$d eventi</string>
+  <string name="developer_log_order">Dal più recente</string>
+  <string name="developer_logs_empty">Nessun log presente</string>
+  <string name="developer_logs_empty_description">Qui compariranno le attività e i messaggi di diagnostica dell’app.</string>
+  <string name="developer_logs_no_matches">Nessun evento trovato</string>
+  <string name="developer_logs_no_matches_description">Modifica la ricerca o scegli un altro livello di log.</string>
+  <string name="developer_alarm_count">In programma · %1$d</string>
+  <string name="developer_alarm_summary">Eventi in ordine cronologico. Sincronizza per aggiornare la programmazione.</string>
+  <string name="developer_alarms_empty_description">Abilita i promemoria dei pasti e attiva un piano alimentare, poi sincronizza.</string>
+  <string name="developer_alarm_id">ID %1$d</string>
 </resources>
