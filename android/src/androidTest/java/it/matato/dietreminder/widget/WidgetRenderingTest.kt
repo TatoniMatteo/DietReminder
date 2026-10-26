@@ -75,7 +75,11 @@ class WidgetRenderingTest {
             val screen = instrumentation.uiAutomation.takeScreenshot()
             val location = IntArray(2)
             instrumentation.runOnMainSync { widgetView.getLocationOnScreen(location) }
-            val bitmap = android.graphics.Bitmap.createBitmap(screen, location[0], location[1], width, height)
+            // CI displays can be narrower than a tested widget. Keep full-size layout assertions
+            // above and export the part visible on the physical display.
+            val bounds = android.graphics.Rect(location[0], location[1], location[0] + width, location[1] + height)
+            assertTrue(bounds.intersect(0, 0, screen.width, screen.height))
+            val bitmap = android.graphics.Bitmap.createBitmap(screen, bounds.left, bounds.top, bounds.width(), bounds.height())
             java.io.File(context.getExternalFilesDir(null), "$snapshot.png").outputStream().use {
                 bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)
             }
