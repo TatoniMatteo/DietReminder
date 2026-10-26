@@ -126,7 +126,7 @@ fun ShoppingListDetailScreen(
 		},
         onMovePurchase = vm::moveShoppingPurchase,
         onAllocation = vm::updateShoppingAllocation,
-        onReminders = { enabled, time -> vm.updateShoppingReminders(listId, enabled, time) },
+        onReminders = { enabled -> vm.updateShoppingReminders(listId, enabled) },
 		onRenameList = { newName ->
 			vm.updateShoppingListName(listId, newName)
 		},
@@ -169,7 +169,7 @@ fun ShoppingListDetailContent(
 	onRenameList: (String) -> Unit,
     onAllocation: (ShoppingListItemDay) -> Unit = {},
     onMovePurchase: (Long, Long?, java.time.DayOfWeek?) -> Unit = { _, _, _ -> },
-    onReminders: (Boolean, Int) -> Unit = { _, _ -> },
+    onReminders: (Boolean) -> Unit = {},
 ) {
 	val isOffline = LocalOfflineMode.current
 	var editingItem by remember { mutableStateOf<ShoppingListItem?>(null) }

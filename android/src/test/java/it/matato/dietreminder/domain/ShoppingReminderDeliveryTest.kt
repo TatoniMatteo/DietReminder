@@ -36,4 +36,19 @@ class ShoppingReminderDeliveryTest {
         assertEquals(0, ShoppingReminderNotifier.deliver(context,snapshot,"previous-account",now){false})
         assertEquals(0, ShoppingReminderNotifier.deliver(context,snapshot.copy(lists=snapshot.lists.map{it.copy(remindersEnabled=false)}),"local",now){true})
     }
+
+    @Test fun commonTimeOverridesDifferentLegacyListTimes() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        val now = LocalDateTime.of(2026, 10, 18, 17, 0)
+        val lists = snapshot.copy(
+            lists = listOf(
+                snapshot.lists.single().copy(reminderTimeMinutes = 480),
+                CloudShoppingList(2, "Altra spesa", 1, remindersEnabled = true, reminderTimeMinutes = 1320),
+            ),
+            items = snapshot.items + CloudShoppingItem(2, 2, "Pane", dayOfWeek = 1),
+        )
+        assertEquals(0, ShoppingReminderNotifier.deliver(context, lists, "local", now.minusMinutes(1), 1020) { true })
+        assertEquals(2, ShoppingReminderNotifier.deliver(context, lists, "local", now, 1020) { true })
+        assertEquals(0, ShoppingReminderNotifier.deliver(context, lists, "local", now.plusMinutes(30), 1020) { true })
+    }
 }

@@ -52,14 +52,16 @@ class WeekRestylingFunctionalTest {
                 MealTimelineItem(lunch, onEdit = { edited = true })
             }
         }
-        compose.onNodeWithText("Piatto unico").assertDoesNotExist()
+        compose.onNodeWithText("Piatto unico").assertIsDisplayed()
+        compose.onNodeWithText("Riso").assertDoesNotExist()
         compose.onNodeWithTag("weekMeal_21").performClick()
         compose.onNodeWithText("Piatto unico").assertIsDisplayed()
         compose.onNodeWithText("Riso").assertIsDisplayed()
         compose.onNodeWithText(text(R.string.edit_meal)).performClick()
         compose.runOnIdle { assertTrue(edited) }
         compose.onNodeWithTag("weekMeal_21").performClick()
-        compose.onNodeWithText("Piatto unico").assertDoesNotExist()
+        compose.onNodeWithText("Piatto unico").assertIsDisplayed()
+        compose.onNodeWithText("Riso").assertDoesNotExist()
     }
 
     @Test

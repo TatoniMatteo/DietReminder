@@ -453,7 +453,7 @@
   <string name="settings_group_organize">Daily routine</string>
   <string name="settings_group_data">Data and application</string>
   <string name="settings_shopping_notifications">Shopping reminders</string>
-  <string name="settings_shopping_reminder_summary">Choose reminders and times in each shopping list</string>
+  <string name="settings_shopping_reminder_summary">Enable or disable reminders for each shopping list</string>
   <string name="settings_backup_login_hint">Sign in from Account and security to use Google Drive backups.</string>
   <string name="settings_security_title">Password and access</string>
   <string name="settings_reset_password">Reset password</string>
@@ -483,4 +483,27 @@
     <string name="server_invalid">Enter a valid HTTPS address without credentials, paths, query parameters or fragments.</string>
     <string name="server_continue">Save and continue</string>
     <string name="server_change_warning">Changing server signs you out. Cached data stays on this device and remains separate for each server. Synchronize pending changes before switching.</string>
+  <string name="shopping_reminder_time">Shopping reminder time</string>
+  <string name="shopping_reminder_time_summary">One time for all shopping lists, the day before purchases.</string>
+  <string name="shopping_purchased">Purchased (%1$d)</string>
+  <string name="shopping_pending_empty">No items left to buy for this day.</string>
+  <string name="developer_permissions">App permissions</string>
+  <string name="developer_permissions_summary">Check notification and alarm permissions</string>
+  <string name="developer_alarms_summary">Inspect, synchronize and cancel scheduled alarms</string>
+  <string name="developer_logs_summary">Filter and clear diagnostic messages</string>
+  <string name="developer_tests_summary">Schedule a test notification</string>
+  <string name="developer_danger_summary">Developer mode and data management</string>
+  <string name="developer_log_search">Search messages</string>
+  <string name="developer_log_all_levels">All levels</string>
+  <string name="developer_log_min_level">%1$s and above</string>
+  <string name="developer_log_count">%1$d of %2$d events</string>
+  <string name="developer_log_order">Most recent first</string>
+  <string name="developer_logs_empty">No logs yet</string>
+  <string name="developer_logs_empty_description">App activity and diagnostic messages will appear here.</string>
+  <string name="developer_logs_no_matches">No matching events</string>
+  <string name="developer_logs_no_matches_description">Change the search or choose a different log level.</string>
+  <string name="developer_alarm_count">Scheduled · %1$d</string>
+  <string name="developer_alarm_summary">Events in chronological order. Synchronize to refresh the schedule.</string>
+  <string name="developer_alarms_empty_description">Enable meal reminders and activate a meal plan, then synchronize.</string>
+  <string name="developer_alarm_id">ID %1$d</string>
 </resources>

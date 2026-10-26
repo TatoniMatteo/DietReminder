@@ -1,8 +1,8 @@
 {
   "minSupportedVersionCode": 1,
-  "deprecatedVersionCode": 1,
-  "latestVersionCode": 3,
-  "latestVersionName": "1.2.1",
+  "deprecatedVersionCode": 5,
+  "latestVersionCode": 7,
+  "latestVersionName": "2.0.2",
   "minSupportedMajor": 1,
   "updateUrl": "https://github.com/TatoniMatteo/DietReminder/releases/latest"
 }
