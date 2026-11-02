@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 /** One account's shared data. Device preferences and notification registries stay local. */
 @Serializable
 data class WorkspaceSnapshot(
-    val schemaVersion: Int = 2,
+    val schemaVersion: Int = 3,
     val diets: List<CloudDiet> = emptyList(),
     val meals: List<CloudMeal> = emptyList(),
     val courses: List<CloudCourse> = emptyList(),
@@ -15,7 +15,7 @@ data class WorkspaceSnapshot(
     val days: List<CloudShoppingDay> = emptyList()
 ) {
     fun requireValid() {
-        require(schemaVersion in 1..2) { "Unsupported workspace schema" }
+        require(schemaVersion in 1..3) { "Unsupported workspace schema" }
         require(diets.size + meals.size + courses.size + foods.size + lists.size + items.size + days.size <= 50_000) { "Too many records" }
         if (schemaVersion == 1) require(lists.none { it.remindersEnabled || it.reminderTimeMinutes != 1080 } && items.none { it.category != null || it.purchaseDayOfWeek != null } && days.none { it.purchaseDayOfWeek != null }) { "Shopping planning requires schema version 2" }
         fun ids(values: List<Long>): Set<Long> {
@@ -42,7 +42,11 @@ data class WorkspaceSnapshot(
             require(it.dietId in dietIds && it.dayOfWeek in 1..7 && it.timeMinutes in 0..1439) { "Invalid meal" }
             text(it.description, 10_000); it.customTypeLabel?.let { label -> text(label, 500) }
         }
-        courses.forEach { require(it.mealId in mealIds) { "Missing meal" }; text(it.name, 500) }
+        if (schemaVersion < 3) require(courses.none { it.alternativeGroup != null || it.description.isNotEmpty() }) { "Meal alternatives require schema version 3" }
+        courses.groupBy { it.mealId }.values.forEach { group ->
+            requireValidAlternativeGroups(group.map { it.alternativeGroup })
+        }
+        courses.forEach { text(it.description, 10_000); require(it.mealId in mealIds) { "Missing meal" }; text(it.name, 500) }
         foods.forEach { require(it.courseId in courseIds) { "Missing course" }; text(it.name, 500, false); text(it.amount, 200) }
         lists.forEach { require(it.dietId == null || it.dietId in dietIds) { "Missing diet" }; text(it.name, 500, false); require(it.createdAt >= 0 && it.reminderTimeMinutes in 0..1439) }
         items.forEach { require(it.shoppingListId in listIds && (it.dayOfWeek == null || it.dayOfWeek in 1..7)) { "Invalid shopping item" }; text(it.name, 500, false); text(it.amount, 200); it.category?.let { category -> text(category, 80, false) }; require(it.purchaseDayOfWeek == null || it.purchaseDayOfWeek in 1..7) }
@@ -55,7 +59,7 @@ data class WorkspaceSnapshot(
 
 @Serializable data class CloudDiet(val id: Long, val uuid: String, val name: String, val nextMealWindowMinutes: Int = 90, val isActive: Boolean = false, val disabledNotificationDays: String = "")
 @Serializable data class CloudMeal(val id: Long, val dietId: Long, val dayOfWeek: Int, val type: MealType, val timeMinutes: Int, val description: String = "", val customTypeLabel: String? = null, val isNotificationEnabled: Boolean = true)
-@Serializable data class CloudCourse(val id: Long, val mealId: Long, val name: String = "", val order: Int = 0)
+@Serializable data class CloudCourse(val id: Long, val mealId: Long, val name: String = "", val order: Int = 0, val alternativeGroup: String? = null, val description: String = "")
 @Serializable data class CloudFood(val id: Long, val courseId: Long, val name: String, val amount: String = "", val unit: QuantityUnit = QuantityUnit.GRAMS, val order: Int = 0)
 @Serializable data class CloudShoppingList(val id: Long, val name: String, val createdAt: Long, val dietId: Long? = null, val remindersEnabled: Boolean = false, val reminderTimeMinutes: Int = 1080)
 @Serializable data class CloudShoppingItem(val id: Long, val shoppingListId: Long, val name: String, val amount: String = "", val unit: QuantityUnit = QuantityUnit.GRAMS, val isBought: Boolean = false, val isCustom: Boolean = false, val isFresh: Boolean = false, val dayOfWeek: Int? = null, val category: String? = null, val purchaseDayOfWeek: Int? = null)

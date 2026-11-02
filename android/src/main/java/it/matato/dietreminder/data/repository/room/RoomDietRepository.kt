@@ -75,6 +75,7 @@ class RoomDietRepository(
 
 	override suspend fun saveMeal(meal: Meal, mealCourses: List<CourseWithItems>) =
 		database.withTransaction {
+            it.matato.dietreminder.common.model.requireValidAlternativeGroups(mealCourses.map { it.course.alternativeGroup })
 			val mealId = if (meal.id == 0L) {
 				meals.insert(meal)
 			} else {
@@ -90,6 +91,8 @@ class RoomDietRepository(
 						mealId = mealId,
 						name = courseWithItems.course.name,
 						order = courseWithIndex(courseIndex, courseWithItems.course.order),
+                        alternativeGroup = courseWithItems.course.alternativeGroup,
+                        description = courseWithItems.course.description,
 					),
 				)
 
@@ -144,6 +147,8 @@ class RoomDietRepository(
 						mealId = newMealId,
 						name = courseDetails.course.name,
 						order = courseDetails.course.order,
+                            alternativeGroup = courseDetails.course.alternativeGroup,
+                            description = courseDetails.course.description,
 					),
 				)
 
@@ -169,6 +174,7 @@ class RoomDietRepository(
 		val dietMeals = meals.getAllWithDetails(id)
 
 		val export = DietExport(
+            formatVersion = if (dietMeals.any { m -> m.courses.any { it.course.alternativeGroup != null || it.course.description.isNotBlank() } }) 2 else 1,
 			uuid = diet.uuid,
 			name = diet.name,
 			nextMealWindowMinutes = diet.nextMealWindowMinutes,
@@ -188,6 +194,8 @@ class RoomDietRepository(
 						CourseExport(
 							name = courseDetails.course.name,
 							order = courseDetails.course.order,
+                            alternativeGroup = courseDetails.course.alternativeGroup,
+                            description = courseDetails.course.description,
 							items = courseDetails.items.map { item ->
 								FoodItemExport(
 									name = item.name,
@@ -253,6 +261,8 @@ class RoomDietRepository(
 						mealId = mealId,
 						name = courseExport.name,
 						order = courseExport.order,
+                        alternativeGroup = courseExport.alternativeGroup,
+                        description = courseExport.description,
 					),
 				)
 

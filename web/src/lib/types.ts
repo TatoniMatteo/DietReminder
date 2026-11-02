@@ -68,6 +68,8 @@ export interface Meal {
   isNotificationEnabled: boolean
 }
 export interface Course {
+  alternativeGroup?: string | null
+  description?: string
   id: number
   mealId: number
   name: string

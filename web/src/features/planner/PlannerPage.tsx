@@ -1,3 +1,4 @@
+import { courseSummary } from '../../lib/alternatives'
 import { Select } from '../../components/Select'
 import { usePermission } from '../../lib/access'
 import { t, locale } from '../../lib/i18n'
@@ -207,6 +208,7 @@ export function PlannerPage({ navigate }: { navigate: (route: string) => void })
                 const courses = s.courses
                   .filter((c) => c.mealId === meal.id)
                   .sort((a, b) => a.order - b.order)
+                const groups = [...new Set(courses.map((c) => c.alternativeGroup).filter(Boolean))]
                 const foods = s.foods.filter((f) => courses.some((c) => c.id === f.courseId))
                 return (
                   <details className={`meal-card surface ${meal.type.toLowerCase()}`} key={meal.id}>
@@ -217,7 +219,7 @@ export function PlannerPage({ navigate }: { navigate: (route: string) => void })
                       <span className="meal-title">
                         <strong>{meal.customTypeLabel || mealNames[meal.type]}</strong>
                         <small>
-                          {meal.description ||
+                          {(groups.length ? courseSummary(courses) : meal.description) ||
                             (foods.length
                               ? t('{0} ingredienti, una buona idea', { '0': foods.length })
                               : t('Il tuo momento di pausa'))}
@@ -229,7 +231,13 @@ export function PlannerPage({ navigate }: { navigate: (route: string) => void })
                     <div className="meal-content">
                       {courses.map((course) => (
                         <div key={course.id}>
+                          {course.alternativeGroup && (
+                            <span className="tag">{t('Alternativa')}</span>
+                          )}
                           {course.name && <h4>{course.name}</h4>}
+                          {course.description && (
+                            <p className="muted small">{course.description}</p>
+                          )}
                           {s.foods
                             .filter((x) => x.courseId === course.id)
                             .sort((a, b) => a.order - b.order)

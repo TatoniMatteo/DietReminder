@@ -479,4 +479,15 @@
   <string name="developer_alarm_summary">Eventi in ordine cronologico. Sincronizza per aggiornare la programmazione.</string>
   <string name="developer_alarms_empty_description">Abilita i promemoria dei pasti e attiva un piano alimentare, poi sincronizza.</string>
   <string name="developer_alarm_id">ID %1$d</string>
+    <string name="add_course_alternative">Aggiungi alternativa a questa portata</string>
+    <string name="course_preparation">Preparazione della portata</string>
+    <string name="meal_alternative">Alternativa</string>
+    <string name="shopping_alternatives">Alternative per questa spesa</string>
+    <string name="shopping_alternatives_hint">Scegli cosa acquistare questa volta. Le scelte non modificano la dieta.</string>
+    <string name="shopping_alternatives_continue">Continua</string>
+    <string name="export_pdf_name">Esporta %1$s in PDF</string>
+    <string name="pdf_exported">PDF esportato</string>
+    <string name="pdf_no_meals">Nessun pasto pianificato.</string>
+    <string name="pdf_alternative">Alternativa %1$d</string>
+    <string name="export_json_name">Esporta %1$s in JSON</string>
 </resources>

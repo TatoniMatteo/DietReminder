@@ -66,7 +66,11 @@ fun DietTheme(
 		shapes = AppShapes,
         typography = AppTypography,
     ) {
-        CompositionLocalProvider(LocalCompactLayout provides compact, content = content)
+        CompositionLocalProvider(
+            LocalCompactLayout provides compact,
+            LocalBrandLogoRotation provides logoHueRotation(seedColor ?: targetScheme.primary, dynamicColor || seedColor != null),
+            content = content,
+        )
     }
 }
 

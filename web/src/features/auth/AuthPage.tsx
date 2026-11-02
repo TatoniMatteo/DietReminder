@@ -80,7 +80,7 @@ export function AuthPage({
       <section className="auth-story">
         <div className="brand">
           <span className="brand-icon">
-            <img className="brand-logo" src="/logo.svg" alt="" />
+            <span className="brand-logo" aria-hidden="true" />
           </span>
           <span>
             Diet Reminder<small>{t('UN PO’ PIÙ DI EQUILIBRIO')}</small>

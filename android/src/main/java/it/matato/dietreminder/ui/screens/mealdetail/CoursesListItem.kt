@@ -99,6 +99,12 @@ fun CourseListItem(
             }
         }
 
+        OutlinedTextField(
+            value = courseWithItems.course.description,
+            onValueChange = { onUpdate(courseWithItems.copy(course = courseWithItems.course.copy(description = it.take(10_000)))) },
+            label = { Text(stringResource(R.string.course_preparation)) },
+            modifier = Modifier.fillMaxWidth(), enabled = !isOffline,
+        )
         courseWithItems.items.forEachIndexed { itemIndex, item ->
             FoodItemRow(
                 item = item,

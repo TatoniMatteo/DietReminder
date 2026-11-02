@@ -116,7 +116,7 @@ internal fun AccountAccessContent(
             Column(Modifier.widthIn(max = 440.dp).fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AppSpace.item)) {
                     Surface(shape = RoundedCornerShape(18.dp), color = androidx.compose.ui.graphics.Color.Transparent) {
-                        androidx.compose.foundation.Image(painterResource(R.drawable.brand_logo), null, Modifier.size(54.dp))
+                        it.matato.dietreminder.ui.theme.BrandLogo(Modifier.size(54.dp))
                     }
                     Column {
                         Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)

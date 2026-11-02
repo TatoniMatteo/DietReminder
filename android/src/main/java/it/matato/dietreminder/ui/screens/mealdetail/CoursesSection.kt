@@ -76,6 +76,7 @@ fun CoursesList(
 	suggestions: List<String> = emptyList(),
 	onUpdate: (Int, CourseWithItems) -> Unit,
 	onDelete: (Int) -> Unit,
+    onAddAlternative: (Int) -> Unit = {},
 	onAddCourse: () -> Unit,
 ) {
 	val isOffline = LocalOfflineMode.current
@@ -85,6 +86,7 @@ fun CoursesList(
 	) {
 		Column {
 			courses.forEachIndexed { index, course ->
+                if (course.course.alternativeGroup != null) Text(stringResource(R.string.meal_alternative))
 				CourseListItem(
 					index = index,
 					courseWithItems = course,
@@ -96,6 +98,7 @@ fun CoursesList(
 						onDelete(index)
 					},
 				)
+                TextButton(onClick = { onAddAlternative(index) }, enabled = !isOffline) { Text(stringResource(R.string.add_course_alternative)) }
 				HorizontalDivider(
 					modifier = Modifier.padding(
 						horizontal = if (index < courses.lastIndex) 16.dp else 0.dp,

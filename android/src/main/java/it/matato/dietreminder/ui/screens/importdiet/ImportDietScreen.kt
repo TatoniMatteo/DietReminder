@@ -342,6 +342,7 @@ private fun DietPreviewCard(
                     )
 
                     meal.courses.forEach { course ->
+                        if (course.alternativeGroup != null) Text(stringResource(R.string.meal_alternative))
                         course.items.forEach { item ->
                             Text(
                                 text = "   - ${item.name} (${item.displayQuantity.ifBlank { "Nessuna quantità" }})",

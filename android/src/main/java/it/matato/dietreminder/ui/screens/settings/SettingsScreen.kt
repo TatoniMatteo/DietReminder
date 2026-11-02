@@ -36,6 +36,8 @@ import it.matato.dietreminder.ui.dialog.TimePickerDialog
 import it.matato.dietreminder.ui.theme.DietTheme
 import it.matato.dietreminder.viewmodel.DietViewModel
 import java.io.OutputStreamWriter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -69,6 +71,7 @@ fun SettingsScreen(
 	val scope = rememberCoroutineScope()
 	val snackBarHostState = remember { SnackbarHostState() }
 
+    var dietToExportPdf by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<Long?>(null) }
 	var dietToExport by remember { mutableStateOf<Long?>(null) }
 	var mealTypeToEdit by remember { mutableStateOf<MealType?>(null) }
 	var showColorPicker by remember { mutableStateOf(false) }
@@ -108,6 +111,23 @@ fun SettingsScreen(
 		dietToExport = null
 	}
 
+    val pdfSuccessMessage = stringResource(R.string.pdf_exported)
+    val exportPdfLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { uri ->
+        val dietId = dietToExportPdf
+        dietToExportPdf = null
+        if (uri != null && dietId != null) scope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    val diet = vm.parseDietJson(vm.exportDiet(dietId))
+                    val output = context.contentResolver.openOutputStream(uri) ?: error("Cannot open PDF destination")
+                    output.use { stream -> it.matato.dietreminder.data.export.DietPdfExporter.write(context, diet, stream) }
+                }
+                snackBarHostState.showSnackbar(pdfSuccessMessage)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+            catch (_: Exception) { snackBarHostState.showSnackbar(exportFailedMessage) }
+        }
+    }
+
     if (page == SettingsPage.DEVELOPER.key) {
         if (isDeveloperMode) it.matato.dietreminder.ui.screens.developer.DeveloperScreen(vm, onBack = goBack)
         return
@@ -133,6 +153,7 @@ fun SettingsScreen(
 		onMealTypeClick = { type -> mealTypeToEdit = type },
 		onRemindersEnabledChange = { enabled -> vm.setMealRemindersEnabled(enabled) },
 		onImportClick = onNavigateToImportDiet,
+        onExportPdfClick = { dietId, fileName -> dietToExportPdf = dietId; exportPdfLauncher.launch(fileName) },
 		onExportClick = { dietId, fileName ->
 			dietToExport = dietId
 			exportLauncher.launch(fileName)
@@ -225,6 +246,7 @@ fun SettingsContent(
 	onRemindersEnabledChange: (Boolean) -> Unit,
 	onImportClick: () -> Unit,
 	onExportClick: (Long, String) -> Unit,
+    onExportPdfClick: (Long, String) -> Unit = { _, _ -> },
 	onVersionClick: () -> Unit,
 	snackBarHostState: SnackbarHostState,
 	getFallbackTime: (MealType) -> Int,
@@ -266,7 +288,7 @@ fun SettingsContent(
                 }
                 SettingsPage.BACKUP -> {
                     item { it.matato.dietreminder.ui.screens.account.AccountBackupSettingsSection() }
-                    item { SettingsBackupSection(diets, onImportClick, onExportClick) }
+                    item { SettingsBackupSection(diets, onImportClick, onExportClick, onExportPdfClick) }
                 }
                 SettingsPage.ABOUT -> item { SettingsAboutSection(onVersionClick) }
                 SettingsPage.DEVELOPER -> Unit

@@ -506,4 +506,15 @@
   <string name="developer_alarm_summary">Events in chronological order. Synchronize to refresh the schedule.</string>
   <string name="developer_alarms_empty_description">Enable meal reminders and activate a meal plan, then synchronize.</string>
   <string name="developer_alarm_id">ID %1$d</string>
+    <string name="add_course_alternative">Add alternative to this course</string>
+    <string name="course_preparation">Course preparation</string>
+    <string name="meal_alternative">Alternative</string>
+    <string name="shopping_alternatives">Alternatives for this shopping list</string>
+    <string name="shopping_alternatives_hint">Choose what to buy this time. These choices do not change the diet.</string>
+    <string name="shopping_alternatives_continue">Continue</string>
+    <string name="export_pdf_name">Export %1$s as PDF</string>
+    <string name="pdf_exported">PDF exported</string>
+    <string name="pdf_no_meals">No planned meals.</string>
+    <string name="pdf_alternative">Alternative %1$d</string>
+    <string name="export_json_name">Export %1$s as JSON</string>
 </resources>

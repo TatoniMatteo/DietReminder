@@ -119,7 +119,7 @@ export default function App() {
     return (
       <div className="boot-screen">
         <span className="brand-icon">
-          <img className="brand-logo" src="/logo.svg" alt="Diet Reminder" />
+          <span className="brand-logo" role="img" aria-label="Diet Reminder" />
         </span>
         <Spinner />
         <span className="muted">{t('Il tuo spazio sta arrivando…')}</span>
@@ -204,7 +204,7 @@ function Shell({
       <aside className="sidebar">
         <a className="brand" href="#week">
           <span className="brand-icon">
-            <img className="brand-logo" src="/logo.svg" alt="" />
+            <span className="brand-logo" aria-hidden="true" />
           </span>
           <span className="brand-name">
             Diet Reminder<small>{t('IL TUO EQUILIBRIO QUOTIDIANO')}</small>

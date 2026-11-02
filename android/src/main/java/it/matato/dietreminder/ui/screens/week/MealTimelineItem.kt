@@ -94,8 +94,8 @@ fun MealTimelineItem(
                 }
                 Icon(Icons.Rounded.KeyboardArrowDown, stateLabel, Modifier.rotate(rotation).size(24.dp), tint = secondary)
             }
-            val preview = if (expanded) mealDetails.meal.description else mealDetails.courses.map { it.course.name.trim() }
-                .filter { it.isNotBlank() }.joinToString(", ")
+            val preview = if (expanded && mealDetails.courses.none { it.course.alternativeGroup != null }) mealDetails.meal.description else mealDetails.courses.map { it.course.name.trim() }
+                .filter { it.isNotBlank() }.joinToString(if (mealDetails.courses.any { it.course.alternativeGroup != null }) " / " else ", ")
             if (preview.isNotBlank()) {
                 Text(preview, style = MaterialTheme.typography.bodyMedium, color = secondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
@@ -109,7 +109,10 @@ fun MealTimelineItem(
                     if (mealDetails.courses.isEmpty()) {
                         Text(stringResource(R.string.week_no_courses), style = MaterialTheme.typography.bodyMedium, color = secondary)
                     }
-                    mealDetails.courses.forEach { course -> CourseSection(course) }
+                    mealDetails.courses.forEach { course ->
+                        if (course.course.alternativeGroup != null) Text(stringResource(R.string.meal_alternative), style = MaterialTheme.typography.labelMedium)
+                        CourseSection(course)
+                    }
                     if (onEdit != null) {
                         TextButton(onClick = onEdit, contentPadding = PaddingValues(horizontal = 0.dp)) {
                             Icon(Icons.Rounded.Edit, null, Modifier.size(18.dp))

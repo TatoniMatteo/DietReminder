@@ -1,6 +1,9 @@
 package it.matato.dietreminder.ui.screens.shoppinglist
 
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import it.matato.dietreminder.domain.toIngredientSummaries
 import androidx.compose.material3.FilledTonalIconButton
 import it.matato.dietreminder.ui.theme.AppSpace
 import it.matato.dietreminder.ui.components.AppTopBar
@@ -70,33 +73,40 @@ fun ImportDietFoodsScreen(
 	dietId: Long,
 	onBack: () -> Unit,
 ) {
-	var ingredients by remember { mutableStateOf<List<IngredientSummary>>(emptyList()) }
-	var isLoading by remember { mutableStateOf(true) }
-
-	LaunchedEffect(dietId) {
-		ingredients = vm.getDietIngredients(dietId)
-		isLoading = false
-	}
-
-	if (isLoading) {
-		Box(
-			modifier = Modifier.fillMaxSize(),
-			contentAlignment = Alignment.Center,
-		) {
-			CircularProgressIndicator()
-		}
-		return
-	}
-
-	ImportDietFoodsContent(
-		ingredients = ingredients,
-		onBack = onBack,
-		onConfirmImport = { configs ->
-			vm.importDietIngredientsToShoppingList(listId, dietId, configs) {
-				onBack()
-			}
-		},
-	)
+    var meals by remember { mutableStateOf<List<it.matato.dietreminder.data.database.relation.MealWithDetails>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var choosing by remember { mutableStateOf(true) }
+    var selected by remember { mutableStateOf<Set<Long>>(emptySet()) }
+    LaunchedEffect(dietId) {
+        meals = vm.getDietMeals(dietId)
+        selected = meals.flatMap { meal -> meal.courses.filter { it.course.alternativeGroup != null }.groupBy { it.course.alternativeGroup }.values.map { it.first().course.id } }.toSet()
+        choosing = selected.isNotEmpty()
+        isLoading = false
+    }
+    if (isLoading) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }; return }
+    if (choosing) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(stringResource(R.string.shopping_alternatives), style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(R.string.shopping_alternatives_hint))
+            meals.forEach { meal ->
+                meal.courses.filter { it.course.alternativeGroup != null }.groupBy { it.course.alternativeGroup }.values.forEach { choices ->
+                    Text(meal.meal.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.getDefault()))
+                    choices.forEach { row ->
+                        FilterChip(selected = row.course.id in selected,
+                            onClick = { selected = selected.minus(choices.map { it.course.id }.toSet()) + row.course.id },
+                            label = { Text(row.course.name) })
+                    }
+                }
+            }
+            Button(onClick = { choosing = false }) { Text(stringResource(R.string.shopping_alternatives_continue)) }
+            TextButton(onClick = onBack) { Text(stringResource(R.string.cancel)) }
+        }
+        return
+    }
+    val ingredients = remember(meals, selected) { meals.toIngredientSummaries(selected) }
+    ImportDietFoodsContent(ingredients = ingredients, onBack = onBack, onConfirmImport = { configs ->
+        vm.importDietIngredientsToShoppingList(listId, dietId, configs.map { it.copy(sourceCourseIds = selected) }) { onBack() }
+    })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

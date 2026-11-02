@@ -18,7 +18,7 @@ import it.matato.dietreminder.ui.theme.AppSpace
 fun WeekHeader(dietName: String?, onToday: (() -> Unit)? = null) {
     Column(Modifier.padding(horizontal = AppSpace.screen).padding(top = AppSpace.group, bottom = AppSpace.group)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(R.drawable.brand_logo), null, Modifier.size(38.dp))
+            it.matato.dietreminder.ui.theme.BrandLogo(Modifier.size(38.dp))
             Spacer(Modifier.width(AppSpace.inline))
             Text(stringResource(R.string.week), Modifier.weight(1f).testTag("weekTitle"), style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold)

@@ -406,7 +406,7 @@ class BackendIntegrationTest {
         alice.putWorkspace(WorkspacePutRequest(0, "valid", workspace()))
         for (invalid in listOf(
             workspace().copy(courses = emptyList()),
-            workspace().copy(schemaVersion = 3),
+            workspace().copy(schemaVersion = 4),
             workspace().copy(diets = workspace().diets + workspace().diets),
             workspace().copy(meals = listOf(CloudMeal(1, 1, 9, MealType.LUNCH, 720)))
         )) expectError(400, "INVALID_WORKSPACE") { alice.putWorkspace(WorkspacePutRequest(1, "invalid", invalid)) }
@@ -525,8 +525,8 @@ class BackendIntegrationTest {
         assertEquals(200, current.statusCode())
         val policy = tree(current.body())
         assertEquals(5, policy.path("deprecatedVersionCode").asInt())
-        assertEquals(7, policy.path("latestVersionCode").asInt())
-        assertEquals("2.0.2", policy.path("latestVersionName").asText())
+        assertEquals(8, policy.path("latestVersionCode").asInt())
+        assertEquals("2.1.0", policy.path("latestVersionName").asText())
         makeAdmin()
         assertEquals(401, http("/api/admin/version-policy", token = aliceSession.token).statusCode())
         assertEquals(401, http("/api/admin/version-policy", "PUT", "{}", aliceSession.token).statusCode())
@@ -601,7 +601,7 @@ class BackendIntegrationTest {
         for (field in listOf("diets", "meals", "courses", "foods", "lists", "items", "days")) {
             assertTrue(response.path("snapshot").path(field).isArray, "$field must be sent even when empty")
         }
-        assertEquals(2, response.path("snapshot").path("schemaVersion").asInt())
+        assertEquals(3, response.path("snapshot").path("schemaVersion").asInt())
         val account = tree(http("/api/auth/me", token = aliceSession.token).body())
         assertEquals("USER", account.path("role").asText())
         assertTrue(account.has("googleLinked")); assertFalse(account.path("googleLinked").asBoolean())

@@ -38,6 +38,9 @@ fun CourseSection(course: CourseWithItems) {
 
 		Spacer(modifier = Modifier.size(6.dp))
 
+        if (course.course.description.isNotBlank()) {
+            Text(course.course.description, style = MaterialTheme.typography.bodySmall)
+        }
 		ItemRows(course)
 	}
 }
