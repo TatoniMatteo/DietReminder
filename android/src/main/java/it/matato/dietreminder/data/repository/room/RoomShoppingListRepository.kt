@@ -125,7 +125,7 @@ class RoomShoppingListRepository(
 		configs: List<DietImportItemConfig>,
 	) = database.withTransaction {
 		val mealDetails = meals.getAllWithDetails(dietId)
-		val summaries = mealDetails.toIngredientSummaries()
+		val summaries = mealDetails.toIngredientSummaries(configs.firstOrNull()?.sourceCourseIds)
 		val configMap = configs.associateBy { it.ingredientName }
 
 		summaries.forEach { summary ->

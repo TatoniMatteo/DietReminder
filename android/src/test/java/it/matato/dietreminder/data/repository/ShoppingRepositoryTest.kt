@@ -48,6 +48,10 @@ class ShoppingRepositoryTest {
         val original=AppDatabase.create(context,name)
         original.shoppingListDao().insertList(ShoppingList(id=1,name="Da conservare"))
         original.shoppingListDao().insertItem(ShoppingListItem(id=1,shoppingListId=1,name="Mele",amount="2"))
+        original.dietDao().insert(Diet(id=1, uuid="legacy-diet", name="Piano"))
+        original.mealDao().insert(Meal(id=1, dietId=1, dayOfWeek=DayOfWeek.MONDAY, type=it.matato.dietreminder.data.model.MealType.LUNCH, timeMinutes=720))
+        original.courseDao().insert(Course(id=1, mealId=1, name="Pasta"))
+        original.foodItemDao().insert(FoodItem(id=1, courseId=1, name="Pasta", amount="80"))
         original.close()
         val sqlite=android.database.sqlite.SQLiteDatabase.openDatabase(context.getDatabasePath(name).path,null,android.database.sqlite.SQLiteDatabase.OPEN_READWRITE)
         sqlite.execSQL("PRAGMA foreign_keys=OFF")
@@ -65,6 +69,11 @@ class ShoppingRepositoryTest {
         }
         sqlite.execSQL("CREATE INDEX index_shopping_list_item_shoppingListId ON shopping_list_item(shoppingListId)")
         sqlite.execSQL("CREATE INDEX index_shopping_list_item_day_shoppingListItemId ON shopping_list_item_day(shoppingListItemId)")
+        sqlite.execSQL("CREATE TABLE courses_old (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mealId` INTEGER NOT NULL, `name` TEXT NOT NULL, `order` INTEGER NOT NULL, FOREIGN KEY(`mealId`) REFERENCES `meals`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)")
+        sqlite.execSQL("INSERT INTO courses_old SELECT id,mealId,name,`order` FROM courses")
+        sqlite.execSQL("DROP TABLE courses")
+        sqlite.execSQL("ALTER TABLE courses_old RENAME TO courses")
+        sqlite.execSQL("CREATE INDEX index_courses_mealId ON courses(mealId)")
         sqlite.version=9
         sqlite.close()
         val migrated=AppDatabase.create(context,name)
@@ -72,6 +81,10 @@ class ShoppingRepositoryTest {
             val snapshot=WorkspaceCache(migrated).read()
             assertEquals("Da conservare",snapshot.lists.single().name)
             assertEquals("Mele",snapshot.items.single().name)
+            assertEquals("Pasta",snapshot.courses.single().name)
+            assertNull(snapshot.courses.single().alternativeGroup)
+            assertEquals("",snapshot.courses.single().description)
+            assertEquals("80",snapshot.foods.single().amount)
             assertFalse(snapshot.lists.single().remindersEnabled)
             assertNull(snapshot.items.single().category)
         } finally { migrated.close();context.deleteDatabase(name) }

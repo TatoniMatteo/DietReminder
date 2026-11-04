@@ -164,6 +164,10 @@ fun MealDetailScreen(
 		onCustomLabelChange = { customLabel = it },
 		onDescriptionChange = { description = it },
 		onNotificationEnabledChange = { isNotificationEnabled = it },
+        onAddAlternative = { index ->
+            val group = courses[index].course.alternativeGroup ?: java.util.UUID.randomUUID().toString()
+            courses = courses.mapIndexed { i, row -> if (i == index) row.copy(course = row.course.copy(alternativeGroup = group)) else row } + CourseWithItems(Course(mealId = mealId, order = courses.size, alternativeGroup = group), emptyList())
+        },
 		onAddCourse = ::addCourse,
 		onUpdateCourse = { index, updated ->
 			courses = courses.toMutableList().apply {
@@ -212,6 +216,7 @@ fun MealDetailContent(
 	onCustomLabelChange: (String) -> Unit,
 	onDescriptionChange: (String) -> Unit,
 	onNotificationEnabledChange: (Boolean) -> Unit,
+    onAddAlternative: (Int) -> Unit = {},
 	onAddCourse: () -> Unit,
 	onUpdateCourse: (Int, CourseWithItems) -> Unit,
 	onDeleteCourse: (Int) -> Unit,
@@ -299,7 +304,8 @@ fun MealDetailContent(
 				} else {
 					item {
 						CoursesList(
-							courses = courses,
+                            onAddAlternative = onAddAlternative,
+                            courses = courses,
 							suggestions = suggestions,
 							onUpdate = onUpdateCourse,
 							onDelete = onDeleteCourse,

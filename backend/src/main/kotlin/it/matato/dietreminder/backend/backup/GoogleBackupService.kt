@@ -83,7 +83,7 @@ class GoogleBackupService(private val connections: GoogleDriveConnectionReposito
             accounts.lockById(accountId) ?: throw ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED", "Account not found")
             val internalId = "restore-" + googleHash(request.requestId + ":" + payload).take(48)
             val replay = commits.findByAccountIdAndRequestId(accountId, internalId) != null
-            val result = workspaces.put(accountId, WorkspacePutRequest(request.baseVersion, internalId, backup.snapshot.copy(schemaVersion = 2)))
+            val result = workspaces.put(accountId, WorkspacePutRequest(request.baseVersion, internalId, backup.snapshot.copy(schemaVersion = 3)))
             if (!replay) profiles.save(backup.profile)
             result.copy(requestId = request.requestId)
         }!!

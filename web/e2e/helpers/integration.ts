@@ -81,7 +81,13 @@ export async function createList(page: Page, name = 'Spesa integrazione', plan?:
   await page.getByRole('link', { name: 'La spesa', exact: true }).click()
   await page.getByRole('button', { name: 'Nuova lista', exact: true }).click()
   await page.getByLabel('Nome della lista').fill(name)
-  if (plan) await selectOption(page.getByLabel('Piano associato'), { label: plan })
+  if (plan)
+    await selectOption(page.getByRole('combobox', { name: 'Piano associato', exact: true }), {
+      label: plan,
+    })
+  await page
+    .getByRole('checkbox', { name: 'Importa gli ingredienti del piano associato', exact: true })
+    .uncheck()
   await page.getByRole('button', { name: 'Crea lista', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()

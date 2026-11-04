@@ -19,6 +19,7 @@ fun SettingsBackupSection(
 	diets: List<Diet>,
 	onImport: () -> Unit,
 	onExport: (Long, String) -> Unit,
+    onExportPdf: (Long, String) -> Unit = { _, _ -> },
 ) {
 	val isOffline = LocalOfflineMode.current
 	SettingsSection(
@@ -43,7 +44,7 @@ fun SettingsBackupSection(
 
 				SettingsListItem(
 					title = stringResource(
-						R.string.export_name,
+						R.string.export_json_name,
 						diet.name,
 					),
 					leadingIcon = Icons.Rounded.FileDownload,
@@ -52,6 +53,11 @@ fun SettingsBackupSection(
 						onExport(diet.id, fileName)
 					},
 				)
+                SettingsListItem(
+                    title = stringResource(R.string.export_pdf_name, diet.name),
+                    leadingIcon = Icons.Rounded.FileDownload,
+                    onClick = { onExportPdf(diet.id, "${diet.name.replace(Regex("[\\\\/:*?\"<>|]"), "_")}.pdf") },
+                )
 			}
 		}
 	}

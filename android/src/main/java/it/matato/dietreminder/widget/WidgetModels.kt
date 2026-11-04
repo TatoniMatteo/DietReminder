@@ -40,3 +40,15 @@ fun selectWidgetList(lists: List<ShoppingListWithItems>, selectedId: Long?, acti
         ?: lists.firstOrNull { it.list.dietId == activeDietId && it.items.any { row -> if (row.days.isEmpty()) !row.item.isBought else row.days.any { !it.isBought } } }
         ?: lists.firstOrNull { it.items.any { row -> if (row.days.isEmpty()) !row.item.isBought else row.days.any { !it.isBought } } }
         ?: lists.firstOrNull()
+
+/** Group mutually exclusive dishes for the widget without recording a choice. */
+internal fun widgetMealCourseNames(meal: it.matato.dietreminder.data.database.relation.MealWithDetails?): List<String> {
+    val courses = meal?.courses.orEmpty()
+    val seen = mutableSetOf<String>()
+    return courses.mapNotNull { row ->
+        val group = row.course.alternativeGroup
+        if (group == null) row.course.name.trim().takeIf { it.isNotEmpty() }
+        else if (seen.add(group)) courses.filter { it.course.alternativeGroup == group }.joinToString(" / ") { it.course.name.trim() }
+        else null
+    }
+}

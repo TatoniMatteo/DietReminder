@@ -72,6 +72,27 @@
         : preferences.colorMode === 'custom'
           ? toRgb(preferences.seed)
           : null
+    // Rotate the original artwork instead of flattening its gradients into a mask.
+    let logoRotation = 0
+    if (seed) {
+      const [r, g, b] = seed.map((value) => value / 255)
+      const max = Math.max(r, g, b),
+        min = Math.min(r, g, b),
+        delta = max - min
+      if (delta > 0) {
+        const hue =
+          (60 *
+            (max === r
+              ? ((g - b) / delta) % 6
+              : max === g
+                ? (b - r) / delta + 2
+                : (r - g) / delta + 4) +
+            360) %
+          360
+        logoRotation = hue - 140
+      }
+    }
+    root.style.setProperty('--logo-hue-rotation', `${logoRotation}deg`)
     if (seed) {
       const dark = theme === 'dark'
       const background = dark ? [24, 26, 33] : [255, 255, 255]

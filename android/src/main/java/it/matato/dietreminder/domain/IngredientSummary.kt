@@ -36,10 +36,10 @@ data class IngredientSummary(
 		}
 }
 
-fun List<MealWithDetails>.toIngredientSummaries(): List<IngredientSummary> {
+fun List<MealWithDetails>.toIngredientSummaries(selectedCourseIds: Set<Long>? = null, includeAllAlternatives: Boolean = false): List<IngredientSummary> {
 	val itemsWithDetails = this.flatMap { mealWithDetails ->
 		val meal = mealWithDetails.meal
-		mealWithDetails.courses.flatMap { courseWithItems ->
+		(if (includeAllAlternatives) mealWithDetails.courses else mealWithDetails.courses.coursesForShopping(selectedCourseIds)).flatMap { courseWithItems ->
 			courseWithItems.items.map { foodItem ->
 				Triple(meal, courseWithItems.course, foodItem)
 			}

@@ -10,6 +10,7 @@ data class DietImportItemConfig(
 	val ingredientName: String,
 	val isFresh: Boolean,
 	val selectedDays: Set<DayOfWeek> = emptySet(),
+    val sourceCourseIds: Set<Long>? = null,
 )
 
 data class ShoppingListInitialItem(

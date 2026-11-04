@@ -64,6 +64,11 @@ class DietJsonCodec {
 	}
 
 	private fun validate(export: DietExport) {
+        require(export.formatVersion in 1..2) { "Unsupported diet format" }
+        export.meals.forEach { meal ->
+            it.matato.dietreminder.common.model.requireValidAlternativeGroups(meal.courses.map { it.alternativeGroup })
+            meal.courses.forEach { require(it.description.length <= 10_000) { "Alternative description too long" } }
+        }
 		if (export.name.isBlank()) {
 			throw DietValidationException.BlankDietName()
 		}

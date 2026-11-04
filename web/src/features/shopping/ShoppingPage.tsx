@@ -1,3 +1,4 @@
+import { DietIngredientsDialog } from './DietIngredientsDialog'
 import { Select } from '../../components/Select'
 import { usePermission } from '../../lib/access'
 import { t } from '../../lib/i18n'
@@ -14,7 +15,7 @@ import {
   timeLabel,
 } from '../../lib/workspace'
 import { shoppingEntries, foodCategory, type ShoppingEntry } from '../../lib/shopping'
-import type { FoodCategory, Unit } from '../../lib/types'
+import type { FoodCategory, Unit, Snapshot } from '../../lib/types'
 import { api } from '../../lib/api'
 
 export function ShoppingPage() {
@@ -25,6 +26,13 @@ export function ShoppingPage() {
   const draftVersion = useRef(workspace!.version)
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [selectedDay, setSelectedDay] = useState(-1)
+  const activeDiet = s.diets.find((d) => d.isActive)
+  const [generation, setGeneration] = useState<{
+    snapshot: Snapshot
+    dietId: number
+    listId: number
+    version: number
+  } | null>(null)
   const [creating, setCreating] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [reminders, setReminders] = useState(false)
@@ -57,29 +65,31 @@ export function ShoppingPage() {
     e.preventDefault()
     const data = new FormData(e.currentTarget)
     const id = nextId(s)
-    if (
-      await save(
+    const dietId = data.get('dietId') ? Number(data.get('dietId')) : null
+    const snapshot = {
+      ...s,
+      lists: [
+        ...s.lists,
         {
-          ...s,
-          lists: [
-            ...s.lists,
-            {
-              id,
-              name: String(data.get('name')).trim(),
-              createdAt: Date.now(),
-              dietId: data.get('dietId') ? Number(data.get('dietId')) : null,
-              remindersEnabled: false,
-              reminderTimeMinutes: 1080,
-            },
-          ],
+          id,
+          name: String(data.get('name')).trim(),
+          createdAt: Date.now(),
+          dietId,
+          remindersEnabled: false,
+          reminderTimeMinutes: 1080,
         },
-        draftVersion.current,
-      )
-    ) {
+      ],
+    }
+    if (data.get('importIngredients') && dietId) {
+      setGeneration({ snapshot, dietId, listId: id, version: draftVersion.current })
+      return
+    }
+    if (await save(snapshot, draftVersion.current)) {
       setSelectedId(id)
       setCreating(false)
     }
   }
+
   async function addItem(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!list || !newName.trim()) return
@@ -301,6 +311,24 @@ export function ShoppingPage() {
                 </span>
               </div>
               <div className="shopping-tools">
+                {activeDiet && (
+                  <button
+                    className="button secondary small"
+                    disabled={saving}
+                    onClick={() =>
+                      open(() =>
+                        setGeneration({
+                          snapshot: s,
+                          dietId: activeDiet.id,
+                          listId: list.id,
+                          version: workspace!.version,
+                        }),
+                      )
+                    }
+                  >
+                    {t('Ingredienti dalla dieta')}
+                  </button>
+                )}
                 <button
                   className="icon-button"
                   aria-label={t('Promemoria spesa')}
@@ -521,7 +549,18 @@ export function ShoppingPage() {
           </section>
         </div>
       )}
-      {creating && (
+      {generation && (
+        <DietIngredientsDialog
+          {...generation}
+          onClose={() => setGeneration(null)}
+          onSaved={() => {
+            setSelectedId(generation.listId)
+            setCreating(false)
+            setGeneration(null)
+          }}
+        />
+      )}
+      {creating && !generation && (
         <Modal title={t('Una nuova lista')} onClose={() => setCreating(false)}>
           <form
             onSubmit={(e) => {
@@ -541,7 +580,11 @@ export function ShoppingPage() {
             </label>
             <label>
               {t('Piano associato')}
-              <Select name="dietId" aria-label={t('Piano associato')}>
+              <Select
+                name="dietId"
+                aria-label={t('Piano associato')}
+                defaultValue={activeDiet?.id ?? ''}
+              >
                 <option value="">{t('Nessun piano')}</option>
                 {s.diets.map((d) => (
                   <option key={d.id} value={d.id}>
@@ -549,6 +592,10 @@ export function ShoppingPage() {
                   </option>
                 ))}
               </Select>
+            </label>
+            <label className="import-choice">
+              <input type="checkbox" name="importIngredients" defaultChecked={!!activeDiet} />
+              {t('Importa gli ingredienti del piano associato')}
             </label>
             <Actions saving={saving} close={() => setCreating(false)} label={t('Crea lista')} />
           </form>

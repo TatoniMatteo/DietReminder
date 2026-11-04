@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import it.matato.dietreminder.ui.icons.AppIcons as Icons
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,7 +29,7 @@ fun SettingsAboutSection(
             Modifier.padding(horizontal = AppSpace.card, vertical = AppSpace.group),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
-            androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(R.drawable.brand_logo), null, Modifier.then(Modifier.size(40.dp)))
+            it.matato.dietreminder.ui.theme.BrandLogo(Modifier.size(40.dp))
             androidx.compose.foundation.layout.Spacer(Modifier.width(12.dp))
             androidx.compose.material3.Text(stringResource(R.string.app_name), style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
         }

@@ -2460,3 +2460,153 @@ td .tag {
     max-width: 155px;
   }
 }
+
+.heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.import-preview {
+  padding: 16px;
+  margin-top: 16px;
+}
+.import-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.import-choice input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin: 0;
+}
+.diet-import-ingredients {
+  display: grid;
+  gap: 16px;
+}
+.import-ingredient {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 0;
+}
+.import-ingredient legend {
+  padding: 0 6px;
+  font-weight: 600;
+}
+.import-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.diet-pdf-open {
+  overflow: hidden;
+}
+.diet-pdf {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: auto;
+  background: #ecefed;
+  color: #17251c;
+  padding: 24px;
+}
+.diet-pdf-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  max-width: 800px;
+  margin: 0 auto 20px;
+}
+.diet-pdf-document {
+  background: white;
+  max-width: 800px;
+  margin: auto;
+  padding: 40px;
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+  overflow-wrap: anywhere;
+}
+.diet-pdf-document h1 {
+  font-size: 26px;
+}
+.diet-pdf-document h2 {
+  margin-top: 28px;
+  border-bottom: 2px solid #246a42;
+  font-size: 21px;
+  color: #246a42;
+}
+.diet-pdf-document h3 {
+  margin-top: 20px;
+  font-size: 16px;
+}
+.diet-pdf-document h4 {
+  margin: 12px 0 6px;
+  font-size: 14px;
+}
+.diet-pdf-document p {
+  white-space: pre-wrap;
+  margin: 6px 0;
+}
+.diet-pdf-document ul {
+  margin: 6px 0 14px;
+  padding-left: 22px;
+}
+@media print {
+  html,
+  body.diet-pdf-open {
+    background: white !important;
+    color: black !important;
+    color-scheme: light !important;
+  }
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+  body.diet-pdf-open > :not(.diet-pdf) {
+    display: none !important;
+  }
+  body.diet-pdf-open {
+    overflow: visible;
+  }
+  .diet-pdf {
+    width: auto;
+    height: auto;
+    position: static;
+    overflow: visible;
+    background: white;
+    padding: 0;
+  }
+  .diet-pdf::backdrop {
+    background: white;
+    backdrop-filter: none;
+  }
+  .diet-pdf-controls {
+    display: none;
+  }
+  .diet-pdf-document {
+    padding: 0;
+    max-width: none;
+    font-size: 10pt;
+    color: black;
+  }
+  .diet-pdf-document h1,
+  .diet-pdf-document h2,
+  .diet-pdf-document h3,
+  .diet-pdf-document h4 {
+    break-after: avoid;
+  }
+  .diet-pdf-document li {
+    break-inside: avoid;
+  }
+}

@@ -39,6 +39,19 @@ export function MealEditor({
   function addCourse() {
     setCourses([...courses, { id: counter.current++, mealId: id, name: '', order: courses.length }])
   }
+  function addAlternative(course: Course) {
+    const group = course.alternativeGroup || crypto.randomUUID()
+    setCourses([
+      ...courses.map((c) => (c.id === course.id ? { ...c, alternativeGroup: group } : c)),
+      {
+        id: counter.current++,
+        mealId: id,
+        name: '',
+        order: courses.length,
+        alternativeGroup: group,
+      },
+    ])
+  }
   function moveCourse(index: number, delta: number) {
     const reordered = [...courses]
     ;[reordered[index], reordered[index + delta]] = [reordered[index + delta], reordered[index]]
@@ -88,7 +101,11 @@ export function MealEditor({
           meals: [...snapshot.meals.filter((x) => x.id !== id), updated],
           courses: [
             ...snapshot.courses.filter((x) => x.mealId !== id),
-            ...courses.map((c, order) => ({ ...c, name: c.name.trim(), order })),
+            ...courses.map((c, order) => ({
+              ...c,
+              name: c.name.trim(),
+              order,
+            })),
           ],
           foods: [...snapshot.foods.filter((x) => !oldCourses.has(x.courseId)), ...foods],
         },
@@ -169,7 +186,9 @@ export function MealEditor({
           </button>
         </div>
         <p className="muted small">
-          {t('Ogni pasto contiene portate; ogni portata ha i propri ingredienti.')}
+          {t(
+            'Le portate dello stesso gruppo sono alternative: puoi scegliere cosa acquistare quando prepari la spesa.',
+          )}
         </p>
         {courses.length === 0 && (
           <button type="button" className="text-button" onClick={() => addFood()}>
@@ -227,6 +246,25 @@ export function MealEditor({
                 <Trash2 size={17} />
               </button>
             </div>
+            {course.alternativeGroup && <p className="muted small">{t('Alternativa')}</p>}
+            <label>
+              {t('Preparazione della portata')}
+              <textarea
+                rows={2}
+                maxLength={10000}
+                value={course.description ?? ''}
+                onChange={(e) =>
+                  setCourses(
+                    courses.map((c) =>
+                      c.id === course.id ? { ...c, description: e.target.value } : c,
+                    ),
+                  )
+                }
+              />
+            </label>
+            <button type="button" className="text-button" onClick={() => addAlternative(course)}>
+              {t('Aggiungi alternativa a questa portata')}
+            </button>
             {foods
               .filter((f) => f.courseId === course.id)
               .sort((a, b) => a.order - b.order)

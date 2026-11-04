@@ -1,7 +1,7 @@
 import { t, localizedArray } from './i18n'
 import type { Snapshot, Unit, MealType } from './types'
 export const emptySnapshot = (): Snapshot => ({
-  schemaVersion: 2,
+  schemaVersion: 3,
   diets: [],
   meals: [],
   courses: [],

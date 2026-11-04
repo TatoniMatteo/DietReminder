@@ -102,6 +102,9 @@ test('real account, workspace edits, shopping, session persistence and responsiv
   await page.getByRole('link', { name: 'La spesa', exact: true }).click()
   await page.getByRole('button', { name: 'Nuova lista' }).click()
   await page.getByLabel('Nome della lista').fill('Spesa dal web')
+  await page
+    .getByRole('checkbox', { name: 'Importa gli ingredienti del piano associato', exact: true })
+    .uncheck()
   await page.getByRole('button', { name: 'Crea lista' }).click()
   await page.getByLabel('Nuovo ingrediente').fill('Mele')
   await page.getByLabel('Quantità', { exact: true }).fill('2')

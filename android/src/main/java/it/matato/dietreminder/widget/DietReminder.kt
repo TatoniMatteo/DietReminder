@@ -63,7 +63,7 @@ internal fun MealWidgetContent(context: Context, shown: MealWidgetModel, dietNam
     val tomorrow = shown.selected?.dateTime?.toLocalDate()?.let { it != now.toLocalDate() } == true
     val status = context.getString(if (shown.browsing) R.string.widget_today_meals else R.string.next_meal) +
         if (tomorrow) " · " + context.getString(R.string.widget_tomorrow) else ""
-    val courses = meal?.courses.orEmpty().map { it.course.name.trim() }.filter { it.isNotBlank() }
+    val courses = widgetMealCourseNames(meal)
     Column(GlanceModifier.widgetSurface(scheme)) {
         WidgetBrand(context, label, if (size.height >= 280.dp) "$status · $dietName" else status, scheme, open, showSubtitle = size.height >= 200.dp)
         Spacer(GlanceModifier.height(8.dp))
@@ -77,7 +77,7 @@ internal fun MealWidgetContent(context: Context, shown: MealWidgetModel, dietNam
                 fontWeight = FontWeight.Bold, color = ColorProvider(scheme.onSurface)),
                 maxLines = if (compact) 2 else ((size.height.value - 130) / 30).toInt().coerceIn(2, 8))
             if (size.height >= 300.dp && meal != null) {
-                val foods = meal.courses.flatMap { it.items }.joinToString(" · ") { it.name }
+                val foods = meal.courses.filter { it.course.alternativeGroup == null }.flatMap { it.items }.joinToString(" · ") { it.name }
                 if (foods.isNotBlank()) {
                     Spacer(GlanceModifier.height(8.dp))
                     Text(foods, style = TextStyle(fontSize = 12.sp, color = ColorProvider(scheme.onSurface)), maxLines = 2)

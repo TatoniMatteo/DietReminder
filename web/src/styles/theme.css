@@ -601,7 +601,8 @@ label small {
 
 .brand-logo {
   height: 100%;
-  object-fit: contain;
+  background: url('/logo.svg') center / contain no-repeat;
+  filter: hue-rotate(var(--logo-hue-rotation, 0deg));
   width: 100%;
 }
 

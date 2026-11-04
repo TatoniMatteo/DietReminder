@@ -34,7 +34,7 @@ import it.matato.dietreminder.data.database.entity.ShoppingListItemDay
 		ShoppingListItem::class,
 		ShoppingListItemDay::class,
 	],
-	version = 10,
+	version = 11,
 	exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -53,6 +53,13 @@ abstract class AppDatabase : RoomDatabase() {
 	abstract fun shoppingListDao(): ShoppingListDao
 
 	companion object {
+
+        val MIGRATION_10_11 = object : androidx.room.migration.Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE courses ADD COLUMN alternativeGroup TEXT")
+                db.execSQL("ALTER TABLE courses ADD COLUMN description TEXT NOT NULL DEFAULT ''")
+            }
+        }
 
         val MIGRATION_9_10 = object : androidx.room.migration.Migration(9, 10) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -76,7 +83,7 @@ abstract class AppDatabase : RoomDatabase() {
                         db.execSQL("DELETE FROM app_config WHERE `key` IN ('HYDRATION_ENABLED', 'HYDRATION_RANGES', 'HYDRATION_DAYS', 'HYDRATION_INTERVAL')")
                     }
                 })
-				.addMigrations(MIGRATION_9_10)
+				.addMigrations(MIGRATION_9_10, MIGRATION_10_11)
 				.build()
 	}
 }

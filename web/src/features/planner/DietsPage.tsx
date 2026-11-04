@@ -1,3 +1,6 @@
+import { DietPdfPreview } from './DietPdfPreview'
+import { downloadDietJson } from '../../lib/diet-export'
+import { ImportDietDialog } from './ImportDietDialog'
 import { usePermission } from '../../lib/access'
 import { t } from '../../lib/i18n'
 import { useState, useRef, type FormEvent } from 'react'
@@ -22,6 +25,8 @@ export function DietsPage({ navigate }: { navigate: (route: string) => void }) {
     draftVersion.current = workspace!.version
     setDeleting(value)
   }
+  const [pdfDietId, setPdfDietId] = useState<number | null>(null)
+  const [importing, setImporting] = useState(false)
   const [editing, setEditing] = useState<Diet | 'new' | null>(null)
   const [deleting, setDeleting] = useState<Diet | null>(null)
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -62,10 +67,15 @@ export function DietsPage({ navigate }: { navigate: (route: string) => void }) {
           </h1>
           <p className="muted">{t('Organizza la settimana a modo tuo.')}</p>
         </div>
-        <button className="button primary" onClick={() => startEdit('new')} disabled={saving}>
-          <Plus size={19} />
-          {t('Nuovo piano')}
-        </button>
+        <div className="heading-actions">
+          <button className="button secondary" disabled={saving} onClick={() => setImporting(true)}>
+            {t('Importa dieta da JSON')}
+          </button>
+          <button className="button primary" onClick={() => startEdit('new')} disabled={saving}>
+            <Plus size={19} />
+            {t('Nuovo piano')}
+          </button>
+        </div>
       </div>
       {s.diets.length === 0 ? (
         <EmptyState
@@ -118,6 +128,17 @@ export function DietsPage({ navigate }: { navigate: (route: string) => void }) {
                 {new Set(s.meals.filter((x) => x.dietId === diet.id).map((x) => x.dayOfWeek)).size}{' '}
                 {t('giorni organizzati')}
               </p>
+              <div className="heading-actions">
+                <button
+                  className="button secondary small"
+                  onClick={() => downloadDietJson(s, diet.id)}
+                >
+                  {t('Esporta JSON')}
+                </button>
+                <button className="button secondary small" onClick={() => setPdfDietId(diet.id)}>
+                  {t('Esporta PDF')}
+                </button>
+              </div>
               <div className="diet-footer">
                 <button className="text-button" onClick={() => navigate(`week?diet=${diet.id}`)}>
                   {t('Vai alla settimana')}
@@ -147,6 +168,10 @@ export function DietsPage({ navigate }: { navigate: (route: string) => void }) {
           ))}
         </div>
       )}
+      {pdfDietId !== null && (
+        <DietPdfPreview snapshot={s} dietId={pdfDietId} onClose={() => setPdfDietId(null)} />
+      )}
+      {importing && <ImportDietDialog onClose={() => setImporting(false)} />}
       {editing && (
         <Modal
           title={editing === 'new' ? t('Un nuovo inizio') : t('Modifica il piano')}

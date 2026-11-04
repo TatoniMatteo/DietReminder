@@ -13,6 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
+import it.matato.dietreminder.data.database.entity.ConfigKey
 
 class CourseReceiver : BroadcastReceiver() {
 
@@ -30,10 +32,15 @@ class CourseReceiver : BroadcastReceiver() {
 		}
 	}
 
-	private suspend fun process(context: Context, intent: Intent) {
+	internal suspend fun process(context: Context, intent: Intent) {
         val app = context.applicationContext as it.matato.dietreminder.DietApplication
         val scope = intent.getStringExtra("account_scope") ?: "local"
         if (scope == "locked" || scope != app.currentAccountScope()) return
+        // An alarm may already be queued when the global switch is turned off.
+        if (app.configRepository.observeConfig(ConfigKey.MEAL_REMINDERS_ENABLED).first()?.value == "false") {
+            AlarmSyncHelper.doSync(context)
+            return
+        }
 		val title = intent.getStringExtra(EXTRA_TITLE)
 			?: context.getString(R.string.app_name)
 

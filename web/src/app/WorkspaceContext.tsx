@@ -82,7 +82,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }, [])
   async function save(snapshot: Snapshot, expectedVersion?: number) {
     if (lock.current || !current.current || conflict) return false
-    snapshot = { ...snapshot, schemaVersion: 2 }
+    snapshot = { ...snapshot, schemaVersion: 3 }
     lock.current = true
     setSaving(true)
     setError('')

@@ -52,6 +52,16 @@ class UpdateManagerTest {
 	}
 
 	@Test
+    fun updateLinkDownloadsApkAndPreservesCustomUrls() {
+        val policy = VersionPolicy(latestVersionName = "2.1.0")
+        assertEquals(
+            "https://github.com/TatoniMatteo/DietReminder/releases/download/v2.1.0/DietReminder-v2.1.0.apk",
+            androidUpdateUrl(policy.copy(updateUrl = "https://github.com/TatoniMatteo/DietReminder/releases/latest")),
+        )
+        assertEquals("https://example.com/app.apk", androidUpdateUrl(policy.copy(updateUrl = "https://example.com/app.apk")))
+    }
+
+	@Test
 	fun testSemVerParsing() {
 		val semVer = SemVer.parse("1.2.3-SNAPSHOT")
 		assertEquals(1, semVer.major)

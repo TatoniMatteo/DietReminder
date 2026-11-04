@@ -22,5 +22,7 @@ data class Course(
 	val id: Long = 0,
 	val mealId: Long,
 	val name: String = "",
-	val order: Int = 0
+	val order: Int = 0,
+    val alternativeGroup: String? = null,
+    @androidx.room.ColumnInfo(defaultValue = "''") val description: String = ""
 )
