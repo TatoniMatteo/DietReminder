@@ -316,7 +316,7 @@ class DietViewModel @Inject constructor(
 
 	suspend fun getDietIngredients(id: Long): List<IngredientSummary> {
 		val meals = dietRepository.getMeals(id)
-        return meals.toIngredientSummaries(includeAllAlternatives = true)
+		return meals.toIngredientSummaries(includeAllAlternatives = true)
 	}
 
 	suspend fun getMeal(id: Long): MealWithDetails? {
