@@ -30,7 +30,6 @@ object AlarmDataObserver {
 
         scope.launch {
             createChangeFlow(app)
-                .debounce(DEBOUCE.seconds)
                 .collect { change ->
                     AppLog.i("AlarmDataObserver: $change detected")
 
@@ -43,7 +42,7 @@ object AlarmDataObserver {
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     private fun createChangeFlow(app: DietApplication): Flow<Change> {
         val activeDietChanges = app.dietRepository.active
             .map { Change.ActiveDiet }
@@ -60,9 +59,9 @@ object AlarmDataObserver {
             observeConfigChanges(app, ConfigKey.MEAL_REMINDERS_ENABLED),
         )
 
+        // Configuration changes must cancel alarms immediately, even while meals change.
         return merge(
-            activeDietChanges,
-            mealChanges,
+            merge(activeDietChanges, mealChanges).debounce(DEBOUCE.seconds),
             configurationChanges,
         )
     }

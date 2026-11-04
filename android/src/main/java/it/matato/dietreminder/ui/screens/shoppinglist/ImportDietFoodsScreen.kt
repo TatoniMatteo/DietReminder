@@ -90,7 +90,7 @@ fun ImportDietFoodsScreen(
             Text(stringResource(R.string.shopping_alternatives_hint))
             meals.forEach { meal ->
                 meal.courses.filter { it.course.alternativeGroup != null }.groupBy { it.course.alternativeGroup }.values.forEach { choices ->
-                    Text(meal.meal.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.getDefault()))
+                    Text(meal.meal.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, LocalLocale.current.platformLocale))
                     choices.forEach { row ->
                         FilterChip(selected = row.course.id in selected,
                             onClick = { selected = selected.minus(choices.map { it.course.id }.toSet()) + row.course.id },

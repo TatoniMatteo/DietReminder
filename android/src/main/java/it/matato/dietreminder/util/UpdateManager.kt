@@ -93,11 +93,20 @@ class UpdateManager(
 			state = state,
 			currentVersionCode = currentCode,
 			latestVersionCode = policy.latestVersionCode,
-			updateUrl = policy.updateUrl,
+			updateUrl = androidUpdateUrl(policy),
 			isOffline = isOffline || (state == AppVersionState.OBSOLETE),
 			isChecking = false,
 		)
 		UpdateManagerStatus.isOffline = _versionStatus.value.isOffline
 		UpdateManagerStatus.isChecking = false
 	}
+}
+
+internal fun androidUpdateUrl(policy: VersionPolicy): String {
+    val releases = "https://github.com/TatoniMatteo/DietReminder/releases"
+    return if (policy.updateUrl.trimEnd('/') == "$releases/latest") {
+        "$releases/download/v${policy.latestVersionName}/DietReminder-v${policy.latestVersionName}.apk"
+    } else {
+        policy.updateUrl
+    }
 }
